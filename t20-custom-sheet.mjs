@@ -26,6 +26,9 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 			template: "modules/t20-custom-sheet/templates/actor/character-custom-sheet.hbs",
 			width: 900,
 			height: 600,
+			left: null,
+			top: null,
+			resizable: true,
 			scrollY: [
 				".tormenta20.base .sheet-body",
 				".tab.attributes",
