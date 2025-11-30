@@ -156,13 +156,13 @@
 	background: var(--glass-bg);
 	backdrop-filter: blur(30px);
 	border: 1px solid var(--glass-border);
-	border-radius: 20px;
-	padding: 25px;
-	margin-bottom: 25px;
+	border-radius: 15px;
+	padding: 15px;
+	margin-bottom: 15px;
 	box-shadow: var(--shadow-deep);
 	display: flex;
 	align-items: center;
-	gap: 20px;
+	gap: 15px;
 	position: relative;
 	overflow: hidden;
 	animation: slideIn 0.6s ease-out;
@@ -186,10 +186,10 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .profile-img {
-	width: 120px;
-	height: 120px;
+	width: 90px;
+	height: 90px;
 	border-radius: 50%;
-	border: 4px solid rgba(255, 255, 255, 0.3);
+	border: 3px solid rgba(255, 255, 255, 0.3);
 	object-fit: cover;
 	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(102, 126, 234, 0.5);
 	cursor: pointer;
@@ -219,15 +219,15 @@
 
 .tormenta20.sheet.actor.custom-sheet .charname input {
 	width: 100%;
-	height: 50px;
-	font-size: 28px;
+	height: 40px;
+	font-size: 22px;
 	font-weight: 800;
 	color: white;
 	background: rgba(0, 0, 0, 0.3);
 	backdrop-filter: blur(10px);
 	border: 2px solid rgba(255, 255, 255, 0.2);
-	border-radius: 12px;
-	padding: 10px 20px;
+	border-radius: 10px;
+	padding: 8px 15px;
 	transition: all 0.3s;
 	text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 	letter-spacing: 1px;
@@ -257,15 +257,15 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .header-fields .resource input {
-	width: 80px;
-	height: 40px;
-	font-size: 20px;
+	width: 60px;
+	height: 32px;
+	font-size: 16px;
 	font-weight: 700;
 	text-align: center;
 	background: rgba(0, 0, 0, 0.3);
 	backdrop-filter: blur(10px);
 	border: 2px solid rgba(255, 255, 255, 0.2);
-	border-radius: 10px;
+	border-radius: 8px;
 	color: white;
 	transition: all 0.3s;
 }
@@ -283,10 +283,10 @@
 
 .tormenta20.sheet.actor.custom-sheet .ability-scores {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-	gap: 15px;
+	grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+	gap: 10px;
 	list-style: none;
-	margin: 0 0 25px 0;
+	margin: 0 0 15px 0;
 	padding: 0;
 }
 
@@ -294,8 +294,8 @@
 	background: var(--glass-bg);
 	backdrop-filter: blur(20px);
 	border: 1px solid var(--glass-border);
-	border-radius: 20px;
-	padding: 20px 15px;
+	border-radius: 15px;
+	padding: 12px 8px;
 	box-shadow: var(--shadow-glow);
 	display: flex;
 	flex-direction: column;
@@ -351,13 +351,13 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .atributo-value {
-	font-size: 36px;
+	font-size: 28px;
 	font-weight: 900;
 	background: var(--primary-gradient);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
-	margin: 10px 0;
+	margin: 6px 0;
 	line-height: 1;
 	position: relative;
 	z-index: 1;
@@ -366,8 +366,8 @@
 
 .tormenta20.sheet.actor.custom-sheet .attribute-footer {
 	display: flex;
-	gap: 8px;
-	margin-top: 12px;
+	gap: 5px;
+	margin-top: 8px;
 	width: 100%;
 	position: relative;
 	z-index: 1;
@@ -375,13 +375,13 @@
 
 .tormenta20.sheet.actor.custom-sheet .attribute-footer input {
 	flex: 1;
-	height: 28px;
-	font-size: 12px;
+	height: 24px;
+	font-size: 11px;
 	text-align: center;
 	background: rgba(0, 0, 0, 0.3);
 	backdrop-filter: blur(10px);
 	border: 1px solid rgba(255, 255, 255, 0.2);
-	border-radius: 8px;
+	border-radius: 6px;
 	color: white;
 	transition: all 0.3s;
 }
@@ -398,13 +398,13 @@
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet .resources-main {
-	margin: 0 0 25px 0;
+	margin: 0 0 15px 0;
 }
 
 .tormenta20.sheet.actor.custom-sheet .resources-main .attributes {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-	gap: 15px;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 10px;
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -414,8 +414,8 @@
 	background: var(--glass-bg);
 	backdrop-filter: blur(20px);
 	border: 1px solid var(--glass-border);
-	border-radius: 20px;
-	padding: 20px;
+	border-radius: 15px;
+	padding: 12px;
 	box-shadow: var(--shadow-glow);
 	display: flex;
 	flex-direction: column;
@@ -436,12 +436,12 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute-name {
-	font-size: 13px;
+	font-size: 11px;
 	font-weight: 800;
 	color: rgba(255, 255, 255, 0.9);
 	text-transform: uppercase;
-	letter-spacing: 1.5px;
-	margin: 0 0 15px 0;
+	letter-spacing: 1px;
+	margin: 0 0 8px 0;
 	text-align: center;
 	text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
@@ -450,8 +450,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	font-size: 24px;
+	gap: 6px;
+	font-size: 18px;
 	font-weight: 900;
 	background: var(--primary-gradient);
 	-webkit-background-clip: text;
@@ -460,15 +460,15 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute-value input {
-	width: 70px;
-	height: 40px;
-	font-size: 22px;
+	width: 55px;
+	height: 32px;
+	font-size: 16px;
 	font-weight: 900;
 	text-align: center;
 	background: rgba(0, 0, 0, 0.3);
 	backdrop-filter: blur(10px);
 	border: 2px solid rgba(255, 255, 255, 0.2);
-	border-radius: 10px;
+	border-radius: 8px;
 	color: white;
 	transition: all 0.3s;
 }
@@ -482,7 +482,7 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .value-slash {
-	font-size: 24px;
+	font-size: 18px;
 	color: rgba(255, 255, 255, 0.6);
 	font-weight: 400;
 }
@@ -495,9 +495,9 @@
 	background: var(--glass-bg);
 	backdrop-filter: blur(20px);
 	border: 1px solid var(--glass-border);
-	border-radius: 20px;
-	padding: 25px;
-	margin-bottom: 25px;
+	border-radius: 15px;
+	padding: 15px;
+	margin-bottom: 15px;
 	box-shadow: var(--shadow-deep);
 	position: relative;
 	overflow: hidden;
@@ -514,17 +514,17 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .skills-section h3 {
-	font-size: 20px;
+	font-size: 16px;
 	font-weight: 900;
 	background: var(--primary-gradient);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
-	margin: 0 0 20px 0;
-	padding-bottom: 15px;
+	margin: 0 0 12px 0;
+	padding-bottom: 10px;
 	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 	text-transform: uppercase;
-	letter-spacing: 2px;
+	letter-spacing: 1.5px;
 	text-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
@@ -532,7 +532,7 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	max-height: 450px;
+	max-height: 350px;
 	overflow-y: auto;
 }
 
@@ -540,12 +540,12 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 12px 15px;
-	margin-bottom: 8px;
+	padding: 8px 12px;
+	margin-bottom: 6px;
 	background: rgba(0, 0, 0, 0.2);
 	backdrop-filter: blur(10px);
 	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 12px;
+	border-radius: 10px;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	cursor: pointer;
 	position: relative;
@@ -577,26 +577,26 @@
 
 .tormenta20.sheet.actor.custom-sheet .skill-name {
 	flex: 1;
-	font-size: 14px;
+	font-size: 12px;
 	color: rgba(255, 255, 255, 0.9);
 	font-weight: 600;
 	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .skill-mod {
-	flex: 0 0 60px;
+	flex: 0 0 50px;
 	text-align: center;
-	font-size: 16px;
+	font-size: 13px;
 	font-weight: 800;
 	background: var(--primary-gradient);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
-	padding: 5px 12px;
-	border-radius: 8px;
+	padding: 4px 10px;
+	border-radius: 6px;
 	background-color: rgba(102, 126, 234, 0.2);
 	-webkit-text-fill-color: white;
-	margin-right: 10px;
+	margin-right: 8px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .skill-prof {
@@ -621,9 +621,9 @@
 	background: var(--glass-bg);
 	backdrop-filter: blur(20px);
 	border: 1px solid var(--glass-border);
-	border-radius: 20px;
-	padding: 25px;
-	margin-bottom: 25px;
+	border-radius: 15px;
+	padding: 15px;
+	margin-bottom: 15px;
 	box-shadow: var(--shadow-deep);
 	position: relative;
 	overflow: hidden;
@@ -644,17 +644,17 @@
 .tormenta20.sheet.actor.custom-sheet .inventory-weapons h3,
 .tormenta20.sheet.actor.custom-sheet .list-powers h3,
 .tormenta20.sheet.actor.custom-sheet .inventory-list h3 {
-	font-size: 20px;
+	font-size: 16px;
 	font-weight: 900;
 	background: var(--secondary-gradient);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
-	margin: 0 0 20px 0;
-	padding-bottom: 15px;
+	margin: 0 0 12px 0;
+	padding-bottom: 10px;
 	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 	text-transform: uppercase;
-	letter-spacing: 2px;
+	letter-spacing: 1.5px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-list {
@@ -666,13 +666,13 @@
 .tormenta20.sheet.actor.custom-sheet .item {
 	display: flex;
 	align-items: center;
-	gap: 15px;
-	padding: 15px;
-	margin-bottom: 10px;
+	gap: 10px;
+	padding: 10px;
+	margin-bottom: 8px;
 	background: rgba(0, 0, 0, 0.2);
 	backdrop-filter: blur(10px);
 	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 15px;
+	border-radius: 12px;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
 	overflow: hidden;
@@ -701,9 +701,9 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .item img {
-	width: 48px;
-	height: 48px;
-	border-radius: 12px;
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
 	border: 2px solid rgba(255, 255, 255, 0.2);
 	object-fit: cover;
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -718,7 +718,7 @@
 
 .tormenta20.sheet.actor.custom-sheet .item-name {
 	flex: 1;
-	font-size: 15px;
+	font-size: 13px;
 	color: rgba(255, 255, 255, 0.9);
 	font-weight: 600;
 	margin: 0;
@@ -731,19 +731,19 @@
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-control {
-	width: 36px;
-	height: 36px;
+	width: 28px;
+	height: 28px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	background: rgba(0, 0, 0, 0.3);
 	backdrop-filter: blur(10px);
 	border: 1px solid rgba(255, 255, 255, 0.2);
-	border-radius: 10px;
+	border-radius: 8px;
 	color: rgba(255, 255, 255, 0.7);
 	cursor: pointer;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	font-size: 14px;
+	font-size: 12px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-control:hover {
@@ -772,12 +772,12 @@
 .tormenta20.sheet.actor.custom-sheet .tab.attributes {
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 15px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .tab.attributes > .flexrow {
 	display: flex;
-	gap: 20px;
+	gap: 15px;
 }
 
 /* ============================================
