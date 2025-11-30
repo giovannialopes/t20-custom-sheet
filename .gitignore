@@ -1,0 +1,17 @@
+# Arquivos temporários
+*.zip
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentação e scripts (não necessários para o módulo funcionar)
+*.md
+*.ps1
