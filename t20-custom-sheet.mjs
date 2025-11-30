@@ -131,6 +131,32 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 			skl.label = CONFIG.T20.pericias?.[s]?.label || s;
 			skl.symbol = skl.treinado ? "fas fa-check" : "far fa-circle";
 			skl.exibir = true;
+			
+			// Calcular o total da perícia
+			// Tentar usar o método do actor se disponível
+			if (this.actor && typeof this.actor.getPericiaTotal === 'function') {
+				try {
+					skl.total = this.actor.getPericiaTotal(s);
+				} catch (e) {
+					console.warn("Erro ao calcular perícia com método do actor:", e);
+					skl.total = 0;
+				}
+			} else {
+				// Calcular manualmente: modificador do atributo + valor da perícia + bônus
+				const skillConfig = CONFIG.T20.pericias?.[s];
+				const attrKey = skillConfig?.atributo || skl.atributo;
+				const attr = data.system.atributos?.[attrKey];
+				const attrMod = attr ? (Number(attr.value) || 0) : 0;
+				const skillValue = Number(skl.value) || 0;
+				const skillBonus = Number(skl.bonus) || 0;
+				
+				skl.total = attrMod + skillValue + skillBonus;
+			}
+			
+			// Garantir que total seja um número válido
+			if (isNaN(skl.total) || skl.total === null || skl.total === undefined) {
+				skl.total = 0;
+			}
 		}
 		data.skills = Object.values(data.skills).sort((a, b) => {
 			if (a.order === b.order) return (a.label || "").localeCompare(b.label || "");

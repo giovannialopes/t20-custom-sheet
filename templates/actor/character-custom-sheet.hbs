@@ -9,7 +9,7 @@
 	{{!-- Sheet Body --}}
 	<section class="sheet-body">
 		{{!-- Attributes Tab --}}
-		<div class="tab attributes flexrow" data-group="primary" data-tab="attributes">
+		<div class="tab attributes" data-group="primary" data-tab="attributes">
 			
 			{{!-- Sheet Header --}}
 			<div class="sheet-header">
@@ -17,12 +17,13 @@
 				<div class="header-fields">
 					<h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="{{localize 'T20.Name'}}"/></h1>
 					<div class="resource">
-						<label>{{localize "T20.Level"}}</label>
+						<label>{{localize "T20.Level"}}:</label>
 						<input type="number" name="system.attributes.nivel.value" value="{{system.attributes.nivel.value}}" min="1" max="20"/>
 					</div>
 				</div>
 			</div>
 
+			<div class="flexrow" style="gap: 15px;">
 			<div class="attributes-left flexcol">
 				{{!-- Abilities --}}
 				<ul class="ability-scores flexrow">
@@ -143,6 +144,7 @@
 						{{/each}}
 					</ul>
 				</div>
+			</div>
 			</div>
 		</div>
 
