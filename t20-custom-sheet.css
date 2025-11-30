@@ -1,279 +1,538 @@
 /**
- * T20 Custom Sheet Styles
- * Estilos personalizados para a nova ficha - Design Moderno
+ * T20 Custom Sheet - Design Revolucionário
+ * Layout extremamente moderno e belo com glassmorphism, animações e efeitos visuais avançados
  */
 
 /* ============================================
-   ESTILOS BASE
+   VARIÁVEIS CSS E ANIMAÇÕES GLOBAIS
+   ============================================ */
+
+:root {
+	--primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+	--secondary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+	--danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+	--success-gradient: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+	--dark-bg: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+	--glass-bg: rgba(255, 255, 255, 0.1);
+	--glass-border: rgba(255, 255, 255, 0.2);
+	--shadow-glow: 0 8px 32px rgba(102, 126, 234, 0.3);
+	--shadow-deep: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes float {
+	0%, 100% { transform: translateY(0px) rotate(0deg); }
+	50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes glow {
+	0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+	50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.8), 0 0 60px rgba(118, 75, 162, 0.5); }
+}
+
+@keyframes shimmer {
+	0% { background-position: -1000px 0; }
+	100% { background-position: 1000px 0; }
+}
+
+@keyframes pulse {
+	0%, 100% { transform: scale(1); opacity: 1; }
+	50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes slideIn {
+	from { opacity: 0; transform: translateY(20px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   ESTILOS BASE - FUNDO E CONTAINER
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet {
-	font-family: "Signika", sans-serif;
-	background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+	font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+	background: var(--dark-bg);
+	background-size: 400% 400%;
+	animation: gradientShift 15s ease infinite;
 	min-height: 100%;
+	position: relative;
+	overflow: hidden;
+}
+
+@keyframes gradientShift {
+	0% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+	100% { background-position: 0% 50%; }
+}
+
+.tormenta20.sheet.actor.custom-sheet::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: 
+		radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+		radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+		radial-gradient(circle at 40% 20%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
+	pointer-events: none;
+	animation: float 20s ease-in-out infinite;
 }
 
 .tormenta20.sheet.actor.custom-sheet .window-content {
 	background: transparent;
-	padding: 0;
+	padding: 20px;
+	position: relative;
+	z-index: 1;
 }
 
 /* ============================================
-   HEADER - Cabeçalho da Ficha
+   NAVEGAÇÃO - TABS MODERNAS
+   ============================================ */
+
+.tormenta20.sheet.actor.custom-sheet .sheet-tabs {
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(20px);
+	border-radius: 15px;
+	padding: 8px;
+	margin-bottom: 20px;
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--shadow-glow);
+	display: flex;
+	gap: 5px;
+}
+
+.tormenta20.sheet.actor.custom-sheet .sheet-tabs .item {
+	flex: 1;
+	padding: 12px 20px;
+	background: transparent;
+	border: none;
+	border-radius: 10px;
+	color: rgba(255, 255, 255, 0.7);
+	font-weight: 600;
+	text-align: center;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.tormenta20.sheet.actor.custom-sheet .sheet-tabs .item::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: var(--primary-gradient);
+	transition: left 0.3s;
+	z-index: -1;
+}
+
+.tormenta20.sheet.actor.custom-sheet .sheet-tabs .item:hover {
+	color: white;
+	transform: translateY(-2px);
+}
+
+.tormenta20.sheet.actor.custom-sheet .sheet-tabs .item:hover::before {
+	left: 0;
+}
+
+.tormenta20.sheet.actor.custom-sheet .sheet-tabs .item.active {
+	background: var(--primary-gradient);
+	color: white;
+	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+	transform: translateY(-2px);
+}
+
+.tormenta20.sheet.actor.custom-sheet .sheet-tabs .item.active::before {
+	left: 0;
+}
+
+/* ============================================
+   HEADER - CABEÇALHO ÉPICO
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet .sheet-header {
-	flex: 0 0 120px;
+	background: var(--glass-bg);
+	backdrop-filter: blur(30px);
+	border: 1px solid var(--glass-border);
+	border-radius: 20px;
+	padding: 25px;
+	margin-bottom: 25px;
+	box-shadow: var(--shadow-deep);
 	display: flex;
-	flex-direction: row;
 	align-items: center;
-	background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-	border-radius: 8px;
-	padding: 15px;
-	margin-bottom: 15px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	gap: 20px;
+	position: relative;
+	overflow: hidden;
+	animation: slideIn 0.6s ease-out;
+}
+
+.tormenta20.sheet.actor.custom-sheet .sheet-header::before {
+	content: '';
+	position: absolute;
+	top: -50%;
+	left: -50%;
+	width: 200%;
+	height: 200%;
+	background: var(--primary-gradient);
+	opacity: 0.1;
+	animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
 }
 
 .tormenta20.sheet.actor.custom-sheet .profile-img {
-	flex: 0 0 100px;
-	height: 100px;
-	width: 100px;
-	border: 3px solid #ecf0f1;
+	width: 120px;
+	height: 120px;
 	border-radius: 50%;
+	border: 4px solid rgba(255, 255, 255, 0.3);
 	object-fit: cover;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-	margin-right: 15px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(102, 126, 234, 0.5);
 	cursor: pointer;
-	transition: transform 0.2s;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	z-index: 1;
+	animation: float 6s ease-in-out infinite;
 }
 
 .tormenta20.sheet.actor.custom-sheet .profile-img:hover {
-	transform: scale(1.05);
+	transform: scale(1.1) rotate(5deg);
+	box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7), 0 0 50px rgba(102, 126, 234, 0.8);
+	border-color: rgba(255, 255, 255, 0.6);
 }
 
 .tormenta20.sheet.actor.custom-sheet .header-fields {
 	flex: 1;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
+	position: relative;
+	z-index: 1;
 }
 
 .tormenta20.sheet.actor.custom-sheet .charname {
-	margin: 0 0 10px 0;
+	margin: 0 0 15px 0;
 	padding: 0;
 	border: none;
 }
 
 .tormenta20.sheet.actor.custom-sheet .charname input {
 	width: 100%;
-	height: 40px;
-	font-size: 24px;
-	font-weight: bold;
-	color: #ecf0f1;
-	background: rgba(255, 255, 255, 0.1);
+	height: 50px;
+	font-size: 28px;
+	font-weight: 800;
+	color: white;
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(10px);
 	border: 2px solid rgba(255, 255, 255, 0.2);
-	border-radius: 6px;
-	padding: 5px 10px;
+	border-radius: 12px;
+	padding: 10px 20px;
 	transition: all 0.3s;
+	text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+	letter-spacing: 1px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .charname input:hover,
 .tormenta20.sheet.actor.custom-sheet .charname input:focus {
-	background: rgba(255, 255, 255, 0.2);
-	border-color: rgba(255, 255, 255, 0.4);
+	background: rgba(0, 0, 0, 0.5);
+	border-color: rgba(102, 126, 234, 0.8);
+	box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
 	outline: none;
+	transform: translateY(-2px);
 }
 
 .tormenta20.sheet.actor.custom-sheet .header-fields .resource {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 15px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .header-fields .resource label {
-	color: #ecf0f1;
-	font-size: 14px;
-	font-weight: 600;
+	color: rgba(255, 255, 255, 0.9);
+	font-size: 16px;
+	font-weight: 700;
 	margin: 0;
+	text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .header-fields .resource input {
-	width: 60px;
-	height: 30px;
-	font-size: 16px;
+	width: 80px;
+	height: 40px;
+	font-size: 20px;
+	font-weight: 700;
 	text-align: center;
-	background: rgba(255, 255, 255, 0.1);
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(10px);
 	border: 2px solid rgba(255, 255, 255, 0.2);
-	border-radius: 4px;
-	color: #ecf0f1;
+	border-radius: 10px;
+	color: white;
+	transition: all 0.3s;
+}
+
+.tormenta20.sheet.actor.custom-sheet .header-fields .resource input:hover,
+.tormenta20.sheet.actor.custom-sheet .header-fields .resource input:focus {
+	border-color: rgba(102, 126, 234, 0.8);
+	box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+	outline: none;
 }
 
 /* ============================================
-   ATRIBUTOS
+   ATRIBUTOS - CARDS FLUTUANTES ÉPICOS
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet .ability-scores {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 10px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+	gap: 15px;
 	list-style: none;
-	margin: 0 0 20px 0;
+	margin: 0 0 25px 0;
 	padding: 0;
 }
 
 .tormenta20.sheet.actor.custom-sheet .ability {
-	flex: 1 1 120px;
-	min-width: 100px;
+	background: var(--glass-bg);
+	backdrop-filter: blur(20px);
+	border: 1px solid var(--glass-border);
+	border-radius: 20px;
+	padding: 20px 15px;
+	box-shadow: var(--shadow-glow);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-	border: 2px solid #dee2e6;
-	border-radius: 8px;
-	padding: 12px 8px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	transition: all 0.3s;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+	animation: slideIn 0.8s ease-out backwards;
+}
+
+.tormenta20.sheet.actor.custom-sheet .ability:nth-child(1) { animation-delay: 0.1s; }
+.tormenta20.sheet.actor.custom-sheet .ability:nth-child(2) { animation-delay: 0.2s; }
+.tormenta20.sheet.actor.custom-sheet .ability:nth-child(3) { animation-delay: 0.3s; }
+.tormenta20.sheet.actor.custom-sheet .ability:nth-child(4) { animation-delay: 0.4s; }
+.tormenta20.sheet.actor.custom-sheet .ability:nth-child(5) { animation-delay: 0.5s; }
+.tormenta20.sheet.actor.custom-sheet .ability:nth-child(6) { animation-delay: 0.6s; }
+
+.tormenta20.sheet.actor.custom-sheet .ability::before {
+	content: '';
+	position: absolute;
+	top: -50%;
+	left: -50%;
+	width: 200%;
+	height: 200%;
+	background: var(--primary-gradient);
+	opacity: 0;
+	transition: opacity 0.4s;
+	z-index: 0;
 }
 
 .tormenta20.sheet.actor.custom-sheet .ability:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-	border-color: #3498db;
+	transform: translateY(-10px) scale(1.05);
+	box-shadow: 0 20px 60px rgba(102, 126, 234, 0.6), 0 0 40px rgba(118, 75, 162, 0.4);
+	border-color: rgba(255, 255, 255, 0.4);
+}
+
+.tormenta20.sheet.actor.custom-sheet .ability:hover::before {
+	opacity: 0.2;
 }
 
 .tormenta20.sheet.actor.custom-sheet .ability-name {
 	font-size: 11px;
-	font-weight: 700;
-	color: #495057;
+	font-weight: 800;
+	color: rgba(255, 255, 255, 0.9);
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin-bottom: 5px;
+	letter-spacing: 2px;
+	margin-bottom: 10px;
+	position: relative;
+	z-index: 1;
+	text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .atributo-value {
-	font-size: 28px;
-	font-weight: 700;
-	color: #2c3e50;
-	margin: 5px 0;
+	font-size: 36px;
+	font-weight: 900;
+	background: var(--primary-gradient);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	margin: 10px 0;
 	line-height: 1;
+	position: relative;
+	z-index: 1;
+	filter: drop-shadow(0 2px 5px rgba(102, 126, 234, 0.5));
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute-footer {
 	display: flex;
-	gap: 5px;
-	margin-top: 8px;
+	gap: 8px;
+	margin-top: 12px;
 	width: 100%;
+	position: relative;
+	z-index: 1;
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute-footer input {
-	width: 50%;
-	height: 24px;
-	font-size: 11px;
+	flex: 1;
+	height: 28px;
+	font-size: 12px;
 	text-align: center;
-	border: 1px solid #ced4da;
-	border-radius: 4px;
-	background: #ffffff;
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 8px;
+	color: white;
+	transition: all 0.3s;
+}
+
+.tormenta20.sheet.actor.custom-sheet .attribute-footer input:hover,
+.tormenta20.sheet.actor.custom-sheet .attribute-footer input:focus {
+	border-color: rgba(102, 126, 234, 0.8);
+	box-shadow: 0 0 10px rgba(102, 126, 234, 0.4);
+	outline: none;
 }
 
 /* ============================================
-   RECURSOS (PV, PM, DEFESA)
+   RECURSOS - PV/PM/DEFESA ÉPICOS
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet .resources-main {
-	margin: 0 0 20px 0;
+	margin: 0 0 25px 0;
 }
 
 .tormenta20.sheet.actor.custom-sheet .resources-main .attributes {
-	display: flex;
-	gap: 10px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 15px;
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute {
-	flex: 1;
+	background: var(--glass-bg);
+	backdrop-filter: blur(20px);
+	border: 1px solid var(--glass-border);
+	border-radius: 20px;
+	padding: 20px;
+	box-shadow: var(--shadow-glow);
 	display: flex;
 	flex-direction: column;
-	background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-	border: 2px solid #dee2e6;
-	border-radius: 8px;
-	padding: 12px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	transition: all 0.4s;
+	position: relative;
+	overflow: hidden;
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute.resource {
-	border-color: #e74c3c;
+	border-image: var(--danger-gradient) 1;
+	border-width: 2px;
+	border-style: solid;
+}
+
+.tormenta20.sheet.actor.custom-sheet .attribute:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 15px 50px rgba(102, 126, 234, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute-name {
-	font-size: 12px;
-	font-weight: 700;
-	color: #495057;
+	font-size: 13px;
+	font-weight: 800;
+	color: rgba(255, 255, 255, 0.9);
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin: 0 0 8px 0;
+	letter-spacing: 1.5px;
+	margin: 0 0 15px 0;
 	text-align: center;
+	text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute-value {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 5px;
-	font-size: 20px;
-	font-weight: 700;
-	color: #2c3e50;
+	gap: 8px;
+	font-size: 24px;
+	font-weight: 900;
+	background: var(--primary-gradient);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
 }
 
 .tormenta20.sheet.actor.custom-sheet .attribute-value input {
-	width: 60px;
-	height: 32px;
-	font-size: 18px;
+	width: 70px;
+	height: 40px;
+	font-size: 22px;
+	font-weight: 900;
 	text-align: center;
-	border: 2px solid #ced4da;
-	border-radius: 6px;
-	background: #ffffff;
-	font-weight: 700;
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(10px);
+	border: 2px solid rgba(255, 255, 255, 0.2);
+	border-radius: 10px;
+	color: white;
+	transition: all 0.3s;
+}
+
+.tormenta20.sheet.actor.custom-sheet .attribute-value input:hover,
+.tormenta20.sheet.actor.custom-sheet .attribute-value input:focus {
+	border-color: rgba(102, 126, 234, 0.8);
+	box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+	outline: none;
+	transform: scale(1.05);
 }
 
 .tormenta20.sheet.actor.custom-sheet .value-slash {
-	font-size: 20px;
-	color: #6c757d;
+	font-size: 24px;
+	color: rgba(255, 255, 255, 0.6);
 	font-weight: 400;
 }
 
 /* ============================================
-   PERÍCIAS
+   PERÍCIAS - LISTA MODERNA E ELEGANTE
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet .skills-section {
-	background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-	border: 2px solid #dee2e6;
-	border-radius: 8px;
-	padding: 15px;
-	margin-bottom: 20px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	background: var(--glass-bg);
+	backdrop-filter: blur(20px);
+	border: 1px solid var(--glass-border);
+	border-radius: 20px;
+	padding: 25px;
+	margin-bottom: 25px;
+	box-shadow: var(--shadow-deep);
+	position: relative;
+	overflow: hidden;
+}
+
+.tormenta20.sheet.actor.custom-sheet .skills-section::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: var(--primary-gradient);
 }
 
 .tormenta20.sheet.actor.custom-sheet .skills-section h3 {
-	font-size: 16px;
-	font-weight: 700;
-	color: #2c3e50;
-	margin: 0 0 12px 0;
-	padding-bottom: 8px;
-	border-bottom: 2px solid #3498db;
+	font-size: 20px;
+	font-weight: 900;
+	background: var(--primary-gradient);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	margin: 0 0 20px 0;
+	padding-bottom: 15px;
+	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
+	letter-spacing: 2px;
+	text-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
 .tormenta20.sheet.actor.custom-sheet .skills-list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	max-height: 400px;
+	max-height: 450px;
 	overflow-y: auto;
 }
 
@@ -281,75 +540,121 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 8px 10px;
-	border-bottom: 1px solid #e9ecef;
-	transition: background 0.2s;
+	padding: 12px 15px;
+	margin-bottom: 8px;
+	background: rgba(0, 0, 0, 0.2);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 12px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+}
+
+.tormenta20.sheet.actor.custom-sheet .skill::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	width: 4px;
+	background: var(--primary-gradient);
+	transform: scaleY(0);
+	transition: transform 0.3s;
 }
 
 .tormenta20.sheet.actor.custom-sheet .skill:hover {
-	background: #f8f9fa;
+	background: rgba(102, 126, 234, 0.2);
+	border-color: rgba(102, 126, 234, 0.5);
+	transform: translateX(5px);
+	box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
 }
 
-.tormenta20.sheet.actor.custom-sheet .skill:last-child {
-	border-bottom: none;
+.tormenta20.sheet.actor.custom-sheet .skill:hover::before {
+	transform: scaleY(1);
 }
 
 .tormenta20.sheet.actor.custom-sheet .skill-name {
 	flex: 1;
-	font-size: 13px;
-	color: #495057;
-	font-weight: 500;
+	font-size: 14px;
+	color: rgba(255, 255, 255, 0.9);
+	font-weight: 600;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .skill-mod {
-	flex: 0 0 50px;
+	flex: 0 0 60px;
 	text-align: center;
-	font-size: 14px;
-	font-weight: 700;
-	color: #2c3e50;
-	padding: 2px 8px;
-	background: #e9ecef;
-	border-radius: 4px;
+	font-size: 16px;
+	font-weight: 800;
+	background: var(--primary-gradient);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	padding: 5px 12px;
+	border-radius: 8px;
+	background-color: rgba(102, 126, 234, 0.2);
+	-webkit-text-fill-color: white;
+	margin-right: 10px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .skill-prof {
-	flex: 0 0 24px;
+	flex: 0 0 30px;
 	text-align: center;
-	color: #28a745;
-	font-size: 14px;
+	color: #4ade80;
+	font-size: 16px;
+	filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.5));
 }
 
 .tormenta20.sheet.actor.custom-sheet .skill-prof .fa-circle {
-	color: #6c757d;
+	color: rgba(255, 255, 255, 0.3);
 }
 
 /* ============================================
-   INVENTÁRIO
+   INVENTÁRIO - CARDS MODERNOS
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet .inventory-weapons,
 .tormenta20.sheet.actor.custom-sheet .list-powers,
 .tormenta20.sheet.actor.custom-sheet .inventory-list {
-	background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-	border: 2px solid #dee2e6;
-	border-radius: 8px;
-	padding: 15px;
-	margin-bottom: 20px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	background: var(--glass-bg);
+	backdrop-filter: blur(20px);
+	border: 1px solid var(--glass-border);
+	border-radius: 20px;
+	padding: 25px;
+	margin-bottom: 25px;
+	box-shadow: var(--shadow-deep);
+	position: relative;
+	overflow: hidden;
+}
+
+.tormenta20.sheet.actor.custom-sheet .inventory-weapons::before,
+.tormenta20.sheet.actor.custom-sheet .list-powers::before,
+.tormenta20.sheet.actor.custom-sheet .inventory-list::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: var(--secondary-gradient);
 }
 
 .tormenta20.sheet.actor.custom-sheet .inventory-weapons h3,
 .tormenta20.sheet.actor.custom-sheet .list-powers h3,
 .tormenta20.sheet.actor.custom-sheet .inventory-list h3 {
-	font-size: 16px;
-	font-weight: 700;
-	color: #2c3e50;
-	margin: 0 0 12px 0;
-	padding-bottom: 8px;
-	border-bottom: 2px solid #3498db;
+	font-size: 20px;
+	font-weight: 900;
+	background: var(--secondary-gradient);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	margin: 0 0 20px 0;
+	padding-bottom: 15px;
+	border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
+	letter-spacing: 2px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-list {
@@ -361,68 +666,101 @@
 .tormenta20.sheet.actor.custom-sheet .item {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 10px;
-	border-bottom: 1px solid #e9ecef;
-	transition: background 0.2s;
+	gap: 15px;
+	padding: 15px;
+	margin-bottom: 10px;
+	background: rgba(0, 0, 0, 0.2);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 15px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.tormenta20.sheet.actor.custom-sheet .item::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+	transition: left 0.5s;
 }
 
 .tormenta20.sheet.actor.custom-sheet .item:hover {
-	background: #f8f9fa;
+	background: rgba(79, 172, 254, 0.2);
+	border-color: rgba(79, 172, 254, 0.5);
+	transform: translateX(5px);
+	box-shadow: 0 5px 25px rgba(79, 172, 254, 0.3);
 }
 
-.tormenta20.sheet.actor.custom-sheet .item:last-child {
-	border-bottom: none;
+.tormenta20.sheet.actor.custom-sheet .item:hover::before {
+	left: 100%;
 }
 
 .tormenta20.sheet.actor.custom-sheet .item img {
-	width: 32px;
-	height: 32px;
-	border-radius: 4px;
-	border: 1px solid #dee2e6;
+	width: 48px;
+	height: 48px;
+	border-radius: 12px;
+	border: 2px solid rgba(255, 255, 255, 0.2);
 	object-fit: cover;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s;
+}
+
+.tormenta20.sheet.actor.custom-sheet .item:hover img {
+	border-color: rgba(79, 172, 254, 0.6);
+	transform: scale(1.1) rotate(5deg);
+	box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-name {
 	flex: 1;
-	font-size: 13px;
-	color: #495057;
-	font-weight: 500;
+	font-size: 15px;
+	color: rgba(255, 255, 255, 0.9);
+	font-weight: 600;
 	margin: 0;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-controls {
 	display: flex;
-	gap: 5px;
+	gap: 8px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-control {
-	width: 28px;
-	height: 28px;
+	width: 36px;
+	height: 36px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border: 1px solid #dee2e6;
-	border-radius: 4px;
-	background: #ffffff;
-	color: #6c757d;
+	background: rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 10px;
+	color: rgba(255, 255, 255, 0.7);
 	cursor: pointer;
-	transition: all 0.2s;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	font-size: 14px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-control:hover {
-	background: #3498db;
-	border-color: #3498db;
-	color: #ffffff;
+	background: var(--secondary-gradient);
+	border-color: transparent;
+	color: white;
+	transform: scale(1.1) rotate(5deg);
+	box-shadow: 0 5px 20px rgba(79, 172, 254, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .item-control.item-delete:hover {
-	background: #e74c3c;
-	border-color: #e74c3c;
+	background: var(--danger-gradient);
+	box-shadow: 0 5px 20px rgba(250, 112, 154, 0.5);
 }
 
 /* ============================================
-   LAYOUT GERAL
+   LAYOUT GERAL E RESPONSIVIDADE
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet .attributes-left,
@@ -434,34 +772,36 @@
 .tormenta20.sheet.actor.custom-sheet .tab.attributes {
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 20px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .tab.attributes > .flexrow {
 	display: flex;
-	gap: 15px;
+	gap: 20px;
 }
 
 /* ============================================
-   SCROLLBAR PERSONALIZADA
+   SCROLLBAR PERSONALIZADA ÉPICA
    ============================================ */
 
 .tormenta20.sheet.actor.custom-sheet .skills-list::-webkit-scrollbar {
-	width: 8px;
+	width: 10px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .skills-list::-webkit-scrollbar-track {
-	background: #f1f1f1;
-	border-radius: 4px;
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 10px;
 }
 
 .tormenta20.sheet.actor.custom-sheet .skills-list::-webkit-scrollbar-thumb {
-	background: #888;
-	border-radius: 4px;
+	background: var(--primary-gradient);
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
 }
 
 .tormenta20.sheet.actor.custom-sheet .skills-list::-webkit-scrollbar-thumb:hover {
-	background: #555;
+	background: var(--secondary-gradient);
+	box-shadow: 0 0 15px rgba(79, 172, 254, 0.7);
 }
 
 /* ============================================
@@ -474,6 +814,24 @@
 	}
 	
 	.tormenta20.sheet.actor.custom-sheet .ability-scores {
-		justify-content: center;
+		grid-template-columns: repeat(3, 1fr);
 	}
+	
+	.tormenta20.sheet.actor.custom-sheet .resources-main .attributes {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ============================================
+   EFEITOS EXTRAS
+   ============================================ */
+
+.tormenta20.sheet.actor.custom-sheet .rollable {
+	cursor: pointer;
+	transition: all 0.3s;
+}
+
+.tormenta20.sheet.actor.custom-sheet .rollable:hover {
+	text-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+	transform: scale(1.05);
 }
