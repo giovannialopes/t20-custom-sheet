@@ -184,9 +184,6 @@ Hooks.once("ready", async () => {
 				
 				// Adicionar painel expansível ao poder (async para enriquecer HTML)
 				this._addPowerTooltip($item, item, tipoLabel);
-				
-				// Configurar seleção visual do poder
-				this._setupPowerSelection($item);
 			});
 		}
 		
@@ -260,33 +257,6 @@ Hooks.once("ready", async () => {
 				}
 				
 				$item.toggleClass('expanded');
-			});
-		}
-		
-		/**
-		 * Configura a seleção visual do poder (destaque ao clicar)
-		 */
-		_setupPowerSelection($item) {
-			// Remover listeners anteriores para evitar duplicação
-			$item.off('click.power-select');
-			
-			// Adicionar evento de clique no item (mas não nos controles e nome)
-			$item.on('click.power-select', (event) => {
-				// Não selecionar se clicar nos botões de controle, nome do poder ou painel de detalhes
-				const $target = $(event.target);
-				if ($target.closest('.power-controls').length > 0 ||
-				    $target.closest('.power-name').length > 0 ||
-				    $target.closest('.power-details-panel').length > 0 ||
-				    $target.hasClass('power-control') ||
-				    $target.hasClass('power-name')) {
-					return;
-				}
-				
-				// Remover seleção de outros poderes
-				this.element.find('.list-powers-custom .power-item').removeClass('selected');
-				
-				// Alternar seleção do item atual
-				$item.toggleClass('selected');
 			});
 		}
 		
