@@ -458,14 +458,17 @@ export class EquipmentManager {
 			
 			// Debug: verificar estrutura completa do equipamento
 			const system = item.system || {};
-			const tipoStr = system.tipo ? (typeof system.tipo === 'object' ? (system.tipo.value || system.tipo.label || '') : String(system.tipo)) : '';
-			const labelsTipo = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
-			const isArmaduraDebug = tipoStr.toLowerCase().includes('armadura') || labelsTipo.includes('armadura');
-			
-			const tipoStr = system.tipo ? (typeof system.tipo === 'object' ? (system.tipo.value || system.tipo.label || '') : String(system.tipo)) : '';
-			const labelsTipo = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
-			const tipoLower = tipoStr.toLowerCase();
-			const isArmaduraDebug = tipoLower.includes('armadura') || labelsTipo.includes('armadura');
+			let tipoStrDebug = '';
+			if (system.tipo) {
+				if (typeof system.tipo === 'object') {
+					tipoStrDebug = system.tipo.value || system.tipo.label || '';
+				} else {
+					tipoStrDebug = String(system.tipo);
+				}
+			}
+			const labelsTipoDebug = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
+			const tipoLowerDebug = tipoStrDebug.toLowerCase();
+			const isArmaduraDebug = tipoLowerDebug.includes('armadura') || labelsTipoDebug.includes('armadura');
 			
 			console.log("T20 Items Manager | Estrutura completa do item (equipamento):", {
 				name: item.name,
@@ -474,10 +477,10 @@ export class EquipmentManager {
 				systemKeys: Object.keys(system),
 				system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
 				tipo: system.tipo,
-				tipoStr: tipoStr,
-				tipoLower: tipoLower,
+				tipoStr: tipoStrDebug,
+				tipoLower: tipoLowerDebug,
 				labelsTipo: item.labels?.tipo,
-				labelsTipoLower: labelsTipo,
+				labelsTipoLower: labelsTipoDebug,
 				tipoUso: system.tipoUso,
 				subtipo: system.subtipo,
 				categoria: system.categoria,
@@ -488,8 +491,8 @@ export class EquipmentManager {
 				espaco: system.espaco,
 				peso: system.peso,
 				isArmadura: isArmaduraDebug,
-				"tipoLower.includes('armadura')": tipoLower.includes('armadura'),
-				"labelsTipo.includes('armadura')": labelsTipo.includes('armadura')
+				"tipoLower.includes('armadura')": tipoLowerDebug.includes('armadura'),
+				"labelsTipo.includes('armadura')": labelsTipoDebug.includes('armadura')
 			});
 			
 			// Formatar estatísticas (defesa/espaço)
