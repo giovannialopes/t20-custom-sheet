@@ -26,7 +26,7 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 			template: "modules/t20-custom-sheet/templates/actor/character-custom-sheet.hbs",
 			width: 800,
 			height: 600,
-			left: null, // Usar posição padrão do Foundry (lado direito)
+			left: null,
 			top: null,
 			resizable: true,
 			dragDrop: [{ dragSelector: ".item-list .item:not(.item-header)" }],
@@ -48,95 +48,42 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 			]
 		});
 	}
+	
+	/** @override */
+	get id() {
+		return `t20-custom-sheet-${this.actor.id}`;
+	}
 
 	/** @override */
 	async _render(force = false, options = {}) {
 		await super._render(force, options);
 		
-		// Forçar posicionamento no lado direito após renderização
-		// O Foundry pode restaurar posições salvas anteriormente, então precisamos forçar
+		// Adicionar classe específica para CSS poder posicionar
+		// Usar setTimeout para garantir que o DOM esteja pronto
 		setTimeout(() => {
-			this._forceRightPosition();
-		}, 0);
-		
-		requestAnimationFrame(() => {
-			this._forceRightPosition();
-		});
-	}
-
-	/**
-	 * Força a ficha a ficar no lado direito da tela (como a ficha padrão)
-	 */
-	_forceRightPosition() {
-		if (!this.element || !this.element.length) return;
-		
-		const width = this.options.width || 800;
-		const height = this.options.height || 600;
-		
-		// Calcular posição no lado direito da tela
-		// Considerar a largura da viewport e posicionar à direita
-		const viewportWidth = window.innerWidth || 1920;
-		const viewportHeight = window.innerHeight || 1080;
-		
-		// Posição à direita: largura total - largura da janela - margem
-		// Deixar espaço para a barra lateral direita do Foundry (se houver)
-		const rightMargin = 20; // Margem da borda direita
-		const left = viewportWidth - width - rightMargin;
-		
-		// Centralizar verticalmente
-		const top = Math.max(20, (viewportHeight - height) / 2);
-		
-		// Usar setPosition se disponível (método preferido do Foundry)
-		if (typeof this.setPosition === 'function') {
-			try {
-				this.setPosition({
-					width: width,
-					height: height,
-					left: left,
-					top: top
-				});
-				return;
-			} catch (e) {
-				console.warn("T20 Custom Sheet | Erro ao usar setPosition:", e);
+			if (this.element && this.element.length) {
+				// Tentar encontrar o elemento window-app de várias formas
+				let windowElement = null;
+				const domElement = this.element[0] || this.element.get?.(0);
+				if (domElement) {
+					// Procurar o elemento window-app no DOM
+					windowElement = domElement.closest?.('.window-app') || 
+					               domElement.parentElement?.closest?.('.window-app') ||
+					               $(domElement).parents('.window-app')[0];
+					
+					if (windowElement) {
+						// Adicionar classe usando jQuery ou DOM direto
+						if (windowElement.classList) {
+							windowElement.classList.add('t20-custom-sheet-window');
+						} else if (windowElement.addClass) {
+							windowElement.addClass('t20-custom-sheet-window');
+						} else if ($(windowElement).length) {
+							$(windowElement).addClass('t20-custom-sheet-window');
+						}
+					}
+				}
 			}
-		}
-		
-		// Método alternativo: Aplicar diretamente no elemento
-		const domElement = this.element?.[0] || this.element?.get?.(0);
-		if (domElement) {
-			domElement.style.left = `${left}px`;
-			domElement.style.top = `${top}px`;
-			domElement.style.width = `${width}px`;
-			domElement.style.height = `${height}px`;
-		}
-		
-		// Atualizar posição no objeto para persistência
-		if (this.position) {
-			this.position.left = left;
-			this.position.top = top;
-			this.position.width = width;
-			this.position.height = height;
-		}
-	}
-
-	/**
-	 * Verifica e corrige a posição se necessário (sem forçar se já estiver correta)
-	 */
-	_ensureRightPosition() {
-		if (!this.element || !this.element.length) return;
-		
-		const domElement = this.element?.[0] || this.element?.get?.(0);
-		if (!domElement) return;
-		
-		const currentLeft = parseInt(domElement.style.left) || domElement.offsetLeft || 0;
-		const viewportWidth = window.innerWidth || 1920;
-		const width = this.options.width || 800;
-		
-		// Se a janela estiver no lado esquerdo (menos de 50% da tela), mover para a direita
-		const midpoint = viewportWidth / 2;
-		if (currentLeft < midpoint) {
-			this._forceRightPosition();
-		}
+		}, 100);
 	}
 
 	/* -------------------------------------------- */
@@ -358,21 +305,6 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 		html.find(".item .item-image").click((event) => this._onItemRoll(event));
 		html.find(".item-control.item-edit").click(this._onItemEdit.bind(this));
 		html.find(".item-control.item-delete").click(this._onItemDelete.bind(this));
-		
-		// Garantir posição correta quando a janela for movida
-		// Usar um pequeno delay para não interferir com o arrasto normal
-		let positionCheckTimeout;
-		const windowElement = this.element?.[0] || this.element?.get?.(0);
-		if (windowElement) {
-			windowElement.addEventListener('mousedown', () => {
-				clearTimeout(positionCheckTimeout);
-			});
-			windowElement.addEventListener('mouseup', () => {
-				positionCheckTimeout = setTimeout(() => {
-					this._ensureRightPosition();
-				}, 100);
-			});
-		}
 	}
 
 	/* -------------------------------------------- */
