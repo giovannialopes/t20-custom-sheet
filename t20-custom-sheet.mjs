@@ -91,6 +91,7 @@ Hooks.once("ready", async () => {
 			// Adicionar badges de tipo aos poderes e configurar filtros
 			setTimeout(() => {
 				this._setupPowersSection();
+				this._setupFloatingIcons();
 			}, 100);
 		}
 		
@@ -261,6 +262,65 @@ Hooks.once("ready", async () => {
 			
 			// Configurar filtros
 			this._setupPowerFilters();
+		}
+		
+		/**
+		 * Configura ícones flutuantes do lado direito da ficha
+		 */
+		_setupFloatingIcons() {
+			if (!this.element || !this.element.length) return;
+			
+			const $container = this.element.find('#floating-icons-container');
+			if ($container.length === 0) return;
+			
+			// Limpar ícones existentes
+			$container.empty();
+			
+			// Configuração dos ícones flutuantes
+			// Você pode adicionar, remover ou modificar ícones aqui
+			// Cada ícone precisa de: icon (caminho), tooltip (texto), action (função ao clicar)
+			const floatingIcons = [
+				{
+					icon: 'icons/svg/fire.svg', // Ícone de fogo - pode ser substituído por qualquer ícone
+					tooltip: 'Ícone Flutuante',
+					action: () => {
+						ui.notifications.info('Ícone flutuante clicado!');
+					}
+				}
+				// Adicione mais ícones aqui:
+				// {
+				//     icon: 'caminho/para/icone.png',
+				//     tooltip: 'Descrição do ícone',
+				//     action: () => {
+				//         // Ação ao clicar
+				//     }
+				// }
+			];
+			
+			// Criar os ícones
+			floatingIcons.forEach((config, index) => {
+				const $icon = $('<div>')
+					.addClass('floating-icon')
+					.attr('title', config.tooltip || '')
+					.css('animation-delay', `${index * 0.1}s`);
+				
+				const $img = $('<img>')
+					.attr('src', config.icon)
+					.attr('alt', config.tooltip || '');
+				
+				$icon.append($img);
+				
+				// Adicionar evento de clique
+				if (config.action && typeof config.action === 'function') {
+					$icon.on('click', (event) => {
+						event.preventDefault();
+						event.stopPropagation();
+						config.action();
+					});
+				}
+				
+				$container.append($icon);
+			});
 		}
 		
 		/**
