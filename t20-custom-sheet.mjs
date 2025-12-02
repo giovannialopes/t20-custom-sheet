@@ -564,14 +564,14 @@ Hooks.once("ready", async () => {
 		}
 		
 		/**
-		 * Cria os chips de resumo por tipo de poder
+		 * Cria o combobox de filtro por tipo de poder
 		 */
 		_createPowerChips() {
-			const $chipsContainer = this.element.find('#powers-chips-container');
-			if ($chipsContainer.length === 0) return;
+			const $combobox = this.element.find('#powers-combobox');
+			if ($combobox.length === 0) return;
 			
-			// Limpar chips existentes
-			$chipsContainer.empty();
+			// Manter a opção "Todos os tipos"
+			$combobox.find('option:not(:first)').remove();
 			
 			// Coletar grupos de poderes
 			const gruposPorTipo = {};
@@ -611,19 +611,16 @@ Hooks.once("ready", async () => {
 				"complicacão"
 			];
 			
-			// Criar chips na ordem definida
+			// Adicionar opções ao combobox na ordem definida
 			for (const tipo of ordemTipos) {
 				if (gruposPorTipo[tipo]) {
 					const grupo = gruposPorTipo[tipo];
-					// Garantir que o tipo seja normalizado novamente antes de criar o chip
 					const tipoNormalizado = this._normalizePowerTypeKey(grupo.tipo);
-					const $chip = $('<div>')
-						.addClass('power-chip')
-						.attr('data-type', tipoNormalizado)
-						.attr('data-filter-type', tipoNormalizado)
-						.html(`${grupo.label} <span class="chip-count">${grupo.count}</span>`);
+					const $option = $('<option>')
+						.attr('value', tipoNormalizado)
+						.text(`${grupo.label} (${grupo.count})`);
 					
-					$chipsContainer.append($chip);
+					$combobox.append($option);
 					delete gruposPorTipo[tipo];
 				}
 			}
@@ -632,40 +629,25 @@ Hooks.once("ready", async () => {
 			for (const tipo in gruposPorTipo) {
 				if (!Object.prototype.hasOwnProperty.call(gruposPorTipo, tipo)) continue;
 				const grupo = gruposPorTipo[tipo];
-				// Garantir que o tipo seja normalizado novamente antes de criar o chip
 				const tipoNormalizado = this._normalizePowerTypeKey(grupo.tipo);
-				const $chip = $('<div>')
-					.addClass('power-chip')
-					.attr('data-type', tipoNormalizado)
-					.attr('data-filter-type', tipoNormalizado)
-					.html(`${grupo.label} <span class="chip-count">${grupo.count}</span>`);
+				const $option = $('<option>')
+					.attr('value', tipoNormalizado)
+					.text(`${grupo.label} (${grupo.count})`);
 				
-				$chipsContainer.append($chip);
+				$combobox.append($option);
 			}
-			
-			// Event listeners para chips serão configurados em _setupPowerFilters
 		}
 		
 		/**
-		 * Configura os filtros de poderes (apenas através dos chips)
+		 * Configura os filtros de poderes (através do combobox)
 		 */
 		_setupPowerFilters() {
+			const $combobox = this.element.find('#powers-combobox');
+			if ($combobox.length === 0) return;
+			
 			// Função de filtro
 			const filterPowers = (typeFilter = '') => {
 				const normalizedTypeFilter = typeFilter ? this._normalizePowerTypeKey(typeFilter) : '';
-				
-				// Atualizar estado visual dos chips
-				const $chipsContainer = this.element.find('#powers-chips-container');
-				$chipsContainer.find('.power-chip').each((index, element) => {
-					const $chip = $(element);
-					const chipType = $chip.attr('data-filter-type') || '';
-					
-					if (typeFilter && this._normalizePowerTypeKey(chipType) === this._normalizePowerTypeKey(typeFilter)) {
-						$chip.addClass('active');
-					} else {
-						$chip.removeClass('active');
-					}
-				});
 				
 				// Coletar todos os itens primeiro para aplicar animação
 				const itemsToShow = [];
@@ -673,13 +655,11 @@ Hooks.once("ready", async () => {
 				
 				this.element.find('.list-powers-custom .power-item').each((index, element) => {
 					const $item = $(element);
-					const itemName = ($item.attr('data-power-name') || '').toLowerCase();
 					const itemType = ($item.attr('data-power-type') || '').toLowerCase();
 					
-					const nameMatch = !nameFilter || itemName.includes(nameFilter);
-					const typeMatch = !typeFilter || this._normalizePowerTypeKey(itemType) === this._normalizePowerTypeKey(typeFilter);
+					const typeMatch = !normalizedTypeFilter || this._normalizePowerTypeKey(itemType) === normalizedTypeFilter;
 					
-					if (nameMatch && typeMatch) {
+					if (typeMatch) {
 						itemsToShow.push({$item, index});
 					} else {
 						itemsToHide.push({$item, index});
@@ -706,25 +686,10 @@ Hooks.once("ready", async () => {
 				});
 			};
 			
-			// Event listeners para chips
-			const $chipsContainer = this.element.find('#powers-chips-container');
-			$chipsContainer.find('.power-chip').off('click.chip-filter').on('click.chip-filter', (event) => {
-				event.preventDefault();
-				const $chip = $(event.currentTarget);
-				const filterType = $chip.attr('data-filter-type');
-				
-				// Toggle: se já estiver ativo, desativa (mostra todos)
-				if ($chip.hasClass('active')) {
-					$chip.removeClass('active');
-					filterPowers('');
-				} else {
-					// Desativar outros chips
-					$chipsContainer.find('.power-chip').removeClass('active');
-					// Ativar este chip
-					$chip.addClass('active');
-					// Aplicar filtro
-					filterPowers(filterType);
-				}
+			// Event listener para combobox
+			$combobox.off('change.combobox-filter').on('change.combobox-filter', (event) => {
+				const selectedValue = $(event.currentTarget).val() || '';
+				filterPowers(selectedValue);
 			});
 			
 			// Event listeners para controles de editar e deletar
@@ -741,11 +706,16 @@ Hooks.once("ready", async () => {
 				const item = this.actor.items.get(itemId);
 				if (item) {
 					item.delete();
-					// Recriar chips e reaplicar filtros após deletar
+					// Recriar combobox e reaplicar filtros após deletar
 					setTimeout(() => {
+						const currentValue = $combobox.val() || '';
 						this._addPowerTypeBadges();
 						this._createPowerChips();
-						filterPowers();
+						// Restaurar valor selecionado e aplicar filtro
+						setTimeout(() => {
+							$combobox.val(currentValue);
+							filterPowers(currentValue);
+						}, 50);
 					}, 100);
 				}
 			});
