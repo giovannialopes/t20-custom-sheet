@@ -705,31 +705,37 @@ Hooks.once("ready", async () => {
 			// Event listener para combobox
 			$combobox.off('change.combobox-filter').on('change.combobox-filter', (event) => {
 				const $select = $(event.currentTarget);
-				const selectedValue = $select.val() || '';
+				const nativeSelect = $select[0];
+				if (!nativeSelect) return;
 				
-				// Garantir que o valor selecionado seja setado corretamente
-				if (selectedValue) {
-					// Verificar se a opção existe
-					const $option = $select.find(`option[value="${selectedValue}"]`);
-					if ($option.length > 0) {
-						// Garantir que a opção está selecionada
-						$option.prop('selected', true);
-						$select.val(selectedValue);
-						// Forçar atualização do selectedIndex para garantir que o texto apareça
-						const nativeSelect = $select[0];
-						if (nativeSelect) {
-							nativeSelect.selectedIndex = $option.index();
-						}
-					}
-				} else {
-					// Se nenhum valor, selecionar primeira opção (Todos os tipos)
-					$select.val('');
-					const nativeSelect = $select[0];
-					if (nativeSelect) {
-						nativeSelect.selectedIndex = 0;
-					}
+				// Obter valor selecionado diretamente do elemento nativo
+				const selectedIndex = nativeSelect.selectedIndex;
+				const selectedValue = nativeSelect.value || '';
+				const selectedText = nativeSelect.options[selectedIndex] ? nativeSelect.options[selectedIndex].text : '';
+				
+				console.log('T20 Custom Sheet | Combobox change:', {
+					selectedIndex,
+					selectedValue,
+					selectedText,
+					allOptions: Array.from(nativeSelect.options).map((opt, idx) => ({
+						index: idx,
+						value: opt.value,
+						text: opt.text,
+						selected: opt.selected
+					}))
+				});
+				
+				// Garantir que o valor está correto
+				if (selectedValue !== $select.val()) {
+					$select.val(selectedValue);
 				}
 				
+				// Garantir que o selectedIndex está correto
+				if (nativeSelect.selectedIndex !== selectedIndex) {
+					nativeSelect.selectedIndex = selectedIndex;
+				}
+				
+				// Aplicar filtro
 				filterPowers(selectedValue);
 			});
 			

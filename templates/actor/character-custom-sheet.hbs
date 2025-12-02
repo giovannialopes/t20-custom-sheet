@@ -131,14 +131,25 @@
 					/* Garantir que o texto selecionado seja visível */
 					.powers-combobox option {
 						background: #1a1d26;
-						color: #ffffff;
+						color: #ffffff !important;
 						padding: 10px;
+					}
+					
+					.powers-combobox option:hover {
+						background: rgba(245, 194, 66, 0.2);
 					}
 					
 					.powers-combobox option:checked,
 					.powers-combobox option[selected] {
 						background: rgba(245, 194, 66, 0.2);
-						color: #ffffff;
+						color: #ffffff !important;
+					}
+					
+					/* Garantir que o texto no select seja sempre visível */
+					.powers-combobox,
+					.powers-combobox:focus,
+					.powers-combobox:active {
+						color: #ffffff !important;
 					}
 					
 					.powers-combobox:hover {
@@ -175,15 +186,6 @@
 						border-top-color: rgba(245, 194, 66, 1);
 					}
 					
-					.powers-combobox option {
-						background: #1a1d26;
-						color: #ffffff;
-						padding: 10px;
-					}
-					
-					.powers-combobox option:hover {
-						background: rgba(245, 194, 66, 0.2);
-					}
 					
 					.powers-chips {
 						display: none;
