@@ -270,6 +270,43 @@
 						display: none;
 					}
 					
+					/* Indicadores visuais especiais para tipos Concedido e Complicação */
+					.power-item[data-power-type="concedido"] {
+						border-left: 4px solid rgba(142, 68, 173, 0.9);
+						box-shadow: inset 0 0 0 1px rgba(142, 68, 173, 0.2);
+					}
+					
+					.power-item[data-power-type="concedido"] .power-icon {
+						border-color: rgba(142, 68, 173, 0.6);
+						box-shadow: 0 0 10px rgba(142, 68, 173, 0.4);
+					}
+					
+					.power-item[data-power-type="concedido"]:hover {
+						border-left-color: rgba(142, 68, 173, 1);
+						box-shadow: inset 0 0 0 1px rgba(142, 68, 173, 0.3), 0 6px 18px rgba(0, 0, 0, 0.45);
+					}
+					
+					.power-item[data-power-type="complicação"],
+					.power-item[data-power-type="complicacao"],
+					.power-item[data-power-type="complicacão"] {
+						border-left: 4px solid rgba(192, 57, 43, 0.9);
+						box-shadow: inset 0 0 0 1px rgba(192, 57, 43, 0.2);
+					}
+					
+					.power-item[data-power-type="complicação"] .power-icon,
+					.power-item[data-power-type="complicacao"] .power-icon,
+					.power-item[data-power-type="complicacão"] .power-icon {
+						border-color: rgba(192, 57, 43, 0.6);
+						box-shadow: 0 0 10px rgba(192, 57, 43, 0.4);
+					}
+					
+					.power-item[data-power-type="complicação"]:hover,
+					.power-item[data-power-type="complicacao"]:hover,
+					.power-item[data-power-type="complicacão"]:hover {
+						border-left-color: rgba(192, 57, 43, 1);
+						box-shadow: inset 0 0 0 1px rgba(192, 57, 43, 0.3), 0 6px 18px rgba(0, 0, 0, 0.45);
+					}
+					
 					.power-icon {
 						width: 40px;
 						height: 40px;
