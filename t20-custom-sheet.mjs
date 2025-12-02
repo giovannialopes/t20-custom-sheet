@@ -643,59 +643,16 @@ Hooks.once("ready", async () => {
 				$chipsContainer.append($chip);
 			}
 			
-			// Event listeners para chips
-			$chipsContainer.find('.power-chip').off('click').on('click', (event) => {
-				event.preventDefault();
-				const $chip = $(event.currentTarget);
-				const filterType = $chip.attr('data-filter-type');
-				const $typeFilter = this.element.find('#power-filter-type');
-				const normalizedFilterType = this._normalizePowerTypeKey(filterType);
-				
-				// Toggle: se já estiver ativo, desativa (mostra todos)
-				if ($chip.hasClass('active')) {
-					$chip.removeClass('active');
-					$typeFilter.val('');
-				} else {
-					// Desativar outros chips
-					$chipsContainer.find('.power-chip').removeClass('active');
-					// Ativar este chip
-					$chip.addClass('active');
-					
-					// Tentar encontrar opção correspondente no select
-					let foundOption = false;
-					$typeFilter.find('option').each((index, option) => {
-						const optionValue = $(option).val();
-						if (optionValue && this._normalizePowerTypeKey(optionValue) === normalizedFilterType) {
-							$typeFilter.val(optionValue);
-							foundOption = true;
-							return false; // break
-						}
-					});
-					
-					// Se não encontrou opção exata, usar o tipo diretamente (pode ser necessário para tipos customizados)
-					if (!foundOption) {
-						$typeFilter.val(filterType);
-					}
-				}
-				
-				// Disparar evento de mudança no filtro para aplicar
-				$typeFilter.trigger('change');
-			});
+			// Event listeners para chips serão configurados em _setupPowerFilters
 		}
 		
 		/**
-		 * Configura os filtros de poderes
+		 * Configura os filtros de poderes (apenas através dos chips)
 		 */
 		_setupPowerFilters() {
-			const $nameFilter = this.element.find('#power-filter-name');
-			const $typeFilter = this.element.find('#power-filter-type');
-			
-			if ($nameFilter.length === 0 || $typeFilter.length === 0) return;
-			
 			// Função de filtro
-			const filterPowers = () => {
-				const nameFilter = $nameFilter.val().toLowerCase().trim();
-				const typeFilter = $typeFilter.val().toLowerCase().trim();
+			const filterPowers = (typeFilter = '') => {
+				const normalizedTypeFilter = typeFilter ? this._normalizePowerTypeKey(typeFilter) : '';
 				
 				// Atualizar estado visual dos chips
 				const $chipsContainer = this.element.find('#powers-chips-container');
@@ -749,9 +706,26 @@ Hooks.once("ready", async () => {
 				});
 			};
 			
-			// Event listeners para filtros
-			$nameFilter.on('input', filterPowers);
-			$typeFilter.on('change', filterPowers);
+			// Event listeners para chips
+			const $chipsContainer = this.element.find('#powers-chips-container');
+			$chipsContainer.find('.power-chip').off('click.chip-filter').on('click.chip-filter', (event) => {
+				event.preventDefault();
+				const $chip = $(event.currentTarget);
+				const filterType = $chip.attr('data-filter-type');
+				
+				// Toggle: se já estiver ativo, desativa (mostra todos)
+				if ($chip.hasClass('active')) {
+					$chip.removeClass('active');
+					filterPowers('');
+				} else {
+					// Desativar outros chips
+					$chipsContainer.find('.power-chip').removeClass('active');
+					// Ativar este chip
+					$chip.addClass('active');
+					// Aplicar filtro
+					filterPowers(filterType);
+				}
+			});
 			
 			// Event listeners para controles de editar e deletar
 			this.element.find('.list-powers-custom .item-edit').off('click').on('click', (event) => {
