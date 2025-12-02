@@ -29,17 +29,7 @@
 				</div>
 				{{/if}}
 
-				{{!-- Inventory Weapons --}}
-				<div class="inventory-weapons">
-					{{> "tormenta20.list-weapon"}}
-				</div>
-
-				{{!-- Defense Inventory Equipment --}}
-				<div class="inventory-equipment flexrow">
-					<!-- <ul class="attributes flexrow"></ul> -->
-			{{> "tormenta20.list-equipment"}}
-		</div>
-		{{#if actor.maiorCirculo}}
+				{{#if actor.maiorCirculo}}
 				{{!-- Spells --}}
 				<div class="list-spells">
 					{{> "tormenta20.list-spells"}}
@@ -55,13 +45,6 @@
 			<div class="attributes-right flexcol">
 				{{!-- Skills --}}
 				{{> "tormenta20.list-skills"}}
-
-				{{!-- Inventory General --}}
-				<div class="inventory-list">
-					{{> "tormenta20.list-general"}}
-					{{> "tormenta20.currency"}}
-					{{> "tormenta20.encumbrance"}}
-				</div>
 			</div>
 		</div>
 
@@ -78,6 +61,11 @@
 		{{!-- Poderes Tab --}}
 		<div class="tab powers flexrow" data-group="primary" data-tab="powers">
 			{{> "modules/t20-custom-sheet/templates/actor/powers-tab"}}
+		</div>
+
+		{{!-- Itens Tab --}}
+		<div class="tab items flexrow" data-group="primary" data-tab="items">
+			{{> "modules/t20-custom-sheet/templates/actor/items-tab"}}
 		</div>
 
 		{{!-- Efeitos Tab --}}

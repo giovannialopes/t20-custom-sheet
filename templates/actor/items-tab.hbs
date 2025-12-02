@@ -1,0 +1,224 @@
+{{!-- Itens Tab Content --}}
+<div class="list-items-custom">
+	<style>
+	.list-items-custom {
+		background: linear-gradient(145deg, #1a1d26 0%, #13151c 100%);
+		border-radius: 16px;
+		padding: 20px;
+		margin: 12px 0;
+		box-shadow: 
+			0 8px 32px rgba(0, 0, 0, 0.6),
+			0 2px 8px rgba(0, 0, 0, 0.4),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		position: relative;
+		overflow: hidden;
+		width: 100%;
+	}
+
+	.list-items-custom::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 3px;
+		background: linear-gradient(90deg, 
+			rgba(245, 194, 66, 0.8) 0%,
+			rgba(230, 126, 34, 0.8) 25%,
+			rgba(74, 144, 226, 0.8) 50%,
+			rgba(155, 89, 182, 0.8) 75%,
+			rgba(39, 174, 96, 0.8) 100%);
+		opacity: 0.6;
+	}
+
+	.items-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16px;
+		padding-bottom: 12px;
+		border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+		position: relative;
+	}
+
+	.items-header::after {
+		content: '';
+		position: absolute;
+		bottom: -2px;
+		left: 0;
+		width: 60px;
+		height: 2px;
+		background: linear-gradient(90deg, rgba(245, 194, 66, 1), rgba(245, 194, 66, 0));
+	}
+
+	.items-header h3 {
+		margin: 0;
+		color: #ffffff;
+		font-size: 22px;
+		font-weight: 700;
+		letter-spacing: -0.5px;
+		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+		position: relative;
+	}
+
+	.items-sections {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.items-section {
+		background: rgba(22, 26, 35, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 12px;
+		padding: 16px;
+		box-shadow: 
+			0 4px 12px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+	}
+
+	.items-section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 12px;
+		padding-bottom: 8px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.items-section-title {
+		font-size: 16px;
+		font-weight: 700;
+		color: #ffffff;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.items-section-content {
+		max-height: 500px;
+		overflow-y: auto;
+		padding-right: 8px;
+	}
+
+	.items-section-content::-webkit-scrollbar {
+		width: 10px;
+	}
+
+	.items-section-content::-webkit-scrollbar-track {
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 10px;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.items-section-content::-webkit-scrollbar-thumb {
+		background: linear-gradient(180deg, 
+			rgba(245, 194, 66, 0.6) 0%,
+			rgba(230, 126, 34, 0.6) 100%);
+		border-radius: 10px;
+		border: 2px solid rgba(0, 0, 0, 0.2);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+	}
+
+	.items-section-content::-webkit-scrollbar-thumb:hover {
+		background: linear-gradient(180deg, 
+			rgba(245, 194, 66, 0.8) 0%,
+			rgba(230, 126, 34, 0.8) 100%);
+	}
+
+	.item-control {
+		padding: 8px 12px;
+		background: rgba(255, 255, 255, 0.08);
+		border: 2px solid rgba(255, 255, 255, 0.12);
+		border-radius: 8px;
+		color: #fff;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		overflow: hidden;
+		box-shadow: 
+			inset 0 2px 4px rgba(0, 0, 0, 0.2),
+			0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.item-control:hover {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.3);
+		transform: translateY(-3px) scale(1.08);
+		box-shadow: 
+			0 6px 16px rgba(0, 0, 0, 0.4),
+			inset 0 1px 0 rgba(255, 255, 255, 0.2);
+	}
+
+	.item-control.item-create {
+		background: linear-gradient(135deg, rgba(245, 194, 66, 0.2) 0%, rgba(230, 126, 34, 0.2) 100%);
+		border-color: rgba(245, 194, 66, 0.4);
+		color: #f5c242;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		font-size: 12px;
+	}
+
+	.item-control.item-create:hover {
+		background: linear-gradient(135deg, rgba(245, 194, 66, 0.4) 0%, rgba(230, 126, 34, 0.4) 100%);
+		border-color: rgba(245, 194, 66, 0.7);
+		color: #ffffff;
+		box-shadow: 
+			0 6px 20px rgba(245, 194, 66, 0.4),
+			inset 0 1px 0 rgba(255, 255, 255, 0.2);
+	}
+
+	.item-control.item-create i {
+		margin-right: 6px;
+	}
+	</style>
+
+	<div class="items-header">
+		<h3>{{localize "T20.Items"}}</h3>
+	</div>
+
+	<div class="items-sections">
+		{{!-- Armas Section --}}
+		<div class="items-section">
+			<div class="items-section-header">
+				<div class="items-section-title">{{localize "T20.Weapons"}}</div>
+				<a class="item-control item-create" title="{{localize 'T20.ItemCreate'}}" data-type="arma">
+					<i class="fas fa-plus"></i> {{localize "T20.Add"}}
+				</a>
+			</div>
+			<div class="items-section-content">
+				{{> "tormenta20.list-weapon"}}
+			</div>
+		</div>
+
+		{{!-- Equipamento Section --}}
+		<div class="items-section">
+			<div class="items-section-header">
+				<div class="items-section-title">{{localize "T20.Equipment"}}</div>
+				<a class="item-control item-create" title="{{localize 'T20.ItemCreate'}}" data-type="equipamento">
+					<i class="fas fa-plus"></i> {{localize "T20.Add"}}
+				</a>
+			</div>
+			<div class="items-section-content">
+				{{> "tormenta20.list-equipment"}}
+			</div>
+		</div>
+
+		{{!-- Inventário Section --}}
+		<div class="items-section">
+			<div class="items-section-header">
+				<div class="items-section-title">{{localize "T20.Inventory"}}</div>
+				<a class="item-control item-create" title="{{localize 'T20.ItemCreate'}}" data-type="consumivel">
+					<i class="fas fa-plus"></i> {{localize "T20.Add"}}
+				</a>
+			</div>
+			<div class="items-section-content">
+				{{> "tormenta20.list-general"}}
+				{{> "tormenta20.currency"}}
+				{{> "tormenta20.encumbrance"}}
+			</div>
+		</div>
+	</div>
+</div>
+

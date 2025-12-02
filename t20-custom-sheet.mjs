@@ -12,20 +12,27 @@ import { PowersManager } from "./t20-powers.mjs";
 Hooks.once("ready", async () => {
 	console.log("T20 Custom Sheet | Inicializando módulo de ficha customizada");
 
-	// Pré-carregar e registrar partial do powers-tab
+	// Pré-carregar e registrar partials do powers-tab e items-tab
 	try {
 		await loadTemplates([
-			"modules/t20-custom-sheet/templates/actor/powers-tab.hbs"
+			"modules/t20-custom-sheet/templates/actor/powers-tab.hbs",
+			"modules/t20-custom-sheet/templates/actor/items-tab.hbs"
 		]);
 		
-		// Registrar o partial manualmente no Handlebars
-		const template = await fetch("modules/t20-custom-sheet/templates/actor/powers-tab.hbs").then(r => r.text());
-		if (template) {
-			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/powers-tab", template);
+		// Registrar os partials manualmente no Handlebars
+		const powersTemplate = await fetch("modules/t20-custom-sheet/templates/actor/powers-tab.hbs").then(r => r.text());
+		if (powersTemplate) {
+			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/powers-tab", powersTemplate);
 			console.log("T20 Custom Sheet | Partial powers-tab registrado com sucesso");
 		}
+		
+		const itemsTemplate = await fetch("modules/t20-custom-sheet/templates/actor/items-tab.hbs").then(r => r.text());
+		if (itemsTemplate) {
+			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/items-tab", itemsTemplate);
+			console.log("T20 Custom Sheet | Partial items-tab registrado com sucesso");
+		}
 	} catch (error) {
-		console.error("T20 Custom Sheet | Erro ao carregar/registrar partial powers-tab:", error);
+		console.error("T20 Custom Sheet | Erro ao carregar/registrar partials:", error);
 	}
 
 	// Aguardar o sistema Tormenta20 estar pronto antes de registrar
@@ -1048,7 +1055,7 @@ Hooks.once("ready", async () => {
 
 	console.log("T20 Custom Sheet | Ficha customizada registrada com sucesso!");
 	
-	// Adicionar aba "Poderes" no nav-bar
+	// Adicionar abas "Poderes" e "Itens" no nav-bar
 	Hooks.on("renderActorSheet", (app, html, data) => {
 		if (app.constructor.name !== "ActorSheetT20CustomCharacter") return;
 		
@@ -1085,43 +1092,75 @@ Hooks.once("ready", async () => {
 				return;
 			}
 			
-			// Verificar se a aba já existe
-			if ($navBar.find('a[data-tab="powers"]').length > 0) {
-				return;
-			}
-			
 			console.log("T20 Custom Sheet | Nav-bar encontrado:", $navBar[0]?.className);
 			
-			// Criar elemento da aba
-			const powersLabel = game.i18n.localize("T20.Powers") || "Poderes";
-			const $powersTab = $(`
-				<a class="item" data-tab="powers" title="${powersLabel}">
-					<i class="fas fa-magic"></i>
-					${powersLabel}
-				</a>
-			`);
-			
-			// Inserir antes da aba "effects"
-			const $effectsTab = $navBar.find('a[data-tab="effects"]');
-			if ($effectsTab.length > 0) {
-				$powersTab.insertBefore($effectsTab);
-				console.log("T20 Custom Sheet | Aba Poderes inserida antes de Efeitos");
-			} else {
-				// Se não encontrar effects, inserir antes da última aba
-				const $lastTab = $navBar.find('a.item').last();
-				if ($lastTab.length > 0) {
-					$powersTab.insertBefore($lastTab);
+			// Adicionar aba "Poderes" se não existir
+			if ($navBar.find('a[data-tab="powers"]').length === 0) {
+				const powersLabel = game.i18n.localize("T20.Powers") || "Poderes";
+				const $powersTab = $(`
+					<a class="item" data-tab="powers" title="${powersLabel}">
+						<i class="fas fa-magic"></i>
+						${powersLabel}
+					</a>
+				`);
+				
+				// Inserir antes da aba "effects"
+				const $effectsTab = $navBar.find('a[data-tab="effects"]');
+				if ($effectsTab.length > 0) {
+					$powersTab.insertBefore($effectsTab);
+					console.log("T20 Custom Sheet | Aba Poderes inserida antes de Efeitos");
 				} else {
-					$navBar.append($powersTab);
+					// Se não encontrar effects, inserir antes da última aba
+					const $lastTab = $navBar.find('a.item').last();
+					if ($lastTab.length > 0) {
+						$powersTab.insertBefore($lastTab);
+					} else {
+						$navBar.append($powersTab);
+					}
+					console.log("T20 Custom Sheet | Aba Poderes adicionada");
 				}
-				console.log("T20 Custom Sheet | Aba Poderes adicionada");
+				
+				// Ativar cliques na aba
+				$powersTab.on('click', (event) => {
+					event.preventDefault();
+					app.activateTab("powers");
+				});
 			}
 			
-			// Ativar cliques na aba
-			$powersTab.on('click', (event) => {
-				event.preventDefault();
-				app.activateTab("powers");
-			});
+			// Adicionar aba "Itens" se não existir
+			if ($navBar.find('a[data-tab="items"]').length === 0) {
+				const itemsLabel = game.i18n.localize("T20.Items") || "Itens";
+				const $itemsTab = $(`
+					<a class="item" data-tab="items" title="${itemsLabel}">
+						<i class="fas fa-backpack"></i>
+						${itemsLabel}
+					</a>
+				`);
+				
+				// Inserir após a aba "powers" ou antes de "effects"
+				const $powersTab = $navBar.find('a[data-tab="powers"]');
+				if ($powersTab.length > 0) {
+					$itemsTab.insertAfter($powersTab);
+					console.log("T20 Custom Sheet | Aba Itens inserida após Poderes");
+				} else {
+					// Se não encontrar powers, inserir antes de effects
+					const $effectsTab = $navBar.find('a[data-tab="effects"]');
+					if ($effectsTab.length > 0) {
+						$itemsTab.insertBefore($effectsTab);
+						console.log("T20 Custom Sheet | Aba Itens inserida antes de Efeitos");
+					} else {
+						// Último recurso: adicionar no final
+						$navBar.append($itemsTab);
+						console.log("T20 Custom Sheet | Aba Itens adicionada");
+					}
+				}
+				
+				// Ativar cliques na aba
+				$itemsTab.on('click', (event) => {
+					event.preventDefault();
+					app.activateTab("items");
+				});
+			}
 		}, 100);
 	});
 });
