@@ -508,7 +508,7 @@ export class EquipmentManager {
 	
 	/**
 	 * Formata as estatísticas de defesa/espaço do equipamento
-	 * Para armaduras: mostra defesa, penalidade e tipo (Leve/Pesada/etc)
+	 * Processa o JSON do item seguindo regras específicas
 	 */
 	formatEquipmentStats($item, item) {
 		const $statsText = $item.find('.equipment-stats-text');
@@ -520,8 +520,7 @@ export class EquipmentManager {
 		
 		const system = item.system || {};
 		
-		// Verificar se é uma armadura
-		// O sistema T20 pode ter tipo como "Armadura Leve", "Armadura Pesada", etc
+		// 1. IDENTIFICAÇÃO BÁSICA - Verificar se é uma armadura
 		let tipoStr = '';
 		if (system.tipo) {
 			if (typeof system.tipo === 'object') {
@@ -533,31 +532,37 @@ export class EquipmentManager {
 		
 		const tipoLower = tipoStr.toLowerCase();
 		const labelsTipo = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
+		const nomeItem = item.name ? String(item.name).toLowerCase() : '';
 		
-		const isArmadura = tipoLower.includes('armadura') ||
-		                   labelsTipo.includes('armadura') ||
-		                   system.tipo === 'armadura' || 
-		                   system.type === 'armadura' ||
-		                   system.categoria === 'armadura' ||
-		                   system.category === 'armadura';
+		// Regras de identificação de armadura
+		const isArmadura = labelsTipo.includes('armadura') ||
+		                   tipoLower.includes('armadura') ||
+		                   system.armadura !== undefined ||
+		                   nomeItem.includes('armadura');
 		
 		console.log("T20 Items Manager | Verificação de armadura para", item.name, ":", {
 			tipoStr,
 			tipoLower,
 			labelsTipo,
+			nomeItem,
+			"system.armadura": system.armadura,
 			isArmadura,
+			"labelsTipo.includes('armadura')": labelsTipo.includes('armadura'),
 			"tipoLower.includes('armadura')": tipoLower.includes('armadura'),
-			"labelsTipo.includes('armadura')": labelsTipo.includes('armadura')
+			"nomeItem.includes('armadura')": nomeItem.includes('armadura')
 		});
 		
 		let finalText = '';
 		
 		if (isArmadura) {
-			// É uma armadura - mostrar defesa, penalidade e tipo
-			
+			// 3. DADOS DA ARMADURA (System)
 			// Buscar defesa da armadura
 			let defesaValue = null;
-			if (system.defesa) {
+			
+			// Priorizar system.armadura.value
+			if (system.armadura && system.armadura.value !== undefined) {
+				defesaValue = system.armadura.value;
+			} else if (system.defesa) {
 				if (typeof system.defesa === 'object') {
 					defesaValue = system.defesa.total !== undefined ? system.defesa.total :
 					              (system.defesa.value !== undefined ? system.defesa.value :
@@ -575,9 +580,18 @@ export class EquipmentManager {
 				}
 			}
 			
+			// Se undefined, usar 0
+			if (defesaValue === null || defesaValue === undefined) {
+				defesaValue = 0;
+			}
+			
 			// Buscar penalidade
 			let penalidadeValue = null;
-			if (system.penalidade) {
+			
+			// Priorizar system.armadura.penalidade
+			if (system.armadura && system.armadura.penalidade !== undefined) {
+				penalidadeValue = system.armadura.penalidade;
+			} else if (system.penalidade) {
 				if (typeof system.penalidade === 'object') {
 					penalidadeValue = system.penalidade.value !== undefined ? system.penalidade.value :
 					                 (system.penalidade.total !== undefined ? system.penalidade.total :
@@ -595,41 +609,40 @@ export class EquipmentManager {
 				}
 			}
 			
-			// Buscar tipo de armadura (Leve, Pesada, etc) - campo "Tipo" do sistema
-			// O campo "Tipo" pode ser "Armadura Leve", "Armadura Pesada", etc
-			let tipoArmadura = '';
-			if (system.tipo) {
-				// Se for objeto, pegar o valor
-				if (typeof system.tipo === 'object') {
-					tipoArmadura = system.tipo.value || system.tipo.label || system.tipo.name || '';
+			// Se undefined, usar 0
+			if (penalidadeValue === null || penalidadeValue === undefined) {
+				penalidadeValue = 0;
+			}
+			
+			// Normalizar tipo para tipoLower (leve, média, pesada)
+			let tipoArmaduraFinal = tipoLower;
+			if (!tipoArmaduraFinal || tipoArmaduraFinal === '') {
+				// Tentar extrair do tipo original
+				if (tipoStr) {
+					tipoArmaduraFinal = tipoStr.toLowerCase();
 				} else {
-					tipoArmadura = String(system.tipo);
+					tipoArmaduraFinal = 'leve'; // Padrão
 				}
 			}
 			
-			// Fallback para subtipo/categoria
-			if (!tipoArmadura) {
-				if (system.subtipo) {
-					tipoArmadura = String(system.subtipo);
-				} else if (system.subtype) {
-					tipoArmadura = String(system.subtype);
-				} else if (system.categoria) {
-					tipoArmadura = String(system.categoria);
-				} else if (system.category) {
-					tipoArmadura = String(system.category);
-				}
+			// Remover "armadura" do tipo se presente, deixar só "leve", "pesada", etc
+			if (tipoArmaduraFinal.includes('armadura')) {
+				tipoArmaduraFinal = tipoArmaduraFinal.replace(/armadura\s*/gi, '').trim();
 			}
 			
-			// Tentar usar labels se disponível
-			if (!tipoArmadura && item.labels?.tipo) {
-				tipoArmadura = String(item.labels.tipo);
-			} else if (!tipoArmadura && item.labels?.subtipo) {
-				tipoArmadura = String(item.labels.subtipo);
-			} else if (!tipoArmadura && item.labels?.subtype) {
-				tipoArmadura = String(item.labels.subtype);
-			} else if (!tipoArmadura && item.labels?.categoria) {
-				tipoArmadura = String(item.labels.categoria);
+			// Garantir que system.armadura existe e está preenchido
+			if (!system.armadura) {
+				system.armadura = {};
 			}
+			system.armadura.value = Number(defesaValue) || 0;
+			system.armadura.penalidade = Number(penalidadeValue) || 0;
+			system.armadura.tipo = tipoArmaduraFinal;
+			
+			// Atualizar system.tipo com tipoLower
+			system.tipo = tipoArmaduraFinal;
+			
+			// 4. CATEGORIA
+			system.categoria = 'Armadura';
 			
 			// Buscar tipo de uso (Vestido, Empunhado, etc) - campo "Tipo de Uso"
 			let tipoUso = '';
@@ -647,15 +660,24 @@ export class EquipmentManager {
 				}
 			}
 			
+			// 5. CAMPO "EQUIPADO" E "EQUIPPED" - Sincronizar
 			// Verificar se está equipado (vestido)
-			// Pode estar em equipped/equipado ou tipoUso === 'Vestido'
 			const tipoUsoLower = tipoUso.toLowerCase();
-			const isEquipped = system.equipped === true || 
-			                   system.equipado === true || 
-			                   tipoUso === 'Vestido' || 
-			                   tipoUsoLower === 'vestido' ||
-			                   tipoUsoLower === 'vestido/a' ||
-			                   tipoUsoLower.includes('vestido');
+			let isEquipped = system.equipped === true || 
+			                 system.equipado === true || 
+			                 tipoUso === 'Vestido' || 
+			                 tipoUsoLower === 'vestido' ||
+			                 tipoUsoLower === 'vestido/a' ||
+			                 tipoUsoLower.includes('vestido');
+			
+			// Sincronizar campos
+			if (isEquipped) {
+				system.equipado = true;
+				system.equipped = true;
+			} else {
+				system.equipado = false;
+				system.equipped = false;
+			}
 			
 			// Formatar defesa
 			let defesaText = '';
@@ -675,10 +697,10 @@ export class EquipmentManager {
 				}
 			}
 			
-			// Montar texto final: "Tipo: Armadura Leve | Defesa: +5 | Penalidade: -2 | Uso: Vestido"
+			// Montar texto final: "Tipo: Leve | Defesa: +5 | Penalidade: -2 | Uso: Vestido"
 			const parts = [];
-			if (tipoArmadura) {
-				parts.push(`Tipo: ${tipoArmadura}`);
+			if (tipoArmaduraFinal) {
+				parts.push(`Tipo: ${tipoArmaduraFinal}`);
 			}
 			if (defesaText) {
 				parts.push(`Defesa: ${defesaText}`);
@@ -692,24 +714,45 @@ export class EquipmentManager {
 			
 			finalText = parts.join(' | ');
 			
-			// Atualizar estado do botão de equipar/desequipar
+			// 2. APARÊNCIA VISUAL (cor azul quando equipada)
 			const $toggleBtn = $item.find('.equipment-toggle-btn');
 			if ($toggleBtn.length > 0) {
 				if (isEquipped) {
+					// itemColor = "#ADD8E6" (Azul clarinho), highlight = true
 					$toggleBtn.addClass('equipped').removeClass('not-equipped').attr('title', 'Desequipar');
-					console.log("T20 Items Manager | Botão marcado como EQUIPADO (azul) para:", item.name);
+					$toggleBtn.css({
+						'border-color': '#ADD8E6 !important',
+						'color': '#ADD8E6 !important',
+						'background': 'rgba(173, 216, 230, 0.15) !important'
+					});
+					console.log("T20 Items Manager | Botão marcado como EQUIPADO (azul #ADD8E6) para:", item.name);
 				} else {
+					// Cor vermelha (já existe), highlight = false
 					$toggleBtn.removeClass('equipped').addClass('not-equipped').attr('title', 'Equipar');
+					$toggleBtn.css({
+						'border-color': 'rgba(192, 57, 43, 0.8)',
+						'color': 'rgba(192, 57, 43, 1)',
+						'background': 'transparent'
+					});
 					console.log("T20 Items Manager | Botão marcado como NÃO EQUIPADO (vermelho) para:", item.name);
 				}
 			}
 			
+			// Aplicar cor ao item também se necessário
+			if (isEquipped && isArmadura) {
+				$item.css('border-left-color', '#ADD8E6');
+			}
+			
 			console.log("T20 Items Manager | Estatísticas formatadas da armadura:", finalText, "de", {
-				tipoArmadura,
-				defesaValue,
-				penalidadeValue,
+				tipoArmadura: tipoArmaduraFinal,
+				defesaValue: system.armadura.value,
+				penalidadeValue: system.armadura.penalidade,
 				tipoUso,
 				isEquipped,
+				equipado: system.equipado,
+				equipped: system.equipped,
+				categoria: system.categoria,
+				"system.armadura": system.armadura,
 				systemKeys: Object.keys(system)
 			});
 			
@@ -822,6 +865,226 @@ export class EquipmentManager {
 	}
 	
 	/**
+	 * Handler para clique no ícone do equipamento
+	 */
+	async onEquipmentIconClick(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		
+		// Prevenir múltiplos cliques rápidos
+		if ($(event.currentTarget).hasClass('processing')) {
+			return;
+		}
+		$(event.currentTarget).addClass('processing');
+		
+		const $icon = $(event.currentTarget);
+		let itemId = $icon.data('item-id');
+		
+		// Se não tiver no ícone, procurar no elemento pai
+		if (!itemId) {
+			const $item = $icon.closest('[data-item-id]');
+			if ($item.length) {
+				itemId = $item.data('item-id');
+			}
+		}
+		
+		if (!itemId) {
+			console.warn("T20 Items Manager | Não foi possível encontrar o ID do item");
+			return;
+		}
+		
+		const item = this.actor.items.get(itemId);
+		if (!item) {
+			console.warn("T20 Items Manager | Item não encontrado:", itemId);
+			return;
+		}
+		
+		if (item.type !== 'equipamento') {
+			console.warn("T20 Items Manager | Item não é um equipamento:", item.type);
+			return;
+		}
+		
+		try {
+			// Tentar usar o equipamento do sistema T20
+			if (typeof item.use === "function") {
+				await item.use();
+				return;
+			}
+
+			// Alternativa: se existir método roll padrão, usar
+			if (typeof item.roll === "function") {
+				await item.roll();
+				return;
+			}
+
+			// Fallback: Mostrar o card do equipamento no chat
+			const speaker = ChatMessage.getSpeaker({actor: this.actor});
+			
+			let content = '';
+			try {
+				const possibleTemplates = [
+					"systems/tormenta20/templates/chat/item-card.hbs",
+					"systems/tormenta20/templates/chat/equipment-card.hbs",
+					"systems/tormenta20/templates/items/equipamento-chat.hbs"
+				];
+				
+				let templateFound = false;
+				for (const templatePath of possibleTemplates) {
+					try {
+						content = await renderTemplate(templatePath, {
+							item: item,
+							actor: this.actor,
+							data: item.system
+						});
+						templateFound = true;
+						break;
+					} catch (e) {
+						// Continuar tentando outros templates
+					}
+				}
+				
+				// Se nenhum template funcionou, criar um card simples
+				if (!templateFound) {
+					let descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+					const img = item.img || 'icons/svg/mystery-man.svg';
+					
+					if (descricao) {
+						try {
+							descricao = await TextEditor.enrichHTML(descricao, {
+								async: true,
+								relativeTo: this.actor
+							});
+						} catch (e) {
+							// Se falhar, usar descrição original
+						}
+					}
+					
+					content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+						<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+						<div style="flex: 1;">
+							<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+							${descricao ? `<div class="item-description" style="margin-top: 8px;">${descricao}</div>` : ''}
+						</div>
+					</div>`;
+				}
+			} catch (templateError) {
+				console.warn("T20 Items Manager | Erro ao renderizar template, usando card simples:", templateError);
+				const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+				const img = item.img || 'icons/svg/mystery-man.svg';
+				content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+					<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+					<div style="flex: 1;">
+						<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+						${descricao ? `<p>${descricao}</p>` : ''}
+					</div>
+				</div>`;
+			}
+			
+			await ChatMessage.create({
+				user: game.user.id,
+				speaker: speaker,
+				content: content
+			});
+			
+		} catch (error) {
+			console.error("T20 Items Manager | Erro ao exibir equipamento no chat:", error);
+			ui.notifications.error(`Erro ao exibir ${item.name}`);
+		} finally {
+			// Remover classe de processamento após 500ms
+			setTimeout(() => {
+				$(event.currentTarget).removeClass('processing');
+			}, 500);
+		}
+	}
+	
+	/**
+	 * Handler para clique no nome do equipamento (expande/contrai descrição)
+	 */
+	onEquipmentNameClick(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		
+		const $name = $(event.currentTarget);
+		const $item = $name.closest('.equipment-item');
+		
+		if ($item.length === 0) return;
+		
+		const itemId = $item.data('item-id') || $item.attr('data-item-id');
+		if (!itemId) return;
+		
+		const item = this.actor.items.get(itemId);
+		if (!item) return;
+		
+		// Toggle expanded class
+		$item.toggleClass('expanded');
+		
+		// Enriquecer descrição na primeira expansão
+		const $descContainer = $item.find('.equipment-details-description');
+		if ($item.hasClass('expanded') && $descContainer.length > 0 && $descContainer.html().trim() === '') {
+			let descricao = '';
+			if (item.system?.descricao?.value) {
+				descricao = item.system.descricao.value;
+			} else if (item.system?.description?.value) {
+				descricao = item.system.description.value;
+			}
+			
+			if (descricao) {
+				TextEditor.enrichHTML(descricao, {
+					async: true,
+					relativeTo: this.actor
+				}).then(html => {
+					$descContainer.html(html);
+				}).catch(e => {
+					$descContainer.html(this.escapeHtml(descricao));
+				});
+			}
+		}
+	}
+	
+	/**
+	 * Handler para toggle de equipar/desequipar
+	 */
+	async onEquipmentToggleClick(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		
+		const $btn = $(event.currentTarget);
+		const $item = $btn.closest('.equipment-item');
+		
+		if ($item.length === 0) return;
+		
+		const itemId = $item.data('item-id') || $item.attr('data-item-id');
+		if (!itemId) return;
+		
+		const item = this.actor.items.get(itemId);
+		if (!item) return;
+		
+		const system = item.system || {};
+		const currentEquipped = system.equipped || system.equipado || false;
+		const newEquipped = !currentEquipped;
+		const newTipoUso = newEquipped ? 'Vestido' : 'Não Vestido';
+		
+		try {
+			// Atualizar o item - sincronizar equipado/equipped
+			const updateData = {
+				'system.equipped': newEquipped,
+				'system.equipado': newEquipped,
+				'system.tipoUso': newTipoUso
+			};
+			
+			await item.update(updateData);
+			
+			// Atualizar visualmente
+			setTimeout(() => {
+				this.setupEquipmentSection();
+			}, 100);
+		} catch (error) {
+			console.error("T20 Items Manager | Erro ao equipar/desequipar:", error);
+			ui.notifications.error(`Erro ao ${newEquipped ? 'equipar' : 'desequipar'} ${item.name}`);
+		}
+	}
+	
+	/**
 	 * Escapa HTML para prevenir XSS
 	 */
 	escapeHtml(text) {
@@ -830,4 +1093,3 @@ export class EquipmentManager {
 		return div.innerHTML;
 	}
 }
-

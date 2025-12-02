@@ -236,12 +236,14 @@ Hooks.once("ready", async () => {
 				const newTipoUso = newEquipped ? 'Vestido' : 'Não Vestido';
 				
 				try {
-					// Atualizar o item
-					await item.update({
+					// Atualizar o item - sincronizar equipado/equipped
+					const updateData = {
 						'system.equipped': newEquipped,
 						'system.equipado': newEquipped,
 						'system.tipoUso': newTipoUso
-					});
+					};
+					
+					await item.update(updateData);
 					
 					// Atualizar visualmente
 					if (this.equipmentManager) {
