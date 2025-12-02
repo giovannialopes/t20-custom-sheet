@@ -12,10 +12,21 @@ import { PowersManager } from "./t20-powers.mjs";
 Hooks.once("ready", async () => {
 	console.log("T20 Custom Sheet | Inicializando módulo de ficha customizada");
 
-	// Pré-carregar templates necessários
-	await loadTemplates([
-		"modules/t20-custom-sheet/templates/actor/powers-tab.hbs"
-	]);
+	// Pré-carregar e registrar partial do powers-tab
+	try {
+		await loadTemplates([
+			"modules/t20-custom-sheet/templates/actor/powers-tab.hbs"
+		]);
+		
+		// Registrar o partial manualmente no Handlebars
+		const template = await fetch("modules/t20-custom-sheet/templates/actor/powers-tab.hbs").then(r => r.text());
+		if (template) {
+			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/powers-tab", template);
+			console.log("T20 Custom Sheet | Partial powers-tab registrado com sucesso");
+		}
+	} catch (error) {
+		console.error("T20 Custom Sheet | Erro ao carregar/registrar partial powers-tab:", error);
+	}
 
 	// Aguardar o sistema Tormenta20 estar pronto antes de registrar
 	// Tentar obter a classe base do sistema
