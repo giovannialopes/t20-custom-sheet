@@ -87,7 +87,62 @@ Hooks.once("ready", async () => {
 		/** @override */
 		async _render(force = false, options = {}) {
 			await super._render(force, options);
-			// O Foundry já posiciona as fichas à direita por padrão, não precisamos fazer nada
+			
+			// Adicionar badges de tipo aos poderes após o render
+			if (this.element && this.element.length) {
+				const powerList = this.element.find('.list-powers .item-list .item');
+				powerList.each((index, element) => {
+					const $item = $(element);
+					const itemId = $item.data('item-id');
+					if (itemId) {
+						const item = this.actor.items.get(itemId);
+						if (item && item.type === 'poder') {
+							// Buscar o nome do poder
+							const $name = $item.find('.item-name h4, .item-name .item-name-input');
+							
+							// Verificar se já tem badge
+							if ($name.find('.power-type-badge').length === 0) {
+								// Obter tipo do poder
+								let tipo = item.system?.tipo || item.system?.type || item.tipo || item.type || "geral";
+								if (typeof tipo === 'object' && tipo !== null) {
+									tipo = tipo.value || tipo.label || "geral";
+								}
+								tipo = String(tipo).toLowerCase().trim();
+								
+								// Mapear tipos
+								const tipoLabels = {
+									"geral": "Geral",
+									"origem": "Origem",
+									"classe": "Classe",
+									"racial": "Racial",
+									"racial_alternativa": "Racial Alternativa",
+									"racial alternativa": "Racial Alternativa",
+									"tormenta": "Tormenta",
+									"devoto": "Devoto",
+									"concedido": "Concedido",
+									"complicacao": "Complicação",
+									"complicação": "Complicação",
+									"ability": "Ability",
+									"arquetipo": "Arquétipo",
+									"arquétipo": "Arquétipo",
+									"multiclasse": "Multiclasse",
+									"multi-classe": "Multiclasse"
+								};
+								
+								const tipoLabel = tipoLabels[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1);
+								
+								// Adicionar badge
+								const badge = $('<span>')
+									.addClass('power-type-badge')
+									.addClass(`power-type-${tipo}`)
+									.text(tipoLabel);
+								
+								$name.append(badge);
+							}
+						}
+					}
+				});
+			}
 		}
 
 		/** @override */
