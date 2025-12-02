@@ -256,7 +256,21 @@
 						background: rgba(10, 12, 18, 0.85);
 						border: 1px solid rgba(255, 255, 255, 0.06);
 						border-radius: 10px;
-						transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+						transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease, opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+						opacity: 0;
+						transform: translateY(-10px);
+						animation: powerItemEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+					}
+					
+					@keyframes powerItemEnter {
+						from {
+							opacity: 0;
+							transform: translateY(-10px);
+						}
+						to {
+							opacity: 1;
+							transform: translateY(0);
+						}
 					}
 					
 					.power-item-row {
@@ -273,7 +287,19 @@
 					}
 					
 					.power-item.hidden {
-						display: none;
+						opacity: 0 !important;
+						max-height: 0 !important;
+						margin-bottom: 0 !important;
+						padding-top: 0 !important;
+						padding-bottom: 0 !important;
+						overflow: hidden;
+						transform: translateY(-5px) scale(0.95);
+						pointer-events: none;
+						animation: none !important;
+					}
+					
+					.power-item.entering {
+						animation: powerItemEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 					}
 					
 					/* Indicadores visuais especiais para todos os tipos de poderes */
@@ -594,11 +620,56 @@
 						border-radius: 4px;
 						color: #fff;
 						cursor: pointer;
-						transition: all 0.2s ease;
+						transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+						position: relative;
+						overflow: hidden;
+					}
+					
+					.power-control::before {
+						content: '';
+						position: absolute;
+						top: 50%;
+						left: 50%;
+						width: 0;
+						height: 0;
+						border-radius: 50%;
+						background: rgba(255, 255, 255, 0.2);
+						transform: translate(-50%, -50%);
+						transition: width 0.4s ease, height 0.4s ease;
 					}
 					
 					.power-control:hover {
-						background: rgba(255, 255, 255, 0.2);
+						background: rgba(255, 255, 255, 0.25);
+						border-color: rgba(255, 255, 255, 0.4);
+						transform: translateY(-2px) scale(1.05);
+						box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+					}
+					
+					.power-control:hover::before {
+						width: 200px;
+						height: 200px;
+					}
+					
+					.power-control i {
+						position: relative;
+						z-index: 1;
+						transition: transform 0.25s ease;
+					}
+					
+					.power-control:hover i {
+						transform: scale(1.15);
+					}
+					
+					.power-control.item-delete:hover {
+						background: rgba(192, 57, 43, 0.3);
+						border-color: rgba(192, 57, 43, 0.6);
+						color: #ffcccc;
+					}
+					
+					.power-control.item-edit:hover {
+						background: rgba(74, 144, 226, 0.3);
+						border-color: rgba(74, 144, 226, 0.6);
+						color: #b3d9ff;
 					}
 					</style>
 					

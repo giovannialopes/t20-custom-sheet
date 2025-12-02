@@ -125,6 +125,9 @@ Hooks.once("ready", async () => {
 				
 				if (!itemId) return;
 				
+				// Adicionar delay escalonado para animação de entrada
+				$item.css('animation-delay', `${index * 0.05}s`);
+				
 				const item = this.actor.items.get(itemId);
 				if (!item || item.type !== 'poder') return;
 				
@@ -541,18 +544,41 @@ Hooks.once("ready", async () => {
 					}
 				});
 				
+				// Coletar todos os itens primeiro para aplicar animação
+				const itemsToShow = [];
+				const itemsToHide = [];
+				
 				this.element.find('.list-powers-custom .power-item').each((index, element) => {
 					const $item = $(element);
 					const itemName = ($item.attr('data-power-name') || '').toLowerCase();
 					const itemType = ($item.attr('data-power-type') || '').toLowerCase();
 					
-				const nameMatch = !nameFilter || itemName.includes(nameFilter);
-				const typeMatch = !typeFilter || this._normalizePowerTypeKey(itemType) === this._normalizePowerTypeKey(typeFilter);
+					const nameMatch = !nameFilter || itemName.includes(nameFilter);
+					const typeMatch = !typeFilter || this._normalizePowerTypeKey(itemType) === this._normalizePowerTypeKey(typeFilter);
 					
 					if (nameMatch && typeMatch) {
-						$item.removeClass('hidden');
+						itemsToShow.push({$item, index});
 					} else {
-						$item.addClass('hidden');
+						itemsToHide.push({$item, index});
+					}
+				});
+				
+				// Animar itens que serão escondidos
+				itemsToHide.forEach(({$item}) => {
+					$item.addClass('hidden');
+				});
+				
+				// Animar itens que serão mostrados com delay escalonado
+				itemsToShow.forEach(({$item, index}) => {
+					if ($item.hasClass('hidden')) {
+						setTimeout(() => {
+							$item.removeClass('hidden');
+							$item.addClass('entering');
+							// Remover classe após animação completar
+							setTimeout(() => {
+								$item.removeClass('entering');
+							}, 300);
+						}, Math.min(index * 30, 150)); // Delay máximo de 150ms total
 					}
 				});
 			};
