@@ -106,6 +106,9 @@ Hooks.once("ready", async () => {
 			// Adicionar tipos aos poderes
 			this._addPowerTypeBadges();
 			
+			// Criar chips de resumo
+			this._createPowerChips();
+			
 			// Configurar filtros
 			this._setupPowerFilters();
 		}
@@ -263,6 +266,130 @@ Hooks.once("ready", async () => {
 		}
 		
 		/**
+		 * Normaliza um tipo de poder para uso consistente (remove acentos, espaços, etc)
+		 */
+		_normalizePowerTypeKey(tipo) {
+			if (!tipo) return '';
+			return String(tipo).toLowerCase().trim();
+		}
+		
+		/**
+		 * Cria os chips de resumo por tipo de poder
+		 */
+		_createPowerChips() {
+			const $chipsContainer = this.element.find('#powers-chips-container');
+			if ($chipsContainer.length === 0) return;
+			
+			// Limpar chips existentes
+			$chipsContainer.empty();
+			
+			// Coletar grupos de poderes
+			const gruposPorTipo = {};
+			
+			this.element.find('.list-powers-custom .power-item').each((index, element) => {
+				const $item = $(element);
+				const tipo = $item.attr('data-power-type') || '';
+				
+				if (!tipo) return;
+				
+				// Normalizar tipo para chave
+				const tipoKey = this._normalizePowerTypeKey(tipo);
+				
+				if (!gruposPorTipo[tipoKey]) {
+					gruposPorTipo[tipoKey] = {
+						tipo: tipoKey,
+						count: 0,
+						label: this._getPowerTypeLabel(tipoKey)
+					};
+				}
+				
+				gruposPorTipo[tipoKey].count++;
+			});
+			
+			// Ordenar tipos em ordem amigável
+			const ordemTipos = [
+				"habilidade-de-classe",
+				"classe",
+				"concedido",
+				"geral",
+				"origem",
+				"racial",
+				"distinção",
+				"distincao",
+				"complicação",
+				"complicacao",
+				"complicacão"
+			];
+			
+			// Criar chips na ordem definida
+			for (const tipo of ordemTipos) {
+				if (gruposPorTipo[tipo]) {
+					const grupo = gruposPorTipo[tipo];
+					const $chip = $('<div>')
+						.addClass('power-chip')
+						.attr('data-type', grupo.tipo)
+						.attr('data-filter-type', grupo.tipo)
+						.html(`${grupo.label} <span class="chip-count">${grupo.count}</span>`);
+					
+					$chipsContainer.append($chip);
+					delete gruposPorTipo[tipo];
+				}
+			}
+			
+			// Adicionar tipos restantes (não previstos)
+			for (const tipo in gruposPorTipo) {
+				if (!Object.prototype.hasOwnProperty.call(gruposPorTipo, tipo)) continue;
+				const grupo = gruposPorTipo[tipo];
+				const $chip = $('<div>')
+					.addClass('power-chip')
+					.attr('data-type', grupo.tipo)
+					.attr('data-filter-type', grupo.tipo)
+					.html(`${grupo.label} <span class="chip-count">${grupo.count}</span>`);
+				
+				$chipsContainer.append($chip);
+			}
+			
+			// Event listeners para chips
+			$chipsContainer.find('.power-chip').off('click').on('click', (event) => {
+				event.preventDefault();
+				const $chip = $(event.currentTarget);
+				const filterType = $chip.attr('data-filter-type');
+				const $typeFilter = this.element.find('#power-filter-type');
+				const normalizedFilterType = this._normalizePowerTypeKey(filterType);
+				
+				// Toggle: se já estiver ativo, desativa (mostra todos)
+				if ($chip.hasClass('active')) {
+					$chip.removeClass('active');
+					$typeFilter.val('');
+				} else {
+					// Desativar outros chips
+					$chipsContainer.find('.power-chip').removeClass('active');
+					// Ativar este chip
+					$chip.addClass('active');
+					
+					// Tentar encontrar opção correspondente no select
+					let foundOption = false;
+					$typeFilter.find('option').each((index, option) => {
+						const optionValue = $(option).val();
+						if (optionValue && this._normalizePowerTypeKey(optionValue) === normalizedFilterType) {
+							$typeFilter.val(optionValue);
+							foundOption = true;
+							return false; // break
+						}
+					});
+					
+					// Se não encontrou opção exata, usar o tipo diretamente (pode ser necessário para tipos customizados)
+					if (!foundOption) {
+						$typeFilter.val(filterType);
+					}
+				}
+				
+				// Disparar evento de mudança no filtro para aplicar
+				$typeFilter.trigger('change');
+			});
+		}
+		
+		/**
 		 * Configura os filtros de poderes
 		 */
 		_setupPowerFilters() {
@@ -276,13 +403,26 @@ Hooks.once("ready", async () => {
 				const nameFilter = $nameFilter.val().toLowerCase().trim();
 				const typeFilter = $typeFilter.val().toLowerCase().trim();
 				
+				// Atualizar estado visual dos chips
+				const $chipsContainer = this.element.find('#powers-chips-container');
+				$chipsContainer.find('.power-chip').each((index, element) => {
+					const $chip = $(element);
+					const chipType = $chip.attr('data-filter-type') || '';
+					
+					if (typeFilter && this._normalizePowerTypeKey(chipType) === this._normalizePowerTypeKey(typeFilter)) {
+						$chip.addClass('active');
+					} else {
+						$chip.removeClass('active');
+					}
+				});
+				
 				this.element.find('.list-powers-custom .power-item').each((index, element) => {
 					const $item = $(element);
 					const itemName = ($item.attr('data-power-name') || '').toLowerCase();
 					const itemType = ($item.attr('data-power-type') || '').toLowerCase();
 					
-					const nameMatch = !nameFilter || itemName.includes(nameFilter);
-					const typeMatch = !typeFilter || itemType === typeFilter;
+				const nameMatch = !nameFilter || itemName.includes(nameFilter);
+				const typeMatch = !typeFilter || this._normalizePowerTypeKey(itemType) === this._normalizePowerTypeKey(typeFilter);
 					
 					if (nameMatch && typeMatch) {
 						$item.removeClass('hidden');
@@ -310,8 +450,12 @@ Hooks.once("ready", async () => {
 				const item = this.actor.items.get(itemId);
 				if (item) {
 					item.delete();
-					// Reaplicar filtros após deletar
-					setTimeout(() => filterPowers(), 100);
+					// Recriar chips e reaplicar filtros após deletar
+					setTimeout(() => {
+						this._addPowerTypeBadges();
+						this._createPowerChips();
+						filterPowers();
+					}, 100);
 				}
 			});
 		}
