@@ -41,38 +41,226 @@
 				</div>
 
 				{{!--Powers --}}
-				<div class="list-powers">
+				<div class="list-powers-custom">
 					<style>
-					.list-powers .power-type-badge {
-						display: inline-block;
-						padding: 1px 6px;
-						border-radius: 3px;
-						font-size: 9px;
-						font-weight: 600;
-						text-transform: uppercase;
-						margin-left: 8px;
-						vertical-align: middle;
-						background: rgba(100, 100, 100, 0.3);
-						color: #fff;
-						border: 1px solid rgba(255, 255, 255, 0.2);
+					.list-powers-custom {
+						background: rgba(20, 20, 30, 0.6);
+						border-radius: 12px;
+						padding: 15px;
+						margin: 10px 0;
+						box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 					}
-					.list-powers .power-type-geral { background: rgba(100, 150, 200, 0.4); border-color: rgba(100, 150, 200, 0.6); }
-					.list-powers .power-type-origem { background: rgba(150, 100, 200, 0.4); border-color: rgba(150, 100, 200, 0.6); }
-					.list-powers .power-type-classe { background: rgba(200, 150, 100, 0.4); border-color: rgba(200, 150, 100, 0.6); }
-					.list-powers .power-type-racial { background: rgba(100, 200, 150, 0.4); border-color: rgba(100, 200, 150, 0.6); }
-					.list-powers .power-type-tormenta { background: rgba(200, 100, 100, 0.4); border-color: rgba(200, 100, 100, 0.6); }
-					.list-powers .power-type-devoto { background: rgba(200, 200, 100, 0.4); border-color: rgba(200, 200, 100, 0.6); }
-					.list-powers .power-type-concedido { background: rgba(150, 100, 200, 0.4); border-color: rgba(150, 100, 200, 0.6); }
-					.list-powers .power-type-complicacao { background: rgba(150, 50, 50, 0.4); border-color: rgba(150, 50, 50, 0.6); }
-					.list-powers .power-type-ability { background: rgba(50, 50, 150, 0.4); border-color: rgba(50, 50, 150, 0.6); }
-					.list-powers .power-type-complicacao { background: rgba(150, 50, 50, 0.4); border-color: rgba(150, 50, 50, 0.6); }
-					.list-powers .power-type-complicação { background: rgba(150, 50, 50, 0.4); border-color: rgba(150, 50, 50, 0.6); }
-					.list-powers .power-type-complicacão { background: rgba(150, 50, 50, 0.4); border-color: rgba(150, 50, 50, 0.6); }
-					.list-powers .item-name h4 {
+					
+					.powers-header {
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+						margin-bottom: 15px;
+						padding-bottom: 10px;
+						border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+					}
+					
+					.powers-header h3 {
+						margin: 0;
+						color: #fff;
+						font-size: 18px;
+						font-weight: 600;
+					}
+					
+					.powers-filters {
+						display: flex;
+						gap: 10px;
+						margin-bottom: 15px;
+						flex-wrap: wrap;
+					}
+					
+					.power-filter-input {
+						flex: 1;
+						min-width: 200px;
+						padding: 8px 12px;
+						background: rgba(255, 255, 255, 0.1);
+						border: 1px solid rgba(255, 255, 255, 0.2);
+						border-radius: 6px;
+						color: #fff;
+						font-size: 13px;
+					}
+					
+					.power-filter-input::placeholder {
+						color: rgba(255, 255, 255, 0.5);
+					}
+					
+					.power-filter-type {
+						padding: 8px 12px;
+						background: rgba(255, 255, 255, 0.1);
+						border: 1px solid rgba(255, 255, 255, 0.2);
+						border-radius: 6px;
+						color: #fff;
+						font-size: 13px;
+						cursor: pointer;
+					}
+					
+					.powers-list {
+						max-height: 400px;
+						overflow-y: auto;
+						padding-right: 5px;
+					}
+					
+					.powers-list::-webkit-scrollbar {
+						width: 8px;
+					}
+					
+					.powers-list::-webkit-scrollbar-track {
+						background: rgba(0, 0, 0, 0.2);
+						border-radius: 4px;
+					}
+					
+					.powers-list::-webkit-scrollbar-thumb {
+						background: rgba(255, 255, 255, 0.3);
+						border-radius: 4px;
+					}
+					
+					.power-item {
+						display: flex;
+						align-items: center;
+						gap: 12px;
+						padding: 12px;
+						margin-bottom: 8px;
+						background: rgba(255, 255, 255, 0.05);
+						border: 1px solid rgba(255, 255, 255, 0.1);
+						border-radius: 8px;
+						transition: all 0.3s ease;
+					}
+					
+					.power-item:hover {
+						background: rgba(255, 255, 255, 0.1);
+						border-color: rgba(255, 255, 255, 0.3);
+						transform: translateX(3px);
+					}
+					
+					.power-item.hidden {
+						display: none;
+					}
+					
+					.power-icon {
+						width: 40px;
+						height: 40px;
+						border-radius: 6px;
+						background-size: cover;
+						background-position: center;
+						flex-shrink: 0;
+						border: 2px solid rgba(255, 255, 255, 0.2);
+					}
+					
+					.power-info {
+						flex: 1;
+						min-width: 0;
+					}
+					
+					.power-name {
+						font-size: 14px;
+						font-weight: 600;
+						color: #fff;
+						margin-bottom: 4px;
+					}
+					
+					.power-activation {
+						font-size: 11px;
+						color: rgba(255, 255, 255, 0.7);
+					}
+					
+					.power-type-badge {
 						display: inline-block;
+						padding: 4px 10px;
+						border-radius: 12px;
+						font-size: 10px;
+						font-weight: 700;
+						text-transform: uppercase;
+						letter-spacing: 0.5px;
+						white-space: nowrap;
+					}
+					
+					.power-type-geral { background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%); color: #fff; }
+					.power-type-origem { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: #fff; }
+					.power-type-classe { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); color: #fff; }
+					.power-type-racial { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: #fff; }
+					.power-type-tormenta { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: #fff; }
+					.power-type-devoto { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: #fff; }
+					.power-type-concedido { background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%); color: #fff; }
+					.power-type-complicacao { background: linear-gradient(135deg, #c0392b 0%, #a93226 100%); color: #fff; }
+					.power-type-complicação { background: linear-gradient(135deg, #c0392b 0%, #a93226 100%); color: #fff; }
+					.power-type-ability { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); color: #fff; }
+					
+					.power-controls {
+						display: flex;
+						gap: 5px;
+					}
+					
+					.power-control {
+						padding: 6px 10px;
+						background: rgba(255, 255, 255, 0.1);
+						border: 1px solid rgba(255, 255, 255, 0.2);
+						border-radius: 4px;
+						color: #fff;
+						cursor: pointer;
+						transition: all 0.2s ease;
+					}
+					
+					.power-control:hover {
+						background: rgba(255, 255, 255, 0.2);
 					}
 					</style>
-					{{> "tormenta20.list-powers"}}
+					
+					<div class="powers-header">
+						<h3>{{localize "T20.Powers"}}</h3>
+						<a class="item-control item-create power-control" title="{{localize 'T20.ItemCreate'}}" data-type="poder">
+							<i class="fas fa-plus"></i> {{localize "T20.Add"}}
+						</a>
+					</div>
+					
+					<div class="powers-filters">
+						<input type="text" class="power-filter-input" id="power-filter-name" placeholder="Filtrar por nome...">
+						<select class="power-filter-type" id="power-filter-type">
+							<option value="">Todos os tipos</option>
+							<option value="geral">Geral</option>
+							<option value="origem">Origem</option>
+							<option value="classe">Classe</option>
+							<option value="racial">Racial</option>
+							<option value="concedido">Concedido</option>
+							<option value="complicacao">Complicação</option>
+							<option value="ability">Ability</option>
+							<option value="tormenta">Tormenta</option>
+							<option value="devoto">Devoto</option>
+						</select>
+					</div>
+					
+					<div class="powers-list" id="powers-list-container">
+						{{#each actor.poderes as |item id|}}
+						<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="">
+							<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
+							<div class="power-info">
+								<div class="power-name">{{item.name}}</div>
+								<div class="power-activation">
+									{{#if item.system.ativacao.value}}
+										{{item.system.ativacao.value}}
+									{{else if item.system.ativacao}}
+										{{item.system.ativacao}}
+									{{else}}
+										Passivo
+									{{/if}}
+								</div>
+							</div>
+							<div class="power-type-badge power-type-placeholder" style="display: none;"></div>
+							<div class="power-controls">
+								<a class="item-control item-edit power-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
+									<i class="fas fa-edit"></i>
+								</a>
+								<a class="item-control item-delete power-control" title="{{localize 'T20.ItemDelete'}}" data-item-id="{{item._id}}">
+									<i class="fas fa-trash"></i>
+								</a>
+							</div>
+						</div>
+						{{/each}}
+					</div>
 				</div>
 
 				{{#if actor.maiorCirculo}}
