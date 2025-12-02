@@ -454,36 +454,87 @@ Hooks.once("ready", async () => {
 				sheetData.actor.poderes = [];
 			}
 			
-			// Preparar tipos dos poderes para exibição
-			// Os labels já são gerados automaticamente pelo sistema em item.labels.tipo
-			// Mas garantimos que estejam disponíveis para o template
-			if (Array.isArray(sheetData.actor.poderes)) {
+			// Preparar tipos dos poderes para exibição e agrupar por tipo
+			if (Array.isArray(sheetData.actor.poderes) && sheetData.actor.poderes.length > 0) {
+				const gruposPorTipo = {};
+				
 				for (const poder of sheetData.actor.poderes) {
-					if (poder && poder.system) {
-						// Obter o tipo do poder (campo padrão: system.tipo)
-						let tipo = poder.system.tipo || "geral";
-						
-						// Se o tipo vier como objeto, pegar o valor
-						if (typeof tipo === 'object' && tipo !== null) {
-							tipo = tipo.value || tipo.label || "geral";
-						}
-						
-						// Normalizar para string minúscula
-						tipo = String(tipo).toLowerCase().trim();
-						
-						// Usar CONFIG.T20 para obter o label localizado
-						const powerTypeConfig = CONFIG.T20.powerType[tipo];
-						if (powerTypeConfig) {
-							poder.tipoLabel = game.i18n.localize(powerTypeConfig);
-						} else {
-							// Fallback: usar label do sistema se disponível
-							poder.tipoLabel = poder.labels?.tipo || tipo.charAt(0).toUpperCase() + tipo.slice(1);
-						}
-						
-						// Garantir que tipo esteja disponível
-						poder.tipo = tipo;
+					if (!poder || !poder.system) continue;
+					
+					// Obter o tipo do poder (campo padrão: system.tipo)
+					let tipo = poder.system.tipo || "geral";
+					
+					// Se o tipo vier como objeto, pegar o valor
+					if (typeof tipo === 'object' && tipo !== null) {
+						tipo = tipo.value || tipo.label || "geral";
+					}
+					
+					// Normalizar para string minúscula
+					tipo = String(tipo).toLowerCase().trim();
+					
+					// Usar CONFIG.T20 para obter o label localizado
+					const powerTypeConfig = CONFIG.T20.powerType[tipo];
+					let tipoLabel;
+					if (powerTypeConfig) {
+						tipoLabel = game.i18n.localize(powerTypeConfig);
+					} else {
+						// Fallback: usar label do sistema se disponível
+						tipoLabel = poder.labels?.tipo || tipo.charAt(0).toUpperCase() + tipo.slice(1);
+					}
+					
+					// Garantir que tipo e label estejam disponíveis no próprio poder
+					poder.tipo = tipo;
+					poder.tipoLabel = tipoLabel;
+					
+					// Criar grupo se ainda não existir
+					if (!gruposPorTipo[tipo]) {
+						gruposPorTipo[tipo] = {
+							tipo,
+							label: tipoLabel,
+							items: []
+						};
+					}
+					
+					gruposPorTipo[tipo].items.push(poder);
+				}
+				
+				// Ordenar grupos em uma ordem amigável (seguindo o filtro)
+				const ordemTipos = [
+					"habilidade-de-classe",
+					"classe",
+					"concedido",
+					"geral",
+					"origem",
+					"racial",
+					"distinção",
+					"distincao",
+					"complicação",
+					"complicacao",
+					"complicacão"
+				];
+				
+				const gruposOrdenados = [];
+				
+				for (const tipo of ordemTipos) {
+					if (gruposPorTipo[tipo]) {
+						const grupo = gruposPorTipo[tipo];
+						grupo.count = grupo.items.length;
+						gruposOrdenados.push(grupo);
+						delete gruposPorTipo[tipo];
 					}
 				}
+				
+				// Qualquer tipo restante (não previsto) entra no final
+				for (const tipo in gruposPorTipo) {
+					if (!Object.prototype.hasOwnProperty.call(gruposPorTipo, tipo)) continue;
+					const grupo = gruposPorTipo[tipo];
+					grupo.count = grupo.items.length;
+					gruposOrdenados.push(grupo);
+				}
+				
+				sheetData.actor.poderesPorTipo = gruposOrdenados;
+			} else {
+				sheetData.actor.poderesPorTipo = [];
 			}
 			
 			return sheetData;
