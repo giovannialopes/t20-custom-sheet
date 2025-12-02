@@ -126,7 +126,10 @@ Hooks.once("ready", async () => {
 			// Adicionar badges de tipo aos poderes e configurar filtros
 			setTimeout(() => {
 				this.powersManager.setupPowersSection();
-				this._setupWeaponsSection();
+				// Aguardar um pouco mais para garantir que os dados das armas estejam preparados
+				setTimeout(() => {
+					this._setupWeaponsSection();
+				}, 200);
 			}, 100);
 		}
 		
@@ -186,47 +189,75 @@ Hooks.once("ready", async () => {
 				return;
 			}
 			
+			// Debug: verificar estrutura do item
+			console.log("T20 Custom Sheet | Formatando arma:", item.name, {
+				labels: item.labels,
+				system: item.system
+			});
+			
 			// Tentar usar labels do sistema primeiro (mais confiável)
+			// O sistema T20 geralmente formata tudo em item.labels.ataque
 			let finalText = item.labels?.ataque || item.labels?.attack || '';
 			
-			// Se não tiver label, formatar manualmente
-			if (!finalText || finalText === '') {
-				const ataque = item.system?.ataque || item.system?.attack || {};
-				const dano = item.system?.dano || item.system?.damage || {};
-				const critico = item.system?.critico || item.system?.critical || {};
+			// Se não tiver label formatado, construir manualmente
+			if (!finalText || finalText === '' || finalText === '-') {
+				const system = item.system || {};
+				const ataque = system.ataque || system.attack || {};
+				const dano = system.dano || system.damage || {};
+				const critico = system.critico || system.critical || {};
+				
+				// Debug (apenas em desenvolvimento)
+				// console.log("T20 Custom Sheet | Dados da arma:", {
+				// 	ataque,
+				// 	dano,
+				// 	critico
+				// });
 				
 				// Formatar ataque - tentar diferentes campos
 				let ataqueValue = '';
-				if (ataque.total !== undefined && ataque.total !== null) {
+				if (ataque.total !== undefined && ataque.total !== null && ataque.total !== '') {
 					ataqueValue = ataque.total >= 0 ? `+${ataque.total}` : `${ataque.total}`;
-				} else if (ataque.value !== undefined && ataque.value !== null) {
+				} else if (ataque.value !== undefined && ataque.value !== null && ataque.value !== '') {
 					ataqueValue = ataque.value >= 0 ? `+${ataque.value}` : `${ataque.value}`;
-				} else if (ataque.bonus !== undefined && ataque.bonus !== null) {
+				} else if (ataque.bonus !== undefined && ataque.bonus !== null && ataque.bonus !== '') {
 					ataqueValue = ataque.bonus >= 0 ? `+${ataque.bonus}` : `${ataque.bonus}`;
 				}
 				
-				// Formatar dano
+				// Formatar dano - tentar diferentes formatos
 				let danoText = '';
-				if (dano.dado || dano.dice) {
+				// Verificar se dano é um objeto ou string
+				if (typeof dano === 'string' && dano.trim() !== '') {
+					danoText = dano;
+				} else if (dano.dado || dano.dice) {
 					danoText = dano.dado || dano.dice;
-					const bonus = dano.bonus !== undefined ? dano.bonus : (dano.mod !== undefined ? dano.mod : null);
-					if (bonus !== undefined && bonus !== null && bonus !== 0) {
+					// Tentar diferentes campos para bonus
+					const bonus = dano.bonus !== undefined ? dano.bonus : 
+					             (dano.mod !== undefined ? dano.mod : 
+					             (dano.value !== undefined ? dano.value : null));
+					if (bonus !== undefined && bonus !== null && bonus !== 0 && bonus !== '') {
 						const bonusNum = Number(bonus);
-						danoText += bonusNum >= 0 ? ` + ${bonusNum}` : ` ${bonusNum}`;
+						if (!isNaN(bonusNum)) {
+							danoText += bonusNum >= 0 ? ` + ${bonusNum}` : ` ${bonusNum}`;
+						}
 					}
+				} else if (dano.total) {
+					// Se tiver total formatado, usar direto
+					danoText = String(dano.total);
 				}
 				
 				// Formatar crítico
 				let criticoText = '';
 				if (critico.range || critico.threat) {
-					criticoText = critico.range || critico.threat;
+					criticoText = String(critico.range || critico.threat);
 					const multiplier = critico.multiplier || critico.mult;
-					if (multiplier && multiplier !== 2) {
+					if (multiplier && multiplier !== 2 && multiplier !== '2') {
 						criticoText += `/${multiplier}x`;
 					}
+				} else if (critico.total) {
+					criticoText = String(critico.total);
 				}
 				
-				// Montar texto final
+				// Montar texto final no formato: +9 (1d4 + 5, 19)
 				if (ataqueValue) {
 					finalText = ataqueValue;
 					if (danoText) {
@@ -248,6 +279,7 @@ Hooks.once("ready", async () => {
 				}
 			}
 			
+			// console.log("T20 Custom Sheet | Texto final formatado:", finalText);
 			$attackText.text(finalText || '-');
 		}
 		
