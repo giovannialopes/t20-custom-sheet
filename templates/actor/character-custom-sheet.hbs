@@ -422,6 +422,93 @@
 						font-weight: 600;
 						color: #fff;
 						margin-bottom: 4px;
+						cursor: help;
+						position: relative;
+					}
+					
+					/* Tooltip rico para poderes */
+					.power-name-tooltip {
+						display: none;
+						position: absolute;
+						bottom: calc(100% + 10px);
+						left: 0;
+						right: 0;
+						margin: 0 auto;
+						padding: 12px 14px;
+						background: linear-gradient(135deg, #1a1d26 0%, #0f1117 100%);
+						border: 1px solid rgba(255, 255, 255, 0.2);
+						border-radius: 8px;
+						box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+						z-index: 1000;
+						min-width: 280px;
+						max-width: 350px;
+						font-size: 12px;
+						line-height: 1.5;
+						pointer-events: none;
+						white-space: normal;
+					}
+					
+					.power-name:hover .power-name-tooltip {
+						display: block;
+					}
+					
+					.power-name-tooltip::after {
+						content: '';
+						position: absolute;
+						top: 100%;
+						left: 50%;
+						transform: translateX(-50%);
+						border: 6px solid transparent;
+						border-top-color: rgba(255, 255, 255, 0.2);
+						margin-top: -1px;
+					}
+					
+					.tooltip-header {
+						font-weight: 700;
+						font-size: 13px;
+						color: #fff;
+						margin-bottom: 10px;
+						padding-bottom: 8px;
+						border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+					}
+					
+					.tooltip-row {
+						display: flex;
+						justify-content: space-between;
+						margin-bottom: 6px;
+						color: rgba(255, 255, 255, 0.9);
+					}
+					
+					.tooltip-label {
+						font-weight: 600;
+						color: rgba(255, 255, 255, 0.7);
+						margin-right: 8px;
+					}
+					
+					.tooltip-value {
+						color: rgba(255, 255, 255, 0.95);
+						text-align: right;
+						flex: 1;
+					}
+					
+					.tooltip-description {
+						margin-top: 10px;
+						padding-top: 10px;
+						border-top: 1px solid rgba(255, 255, 255, 0.15);
+						color: rgba(255, 255, 255, 0.8);
+						font-size: 11px;
+						line-height: 1.4;
+						max-height: 100px;
+						overflow-y: auto;
+					}
+					
+					.tooltip-description::-webkit-scrollbar {
+						width: 4px;
+					}
+					
+					.tooltip-description::-webkit-scrollbar-thumb {
+						background: rgba(255, 255, 255, 0.3);
+						border-radius: 2px;
 					}
 					
 					.power-activation {

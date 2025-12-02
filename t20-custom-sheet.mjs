@@ -181,7 +181,75 @@ Hooks.once("ready", async () => {
 				
 				// Formatar ativação e custo de mana
 				this._formatPowerActivation($item, item);
+				
+				// Adicionar tooltip rico ao nome do poder
+				this._addPowerTooltip($item, item, tipoLabel);
 			});
+		}
+		
+		/**
+		 * Adiciona tooltip rico ao nome do poder com informações detalhadas
+		 */
+		_addPowerTooltip($item, item, tipoLabel) {
+			const $powerName = $item.find('.power-name');
+			if ($powerName.length === 0) return;
+			
+			// Verificar se já tem tooltip
+			if ($powerName.find('.power-name-tooltip').length > 0) return;
+			
+			// Obter ativação já formatada do elemento (já foi formatada por _formatPowerActivation)
+			const $activationText = $item.find('.power-activation .activation-text');
+			let ativacaoText = $activationText.text() || "Passivo";
+			
+			// Obter descrição (primeiros caracteres)
+			let descricao = '';
+			if (item.system?.descricao?.value) {
+				descricao = item.system.descricao.value;
+			} else if (item.system?.description?.value) {
+				descricao = item.system.description.value;
+			}
+			
+			// Limitar descrição a 200 caracteres
+			if (descricao && descricao.length > 200) {
+				descricao = descricao.substring(0, 200) + '...';
+			}
+			
+			// Remover HTML tags da descrição para o tooltip
+			if (descricao) {
+				const tempDiv = document.createElement('div');
+				tempDiv.innerHTML = descricao;
+				descricao = tempDiv.textContent || tempDiv.innerText || '';
+				// Limpar espaços em branco extras
+				descricao = descricao.trim().replace(/\s+/g, ' ');
+			}
+			
+			// Criar tooltip
+			const $tooltip = $('<div>')
+				.addClass('power-name-tooltip')
+				.html(`
+					<div class="tooltip-header">${this._escapeHtml(item.name)}</div>
+					<div class="tooltip-row">
+						<span class="tooltip-label">Tipo:</span>
+						<span class="tooltip-value">${this._escapeHtml(tipoLabel || 'Geral')}</span>
+					</div>
+					<div class="tooltip-row">
+						<span class="tooltip-label">Execução:</span>
+						<span class="tooltip-value">${this._escapeHtml(ativacaoText)}</span>
+					</div>
+					${descricao ? `<div class="tooltip-description">${this._escapeHtml(descricao)}</div>` : ''}
+				`);
+			
+			// Adicionar tooltip ao nome (precisa ser position: relative)
+			$powerName.css('position', 'relative').append($tooltip);
+		}
+		
+		/**
+		 * Escapa HTML para prevenir XSS
+		 */
+		_escapeHtml(text) {
+			const div = document.createElement('div');
+			div.textContent = text;
+			return div.innerHTML;
 		}
 		
 		/**
