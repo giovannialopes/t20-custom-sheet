@@ -1052,26 +1052,76 @@ Hooks.once("ready", async () => {
 	Hooks.on("renderActorSheet", (app, html, data) => {
 		if (app.constructor.name !== "ActorSheetT20CustomCharacter") return;
 		
-		const $navBar = html.find('.sheet-navigation');
-		if ($navBar.length === 0) return;
-		
-		// Verificar se a aba já existe
-		if ($navBar.find('a[data-tab="powers"]').length > 0) return;
-		
-		// Criar elemento da aba
-		const $powersTab = $(`
-			<a class="item" data-tab="powers" title="${game.i18n.localize("T20.Powers")}">
-				<i class="fas fa-magic"></i>
-				${game.i18n.localize("T20.Powers")}
-			</a>
-		`);
-		
-		// Inserir antes da aba "effects"
-		const $effectsTab = $navBar.find('a[data-tab="effects"]');
-		if ($effectsTab.length > 0) {
-			$powersTab.insertBefore($effectsTab);
-		} else {
-			$navBar.append($powersTab);
-		}
+		// Usar setTimeout para garantir que o nav-bar já foi renderizado
+		setTimeout(() => {
+			// Tentar encontrar o nav-bar com diferentes seletores
+			let $navBar = html.find('.sheet-navigation');
+			if ($navBar.length === 0) {
+				$navBar = html.find('nav.sheet-tabs');
+			}
+			if ($navBar.length === 0) {
+				$navBar = html.find('nav[class*="nav"]');
+			}
+			if ($navBar.length === 0) {
+				$navBar = html.find('nav');
+			}
+			if ($navBar.length === 0) {
+				// Tentar encontrar qualquer elemento com tabs
+				$navBar = html.find('[class*="tab"]').first().parent();
+			}
+			
+			if ($navBar.length === 0) {
+				console.warn("T20 Custom Sheet | Nav-bar não encontrado. Tentando buscar diretamente no elemento da sheet");
+				// Última tentativa: buscar por elementos que contenham tabs
+				const $allTabs = html.find('a[data-tab]');
+				if ($allTabs.length > 0) {
+					$navBar = $allTabs.first().parent();
+					console.log("T20 Custom Sheet | Nav-bar encontrado através de tabs:", $navBar[0]?.className);
+				}
+			}
+			
+			if ($navBar.length === 0) {
+				console.error("T20 Custom Sheet | Nav-bar não encontrado após todas as tentativas");
+				return;
+			}
+			
+			// Verificar se a aba já existe
+			if ($navBar.find('a[data-tab="powers"]').length > 0) {
+				return;
+			}
+			
+			console.log("T20 Custom Sheet | Nav-bar encontrado:", $navBar[0]?.className);
+			
+			// Criar elemento da aba
+			const powersLabel = game.i18n.localize("T20.Powers") || "Poderes";
+			const $powersTab = $(`
+				<a class="item" data-tab="powers" title="${powersLabel}">
+					<i class="fas fa-magic"></i>
+					${powersLabel}
+				</a>
+			`);
+			
+			// Inserir antes da aba "effects"
+			const $effectsTab = $navBar.find('a[data-tab="effects"]');
+			if ($effectsTab.length > 0) {
+				$powersTab.insertBefore($effectsTab);
+				console.log("T20 Custom Sheet | Aba Poderes inserida antes de Efeitos");
+			} else {
+				// Se não encontrar effects, inserir antes da última aba
+				const $lastTab = $navBar.find('a.item').last();
+				if ($lastTab.length > 0) {
+					$powersTab.insertBefore($lastTab);
+				} else {
+					$navBar.append($powersTab);
+				}
+				console.log("T20 Custom Sheet | Aba Poderes adicionada");
+			}
+			
+			// Ativar cliques na aba
+			$powersTab.on('click', (event) => {
+				event.preventDefault();
+				app.activateTab("powers");
+			});
+		}, 100);
 	});
 });
