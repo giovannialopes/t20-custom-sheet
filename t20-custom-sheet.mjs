@@ -132,8 +132,18 @@ Hooks.once("ready", async () => {
 				let tipo = this._getPowerType(item);
 				const tipoLabel = this._getPowerTypeLabel(tipo);
 				
-				// Atualizar data attribute (usar normalizado para filtros, mas manter original para badge CSS)
-				const tipoNormalizadoParaFiltro = this._normalizePowerTypeKey(tipo);
+				// Detectar "Habilidade de Classe" pelo label localizado também (mais confiável)
+				// Se o label for "Habilidade de Classe", forçar o tipo normalizado
+				let tipoNormalizadoParaFiltro = this._normalizePowerTypeKey(tipo);
+				if (tipoLabel && tipoLabel.toLowerCase().includes('habilidade') && tipoLabel.toLowerCase().includes('classe')) {
+					tipoNormalizadoParaFiltro = 'habilidade-de-classe';
+				}
+				// Também verificar se o tipo original é "ability" (formato do sistema)
+				if (tipo === 'ability' || tipo === 'habilidade-de-classe' || tipo === 'habilidade_de_classe') {
+					tipoNormalizadoParaFiltro = 'habilidade-de-classe';
+				}
+				
+				// Atualizar data attribute
 				$item.attr('data-power-type', tipoNormalizadoParaFiltro);
 				
 				// Adicionar classe CSS ao item para garantir que os estilos sejam aplicados
