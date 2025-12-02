@@ -104,6 +104,8 @@ Hooks.once("ready", async () => {
 		
 		/**
 		 * Handler para clique no ícone do poder
+		 * GERAL: tenta usar o fluxo oficial do sistema (item.use / item.roll)
+		 * e cai para mostrar o card em chat apenas como fallback.
 		 */
 		async _onPowerIconClick(event) {
 			event.preventDefault();
@@ -142,8 +144,20 @@ Hooks.once("ready", async () => {
 				return;
 			}
 			
-			// Mostrar o card do poder no chat
 			try {
+				// 1) Fluxo oficial: tentar usar a habilidade do sistema T20
+				if (typeof item.use === "function") {
+					await item.use();
+					return;
+				}
+
+				// 2) Alternativa: se existir método roll padrão, usar
+				if (typeof item.roll === "function") {
+					await item.roll();
+					return;
+				}
+
+				// 3) Fallback: Mostrar o card do poder no chat
 				const speaker = ChatMessage.getSpeaker({actor: this.actor});
 				
 				// Tentar usar o template padrão do sistema T20 para o card do item
