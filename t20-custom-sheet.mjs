@@ -688,7 +688,17 @@ Hooks.once("ready", async () => {
 			
 			// Event listener para combobox
 			$combobox.off('change.combobox-filter').on('change.combobox-filter', (event) => {
-				const selectedValue = $(event.currentTarget).val() || '';
+				const $select = $(event.currentTarget);
+				const selectedValue = $select.val() || '';
+				
+				// Garantir que o texto selecionado apareça corretamente
+				const $selectedOption = $select.find('option:selected');
+				if ($selectedOption.length > 0) {
+					// O texto já aparece automaticamente no select HTML
+					// Mas vamos garantir que está visível
+					$select.trigger('blur').trigger('focus');
+				}
+				
 				filterPowers(selectedValue);
 			});
 			
