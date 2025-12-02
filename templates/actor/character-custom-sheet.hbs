@@ -177,6 +177,8 @@
 						text-transform: uppercase;
 						letter-spacing: 0.5px;
 						white-space: nowrap;
+						margin-right: 8px;
+						flex-shrink: 0;
 					}
 					
 					.power-type-geral { background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%); color: #fff; }
@@ -237,6 +239,7 @@
 					<div class="powers-list" id="powers-list-container">
 						{{#each actor.poderes as |item id|}}
 						<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="">
+							<div class="power-type-badge power-type-placeholder" style="display: none;"></div>
 							<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
 							<div class="power-info">
 								<div class="power-name">{{item.name}}</div>
@@ -245,7 +248,6 @@
 									<span class="mana-cost" style="display: none;"></span>
 								</div>
 							</div>
-							<div class="power-type-badge power-type-placeholder" style="display: none;"></div>
 							<div class="power-controls">
 								<a class="item-control item-edit power-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
 									<i class="fas fa-edit"></i>

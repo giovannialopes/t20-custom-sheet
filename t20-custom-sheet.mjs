@@ -135,9 +135,13 @@ Hooks.once("ready", async () => {
 				// Adicionar badge de tipo
 				const $badgePlaceholder = $item.find('.power-type-placeholder');
 				if ($badgePlaceholder.length > 0 && $badgePlaceholder.hasClass('power-type-placeholder')) {
+					// Normalizar o tipo para usar no CSS (substituir espaços e caracteres especiais por hífen)
+					const tipoNormalizado = tipo.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '-').toLowerCase();
+					
 					$badgePlaceholder
 						.removeClass('power-type-placeholder')
-						.addClass(`power-type-${tipo.replace(/[^a-z0-9]/g, '-')}`)
+						.addClass('power-type-badge')
+						.addClass(`power-type-${tipoNormalizado}`)
 						.text(tipoLabel)
 						.show();
 				}
