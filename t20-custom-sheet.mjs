@@ -122,6 +122,7 @@ Hooks.once("ready", async () => {
 									"concedido": "Concedido",
 									"complicacao": "Complicação",
 									"complicação": "Complicação",
+									"complicacão": "Complicação",
 									"ability": "Ability",
 									"arquetipo": "Arquétipo",
 									"arquétipo": "Arquétipo",
