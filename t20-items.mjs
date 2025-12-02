@@ -463,7 +463,11 @@ export class EquipmentManager {
 				labelsKeys: Object.keys(item.labels || {}),
 				systemKeys: Object.keys(item.system || {}),
 				system: JSON.parse(JSON.stringify(item.system || {})), // Deep clone para ver tudo
+				tipo: item.system?.tipo,
+				subtipo: item.system?.subtipo,
+				categoria: item.system?.categoria,
 				defesa: item.system?.defesa,
+				penalidade: item.system?.penalidade,
 				espaco: item.system?.espaco,
 				peso: item.system?.peso
 			});
@@ -481,6 +485,7 @@ export class EquipmentManager {
 	
 	/**
 	 * Formata as estatísticas de defesa/espaço do equipamento
+	 * Para armaduras: mostra defesa, penalidade e tipo (Leve/Pesada/etc)
 	 */
 	formatEquipmentStats($item, item) {
 		const $statsText = $item.find('.equipment-stats-text');
@@ -490,60 +495,209 @@ export class EquipmentManager {
 			return;
 		}
 		
-		// Tentar usar labels do sistema primeiro (mais confiável)
-		let finalText = item.labels?.defesa || 
-		                item.labels?.defense ||
-		                item.labels?.espaco ||
-		                item.labels?.space ||
-		                '';
+		const system = item.system || {};
 		
-		// Se não tiver label formatado, construir manualmente
-		if (!finalText || finalText === '' || finalText === '-') {
-			const system = item.system || {};
-			const defesa = system.defesa || system.defense || {};
-			const espaco = system.espaco || system.space || system.peso || system.weight || {};
+		// Verificar se é uma armadura
+		// O sistema T20 geralmente tem um campo tipo ou categoria que indica se é armadura
+		const isArmadura = system.tipo === 'armadura' || 
+		                   system.type === 'armadura' ||
+		                   system.categoria === 'armadura' ||
+		                   system.category === 'armadura' ||
+		                   (item.labels?.tipo && item.labels.tipo.toLowerCase().includes('armadura')) ||
+		                   (item.labels?.type && item.labels.type.toLowerCase().includes('armadura')) ||
+		                   (item.labels?.categoria && item.labels.categoria.toLowerCase().includes('armadura'));
+		
+		let finalText = '';
+		
+		if (isArmadura) {
+			// É uma armadura - mostrar defesa, penalidade e tipo
+			
+			// Buscar defesa da armadura
+			let defesaValue = null;
+			if (system.defesa) {
+				if (typeof system.defesa === 'object') {
+					defesaValue = system.defesa.total !== undefined ? system.defesa.total :
+					              (system.defesa.value !== undefined ? system.defesa.value :
+					              (system.defesa.bonus !== undefined ? system.defesa.bonus : null));
+				} else {
+					defesaValue = system.defesa;
+				}
+			} else if (system.defense) {
+				if (typeof system.defense === 'object') {
+					defesaValue = system.defense.total !== undefined ? system.defense.total :
+					              (system.defense.value !== undefined ? system.defense.value :
+					              (system.defense.bonus !== undefined ? system.defense.bonus : null));
+				} else {
+					defesaValue = system.defense;
+				}
+			}
+			
+			// Buscar penalidade
+			let penalidadeValue = null;
+			if (system.penalidade) {
+				if (typeof system.penalidade === 'object') {
+					penalidadeValue = system.penalidade.value !== undefined ? system.penalidade.value :
+					                 (system.penalidade.total !== undefined ? system.penalidade.total :
+					                 (system.penalidade.mod !== undefined ? system.penalidade.mod : null));
+				} else {
+					penalidadeValue = system.penalidade;
+				}
+			} else if (system.penalty) {
+				if (typeof system.penalty === 'object') {
+					penalidadeValue = system.penalty.value !== undefined ? system.penalty.value :
+					                 (system.penalty.total !== undefined ? system.penalty.total :
+					                 (system.penalty.mod !== undefined ? system.penalty.mod : null));
+				} else {
+					penalidadeValue = system.penalty;
+				}
+			}
+			
+			// Buscar tipo de armadura (Leve, Pesada, etc) - campo "Tipo" do sistema
+			// O campo "Tipo" pode ser "Armadura Leve", "Armadura Pesada", etc
+			let tipoArmadura = '';
+			if (system.tipo) {
+				// Se for objeto, pegar o valor
+				if (typeof system.tipo === 'object') {
+					tipoArmadura = system.tipo.value || system.tipo.label || system.tipo.name || '';
+				} else {
+					tipoArmadura = String(system.tipo);
+				}
+			}
+			
+			// Fallback para subtipo/categoria
+			if (!tipoArmadura) {
+				if (system.subtipo) {
+					tipoArmadura = String(system.subtipo);
+				} else if (system.subtype) {
+					tipoArmadura = String(system.subtype);
+				} else if (system.categoria) {
+					tipoArmadura = String(system.categoria);
+				} else if (system.category) {
+					tipoArmadura = String(system.category);
+				}
+			}
+			
+			// Tentar usar labels se disponível
+			if (!tipoArmadura && item.labels?.tipo) {
+				tipoArmadura = String(item.labels.tipo);
+			} else if (!tipoArmadura && item.labels?.subtipo) {
+				tipoArmadura = String(item.labels.subtipo);
+			} else if (!tipoArmadura && item.labels?.subtype) {
+				tipoArmadura = String(item.labels.subtype);
+			} else if (!tipoArmadura && item.labels?.categoria) {
+				tipoArmadura = String(item.labels.categoria);
+			}
+			
+			// Buscar tipo de uso (Vestido, Empunhado, etc) - campo "Tipo de Uso"
+			let tipoUso = '';
+			if (system.tipoUso) {
+				if (typeof system.tipoUso === 'object') {
+					tipoUso = system.tipoUso.value || system.tipoUso.label || system.tipoUso.name || '';
+				} else {
+					tipoUso = String(system.tipoUso);
+				}
+			} else if (system.usageType) {
+				if (typeof system.usageType === 'object') {
+					tipoUso = system.usageType.value || system.usageType.label || system.usageType.name || '';
+				} else {
+					tipoUso = String(system.usageType);
+				}
+			}
+			
+			// Verificar se está equipado (vestido)
+			// Pode estar em equipped/equipado ou tipoUso === 'Vestido'
+			const isEquipped = system.equipped === true || 
+			                   system.equipado === true || 
+			                   tipoUso === 'Vestido' || 
+			                   tipoUso === 'vestido' ||
+			                   tipoUso === 'Vestido/a';
 			
 			// Formatar defesa
 			let defesaText = '';
-			if (typeof defesa === 'object' && defesa !== null) {
-				const defesaValue = defesa.total !== undefined ? defesa.total : 
-				                   (defesa.value !== undefined ? defesa.value : 
-				                   (defesa.bonus !== undefined ? defesa.bonus : null));
-				if (defesaValue !== null && defesaValue !== undefined && defesaValue !== '') {
-					const defesaNum = Number(defesaValue);
-					if (!isNaN(defesaNum)) {
-						defesaText = defesaNum >= 0 ? `+${defesaNum}` : `${defesaNum}`;
-					}
+			if (defesaValue !== null && defesaValue !== undefined && defesaValue !== '') {
+				const defesaNum = Number(defesaValue);
+				if (!isNaN(defesaNum)) {
+					defesaText = defesaNum >= 0 ? `+${defesaNum}` : `${defesaNum}`;
 				}
-			} else if (defesa !== null && defesa !== undefined && defesa !== '') {
-				defesaText = String(defesa);
 			}
 			
-			// Formatar espaço/peso
-			let espacoText = '';
-			if (typeof espaco === 'object' && espaco !== null) {
-				const espacoValue = espaco.value !== undefined ? espaco.value : 
-				                  (espaco.total !== undefined ? espaco.total : null);
-				if (espacoValue !== null && espacoValue !== undefined && espacoValue !== '') {
-					espacoText = String(espacoValue);
+			// Formatar penalidade
+			let penalidadeText = '';
+			if (penalidadeValue !== null && penalidadeValue !== undefined && penalidadeValue !== '') {
+				const penalidadeNum = Number(penalidadeValue);
+				if (!isNaN(penalidadeNum) && penalidadeNum !== 0) {
+					penalidadeText = penalidadeNum >= 0 ? `+${penalidadeNum}` : `${penalidadeNum}`;
 				}
-			} else if (espaco !== null && espaco !== undefined && espaco !== '') {
-				espacoText = String(espaco);
 			}
 			
-			// Montar texto final no formato: +2 / 2 ou similar
-			if (defesaText && espacoText) {
-				finalText = `${defesaText} / ${espacoText}`;
-			} else if (defesaText) {
-				finalText = defesaText;
-			} else if (espacoText) {
-				finalText = espacoText;
+			// Montar texto final: "Tipo: Armadura Leve | Defesa: +5 | Penalidade: -2 | Uso: Vestido"
+			const parts = [];
+			if (tipoArmadura) {
+				parts.push(`Tipo: ${tipoArmadura}`);
+			}
+			if (defesaText) {
+				parts.push(`Defesa: ${defesaText}`);
+			}
+			if (penalidadeText) {
+				parts.push(`Penalidade: ${penalidadeText}`);
+			}
+			if (tipoUso) {
+				parts.push(`Uso: ${tipoUso}`);
 			}
 			
-			console.log("T20 Items Manager | Estatísticas formatadas do equipamento:", finalText, "de", {
-				defesaText,
-				espacoText
+			finalText = parts.join(' | ');
+			
+			// Atualizar estado do botão de equipar/desequipar
+			const $toggleBtn = $item.find('.equipment-toggle-btn');
+			if ($toggleBtn.length > 0) {
+				if (isEquipped) {
+					$toggleBtn.addClass('equipped').attr('title', 'Desequipar');
+					$toggleBtn.find('i').removeClass('fa-hand-paper').addClass('fa-check-circle');
+				} else {
+					$toggleBtn.removeClass('equipped').attr('title', 'Equipar');
+					$toggleBtn.find('i').removeClass('fa-check-circle').addClass('fa-hand-paper');
+				}
+			}
+			
+			console.log("T20 Items Manager | Estatísticas formatadas da armadura:", finalText, "de", {
+				tipoArmadura,
+				defesaValue,
+				penalidadeValue,
+				tipoUso,
+				isEquipped,
+				systemKeys: Object.keys(system)
 			});
+			
+		} else {
+			// Não é armadura - mostrar espaço/peso como antes
+			
+			// Tentar usar labels do sistema primeiro (mais confiável)
+			finalText = item.labels?.espaco || 
+			            item.labels?.space ||
+			            '';
+			
+			// Se não tiver label formatado, construir manualmente
+			if (!finalText || finalText === '' || finalText === '-') {
+				const espaco = system.espaco || system.space || system.peso || system.weight || {};
+				
+				// Formatar espaço/peso
+				let espacoText = '';
+				if (typeof espaco === 'object' && espaco !== null) {
+					const espacoValue = espaco.value !== undefined ? espaco.value : 
+					                  (espaco.total !== undefined ? espaco.total : null);
+					if (espacoValue !== null && espacoValue !== undefined && espacoValue !== '') {
+						espacoText = String(espacoValue);
+					}
+				} else if (espaco !== null && espaco !== undefined && espaco !== '') {
+					espacoText = String(espaco);
+				}
+				
+				finalText = espacoText || '-';
+				
+				console.log("T20 Items Manager | Estatísticas formatadas do equipamento:", finalText, "de", {
+					espacoText
+				});
+			}
 		}
 		
 		$statsText.text(finalText || '-');

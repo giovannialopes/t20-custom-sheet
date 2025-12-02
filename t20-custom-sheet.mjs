@@ -218,6 +218,43 @@ Hooks.once("ready", async () => {
 				}
 			});
 			
+			// Handler para botão de equipar/desequipar
+			html.find('.equipment-list-custom .equipment-toggle-btn').off('click').on('click', async (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				
+				const itemId = $(event.currentTarget).data('item-id');
+				const item = this.actor.items.get(itemId);
+				if (!item) return;
+				
+				const system = item.system || {};
+				const currentEquipped = system.equipped || system.equipado || false;
+				const currentTipoUso = system.tipoUso || system.usageType || '';
+				
+				// Alternar estado de equipado
+				const newEquipped = !currentEquipped;
+				const newTipoUso = newEquipped ? 'Vestido' : 'Não Vestido';
+				
+				try {
+					// Atualizar o item
+					await item.update({
+						'system.equipped': newEquipped,
+						'system.equipado': newEquipped,
+						'system.tipoUso': newTipoUso
+					});
+					
+					// Atualizar visualmente
+					if (this.equipmentManager) {
+						setTimeout(() => {
+							this.equipmentManager.setupEquipmentSection();
+						}, 100);
+					}
+				} catch (error) {
+					console.error("T20 Custom Sheet | Erro ao equipar/desequipar:", error);
+					ui.notifications.error(`Erro ao ${newEquipped ? 'equipar' : 'desequipar'} ${item.name}`);
+				}
+			});
+			
 			// Handler para controles de editar e deletar armas
 			html.find('.weapons-list-custom .item-edit').off('click').on('click', (event) => {
 				event.preventDefault();
