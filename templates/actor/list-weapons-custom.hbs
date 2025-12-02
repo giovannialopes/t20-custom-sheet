@@ -11,12 +11,19 @@
 				</div>
 			</div>
 			<div class="weapon-controls">
-				<a class="item-control item-edit weapon-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
-					<i class="fas fa-edit"></i>
-				</a>
-				<a class="item-control item-delete weapon-control" title="{{localize 'T20.ItemDelete'}}" data-item-id="{{item._id}}">
-					<i class="fas fa-trash"></i>
-				</a>
+				<div class="weapon-controls-row">
+					<a class="item-control item-edit weapon-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
+						<i class="fas fa-edit"></i>
+					</a>
+					<a class="item-control item-delete weapon-control" title="{{localize 'T20.ItemDelete'}}" data-item-id="{{item._id}}">
+						<i class="fas fa-trash"></i>
+					</a>
+				</div>
+				<div class="weapon-actions" data-item-id="{{item._id}}">
+					<button class="weapon-toggle-btn" data-item-id="{{item._id}}" title="Equipar/Desequipar">
+						<i class="fas fa-sword"></i>
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -177,6 +184,13 @@
 
 .weapon-controls {
 	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	align-items: flex-end;
+}
+
+.weapon-controls-row {
+	display: flex;
 	gap: 5px;
 }
 
@@ -325,6 +339,49 @@
 
 .weapon-details-description:empty {
 	display: none;
+}
+
+.weapon-actions {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 4px;
+}
+
+.weapon-toggle-btn {
+	padding: 4px 8px;
+	background: transparent;
+	border: 2px solid rgba(192, 57, 43, 0.6); /* Red border for not equipped */
+	border-radius: 4px;
+	color: rgba(192, 57, 43, 0.8);
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	font-size: 11px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	min-width: 28px;
+	min-height: 28px;
+}
+
+.weapon-toggle-btn:hover {
+	border-color: rgba(192, 57, 43, 0.9);
+	color: rgba(192, 57, 43, 1);
+	transform: scale(1.1);
+}
+
+.weapon-toggle-btn.equipped {
+	border-color: rgba(74, 144, 226, 0.8) !important; /* Blue border for equipped */
+	color: rgba(74, 144, 226, 1) !important;
+	background: rgba(74, 144, 226, 0.1) !important;
+}
+
+.weapon-toggle-btn.equipped:hover {
+	border-color: rgba(74, 144, 226, 1) !important;
+	background: rgba(74, 144, 226, 0.2) !important;
+	transform: scale(1.1);
 }
 </style>
 

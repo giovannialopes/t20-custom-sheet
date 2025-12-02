@@ -196,6 +196,23 @@ Hooks.once("ready", async () => {
 				}
 			});
 			
+			// Handler para clique no nome da arma (expande/contrai descrição)
+			html.off('click', '.weapons-list-custom .weapon-name').on('click', '.weapons-list-custom .weapon-name', (event) => {
+				if (this.weaponsManager) {
+					this.weaponsManager.onWeaponNameClick(event);
+				}
+			});
+			
+			// Handler para botão de equipar/desequipar arma
+			html.find('.weapons-list-custom .weapon-toggle-btn').off('click').on('click', async (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				
+				if (this.weaponsManager) {
+					await this.weaponsManager.onWeaponToggleClick(event);
+				}
+			});
+			
 			// Handler para controles de editar e deletar equipamentos
 			html.find('.equipment-list-custom .item-edit').off('click').on('click', (event) => {
 				event.preventDefault();

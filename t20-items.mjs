@@ -52,6 +52,9 @@ export class WeaponsManager {
 			
 			// Adicionar painel expansível com descrição
 			this.addWeaponTooltip($item, item);
+			
+			// Configurar botão de equipar/desequipar
+			this.setupWeaponToggle($item, item);
 		});
 	}
 	
@@ -75,21 +78,26 @@ export class WeaponsManager {
 		                item.labels?.damage ||
 		                '';
 		
+		const system = item.system || {};
+		
+		// Debug completo para ver estrutura da arma
+		console.log("T20 Items Manager | Estrutura completa do item (arma):", {
+			name: item.name,
+			labels: item.labels,
+			labelsKeys: Object.keys(item.labels || {}),
+			systemKeys: Object.keys(system),
+			system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
+			ataque: system.ataque,
+			dano: system.dano,
+			critico: system.critico,
+			equipped: system.equipped,
+			equipado: system.equipado,
+			tipoUso: system.tipoUso,
+			usageType: system.usageType
+		});
+		
 		// Se não tiver label formatado, construir manualmente
 		if (!finalText || finalText === '' || finalText === '-') {
-			const system = item.system || {};
-			
-			// Debug temporário para ver estrutura completa
-			console.log("T20 Items Manager | Estrutura completa do item (arma):", {
-				name: item.name,
-				labels: item.labels,
-				labelsKeys: Object.keys(item.labels || {}),
-				systemKeys: Object.keys(system),
-				system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
-				ataque: system.ataque,
-				dano: system.dano,
-				critico: system.critico
-			});
 			
 			const ataque = system.ataque || system.attack || {};
 			const dano = system.dano || system.damage || {};
@@ -402,6 +410,146 @@ export class WeaponsManager {
 			setTimeout(() => {
 				$(event.currentTarget).removeClass('processing');
 			}, 500);
+		}
+	}
+	
+	/**
+	 * Handler para clique no nome da arma (expande/contrai descrição)
+	 */
+	onWeaponNameClick(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		
+		const $name = $(event.currentTarget);
+		const $item = $name.closest('.weapon-item');
+		
+		if ($item.length === 0) return;
+		
+		const itemId = $item.data('item-id') || $item.attr('data-item-id');
+		if (!itemId) return;
+		
+		const item = this.actor.items.get(itemId);
+		if (!item) return;
+		
+		// Toggle expanded class
+		$item.toggleClass('expanded');
+		
+		// Enriquecer descrição na primeira expansão
+		const $descContainer = $item.find('.weapon-details-description');
+		if ($item.hasClass('expanded') && $descContainer.length > 0 && $descContainer.html().trim() === '') {
+			let descricao = '';
+			if (item.system?.descricao?.value) {
+				descricao = item.system.descricao.value;
+			} else if (item.system?.description?.value) {
+				descricao = item.system.description.value;
+			}
+			
+			if (descricao) {
+				TextEditor.enrichHTML(descricao, {
+					async: true,
+					relativeTo: this.actor
+				}).then(html => {
+					$descContainer.html(html);
+				}).catch(e => {
+					$descContainer.html(this.escapeHtml(descricao));
+				});
+			}
+		}
+	}
+	
+	/**
+	 * Configura o botão de equipar/desequipar arma
+	 */
+	setupWeaponToggle($item, item) {
+		const $toggleBtn = $item.find('.weapon-toggle-btn');
+		if ($toggleBtn.length === 0) return;
+		
+		const system = item.system || {};
+		const tipoUso = system.tipoUso || system.usageType || '';
+		const tipoUsoLower = tipoUso.toLowerCase();
+		
+		// Verificar se está equipado (empunhado)
+		const isEquipped = system.equipped === true || 
+		                   system.equipado === true || 
+		                   tipoUso === 'Empunhado' || 
+		                   tipoUsoLower === 'empunhado' ||
+		                   tipoUsoLower.includes('empunhado');
+		
+		// Aplicar estado visual
+		if (isEquipped) {
+			// itemColor = "#ADD8E6" (Azul clarinho), highlight = true
+			$toggleBtn.addClass('equipped').removeClass('not-equipped').attr('title', 'Desequipar');
+			$toggleBtn.css({
+				'border-color': '#ADD8E6 !important',
+				'color': '#ADD8E6 !important',
+				'background': 'rgba(173, 216, 230, 0.15) !important'
+			});
+			console.log("T20 Items Manager | Arma marcada como EQUIPADA (azul #ADD8E6) para:", item.name);
+		} else {
+			// Cor vermelha (já existe), highlight = false
+			$toggleBtn.removeClass('equipped').addClass('not-equipped').attr('title', 'Equipar');
+			$toggleBtn.css({
+				'border-color': 'rgba(192, 57, 43, 0.8)',
+				'color': 'rgba(192, 57, 43, 1)',
+				'background': 'transparent'
+			});
+			console.log("T20 Items Manager | Arma marcada como NÃO EQUIPADA (vermelho) para:", item.name);
+		}
+		
+		// Aplicar cor ao item também se necessário
+		if (isEquipped) {
+			$item.css('border-left-color', '#ADD8E6');
+		}
+		
+		console.log("T20 Items Manager | Estado da arma:", {
+			name: item.name,
+			equipped: system.equipped,
+			equipado: system.equipado,
+			tipoUso: tipoUso,
+			isEquipped: isEquipped
+		});
+	}
+	
+	/**
+	 * Handler para toggle de equipar/desequipar arma
+	 */
+	async onWeaponToggleClick(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		
+		const $btn = $(event.currentTarget);
+		const $item = $btn.closest('.weapon-item');
+		
+		if ($item.length === 0) return;
+		
+		const itemId = $item.data('item-id') || $item.attr('data-item-id');
+		if (!itemId) return;
+		
+		const item = this.actor.items.get(itemId);
+		if (!item) return;
+		
+		const system = item.system || {};
+		const currentEquipped = system.equipped || system.equipado || false;
+		const newEquipped = !currentEquipped;
+		const newTipoUso = newEquipped ? 'Empunhado' : 'Não Empunhado';
+		
+		try {
+			// Atualizar o item - sincronizar equipado/equipped
+			const updateData = {
+				'system.equipped': newEquipped,
+				'system.equipado': newEquipped,
+				'system.tipoUso': newTipoUso
+			};
+			
+			await item.update(updateData);
+			
+			// Atualizar visualmente
+			setTimeout(() => {
+				this.setupWeaponsSection();
+			}, 100);
+		} catch (error) {
+			console.error("T20 Items Manager | Erro ao equipar/desequipar arma:", error);
+			ui.notifications.error(`Erro ao ${newEquipped ? 'equipar' : 'desequipar'} ${item.name}`);
 		}
 	}
 	
