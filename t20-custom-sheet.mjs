@@ -29,6 +29,7 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 			left: null,
 			top: null,
 			resizable: true,
+			dragDrop: [{ dragSelector: ".item-list .item:not(.item-header)" }],
 			scrollY: [
 				".tormenta20.base .sheet-body",
 				".tab.attributes",
@@ -44,9 +45,55 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 					contentSelector: ".sheet-body",
 					initial: "attributes"
 				}
-			],
-			dragDrop: [{ dragSelector: ".item-list .item:not(.item-header)" }]
+			]
 		});
+	}
+
+	/** @override */
+	async _render(force = false, options = {}) {
+		await super._render(force, options);
+		
+		// Centralizar a ficha quando renderizada pela primeira vez
+		// Aguardar um frame para garantir que o DOM está pronto
+		requestAnimationFrame(() => {
+			this._centerSheet();
+		});
+	}
+
+	/**
+	 * Centraliza a ficha na tela
+	 */
+	_centerSheet() {
+		if (!this.element || !this.element.length) return;
+		
+		const width = this.options.width || 900;
+		const height = this.options.height || 600;
+		
+		// Calcular posição central da viewport
+		const viewportWidth = window.innerWidth || 1920;
+		const viewportHeight = window.innerHeight || 1080;
+		
+		const left = Math.max(0, (viewportWidth - width) / 2);
+		const top = Math.max(0, (viewportHeight - height) / 2);
+		
+		// Aplicar posição centralizada
+		// Usar jQuery se disponível, senão usar método nativo
+		if (this.element && this.element.css) {
+			this.element.css({
+				left: `${left}px`,
+				top: `${top}px`,
+				width: `${width}px`,
+				height: `${height}px`
+			});
+		}
+		
+		// Atualizar a posição no objeto para que seja salva
+		if (this.position) {
+			this.position.left = left;
+			this.position.top = top;
+			this.position.width = width;
+			this.position.height = height;
+		}
 	}
 
 	/* -------------------------------------------- */
