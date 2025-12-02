@@ -44,85 +44,154 @@
 				<div class="list-powers-custom">
 					<style>
 					.list-powers-custom {
-						background: linear-gradient(135deg, #2b2f3a 0%, #1f232c 100%);
-						border-radius: 14px;
-						padding: 18px;
-						margin: 10px 0;
-						box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
-						border: 1px solid rgba(255, 255, 255, 0.06);
+						background: linear-gradient(145deg, #1a1d26 0%, #13151c 100%);
+						border-radius: 16px;
+						padding: 24px;
+						margin: 12px 0;
+						box-shadow: 
+							0 8px 32px rgba(0, 0, 0, 0.6),
+							0 2px 8px rgba(0, 0, 0, 0.4),
+							inset 0 1px 0 rgba(255, 255, 255, 0.05);
+						border: 1px solid rgba(255, 255, 255, 0.08);
+						position: relative;
+						overflow: hidden;
+					}
+					
+					.list-powers-custom::before {
+						content: '';
+						position: absolute;
+						top: 0;
+						left: 0;
+						right: 0;
+						height: 3px;
+						background: linear-gradient(90deg, 
+							rgba(245, 194, 66, 0.8) 0%,
+							rgba(230, 126, 34, 0.8) 25%,
+							rgba(74, 144, 226, 0.8) 50%,
+							rgba(155, 89, 182, 0.8) 75%,
+							rgba(39, 174, 96, 0.8) 100%);
+						opacity: 0.6;
 					}
 					
 					.powers-header {
 						display: flex;
 						justify-content: space-between;
 						align-items: center;
-						margin-bottom: 15px;
-						padding-bottom: 10px;
-						border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+						margin-bottom: 20px;
+						padding-bottom: 16px;
+						border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+						position: relative;
+					}
+					
+					.powers-header::after {
+						content: '';
+						position: absolute;
+						bottom: -2px;
+						left: 0;
+						width: 60px;
+						height: 2px;
+						background: linear-gradient(90deg, rgba(245, 194, 66, 1), rgba(245, 194, 66, 0));
 					}
 					
 					.powers-header h3 {
 						margin: 0;
-						color: #fff;
-						font-size: 18px;
-						font-weight: 600;
+						color: #ffffff;
+						font-size: 22px;
+						font-weight: 700;
+						letter-spacing: -0.5px;
+						text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+						position: relative;
 					}
 					
 					.powers-chips {
 						display: flex;
 						flex-wrap: wrap;
-						gap: 8px;
-						margin-bottom: 15px;
-						padding: 12px;
-						background: rgba(0, 0, 0, 0.2);
-						border-radius: 8px;
-						border: 1px solid rgba(255, 255, 255, 0.08);
+						gap: 10px;
+						margin-bottom: 20px;
+						padding: 16px;
+						background: rgba(0, 0, 0, 0.25);
+						border-radius: 12px;
+						border: 1px solid rgba(255, 255, 255, 0.1);
+						backdrop-filter: blur(10px);
 					}
 					
 					.power-chip {
 						display: inline-flex;
 						align-items: center;
-						gap: 6px;
-						padding: 6px 12px;
-						border-radius: 16px;
+						gap: 8px;
+						padding: 8px 16px;
+						border-radius: 20px;
 						font-size: 11px;
-						font-weight: 600;
+						font-weight: 700;
 						text-transform: uppercase;
-						letter-spacing: 0.5px;
+						letter-spacing: 0.8px;
 						cursor: pointer;
-						transition: all 0.2s ease;
+						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 						border: 2px solid transparent;
 						user-select: none;
-						/* Fallback para garantir que sempre tenha cor */
+						position: relative;
+						overflow: hidden;
+						box-shadow: 
+							0 2px 8px rgba(0, 0, 0, 0.3),
+							inset 0 1px 0 rgba(255, 255, 255, 0.1);
 						background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
 						color: #fff;
 					}
 					
+					.power-chip::before {
+						content: '';
+						position: absolute;
+						top: 0;
+						left: -100%;
+						width: 100%;
+						height: 100%;
+						background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+						transition: left 0.5s ease;
+					}
+					
+					.power-chip:hover::before {
+						left: 100%;
+					}
+					
 					.power-chip:hover {
-						transform: translateY(-2px);
-						box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+						transform: translateY(-3px) scale(1.05);
+						box-shadow: 
+							0 6px 20px rgba(0, 0, 0, 0.5),
+							0 0 0 3px rgba(255, 255, 255, 0.1);
+						filter: brightness(1.1);
 					}
 					
 					.power-chip.active {
-						border-color: rgba(255, 255, 255, 0.5);
-						box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+						border-color: rgba(255, 255, 255, 0.6);
+						box-shadow: 
+							0 4px 16px rgba(0, 0, 0, 0.4),
+							0 0 0 3px rgba(255, 255, 255, 0.2),
+							inset 0 2px 4px rgba(0, 0, 0, 0.2);
+						filter: brightness(1.15);
+						transform: translateY(-2px);
 					}
 					
 					.power-chip .chip-count {
 						display: inline-flex;
 						align-items: center;
 						justify-content: center;
-						min-width: 20px;
-						height: 20px;
-						padding: 0 6px;
-						border-radius: 10px;
-						background: rgba(0, 0, 0, 0.3);
-						font-size: 10px;
-						font-weight: 700;
+						min-width: 24px;
+						height: 24px;
+						padding: 0 8px;
+						border-radius: 12px;
+						background: rgba(0, 0, 0, 0.4);
+						font-size: 11px;
+						font-weight: 800;
+						box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+						border: 1px solid rgba(255, 255, 255, 0.1);
 					}
 					
 					.power-chip.active .chip-count {
-						background: rgba(255, 255, 255, 0.3);
+						background: rgba(255, 255, 255, 0.25);
+						border-color: rgba(255, 255, 255, 0.3);
+						box-shadow: 
+							inset 0 2px 4px rgba(0, 0, 0, 0.2),
+							0 2px 4px rgba(255, 255, 255, 0.1);
 					}
 					
 					.power-chip[data-type="geral"] {
@@ -172,54 +241,105 @@
 					
 					.powers-filters {
 						display: flex;
-						gap: 10px;
-						margin-bottom: 15px;
+						gap: 12px;
+						margin-bottom: 20px;
 						flex-wrap: wrap;
 					}
 					
 					.power-filter-input {
 						flex: 1;
-						min-width: 200px;
-						padding: 8px 12px;
-						background: rgba(255, 255, 255, 0.1);
-						border: 1px solid rgba(255, 255, 255, 0.2);
-						border-radius: 6px;
-						color: #fff;
-						font-size: 13px;
+						min-width: 240px;
+						padding: 12px 16px;
+						background: rgba(255, 255, 255, 0.08);
+						border: 2px solid rgba(255, 255, 255, 0.12);
+						border-radius: 10px;
+						color: #ffffff;
+						font-size: 14px;
+						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+						outline: none;
+						box-shadow: 
+							inset 0 2px 4px rgba(0, 0, 0, 0.2),
+							0 2px 4px rgba(0, 0, 0, 0.1);
+					}
+					
+					.power-filter-input:focus {
+						background: rgba(255, 255, 255, 0.12);
+						border-color: rgba(245, 194, 66, 0.6);
+						box-shadow: 
+							inset 0 2px 4px rgba(0, 0, 0, 0.2),
+							0 0 0 4px rgba(245, 194, 66, 0.2),
+							0 4px 12px rgba(0, 0, 0, 0.2);
 					}
 					
 					.power-filter-input::placeholder {
-						color: rgba(255, 255, 255, 0.5);
+						color: rgba(255, 255, 255, 0.4);
+						font-style: italic;
 					}
 					
 					.power-filter-type {
-						padding: 8px 12px;
-						background: rgba(255, 255, 255, 0.1);
-						border: 1px solid rgba(255, 255, 255, 0.2);
-						border-radius: 6px;
-						color: #fff;
-						font-size: 13px;
+						padding: 12px 16px;
+						background: rgba(255, 255, 255, 0.08);
+						border: 2px solid rgba(255, 255, 255, 0.12);
+						border-radius: 10px;
+						color: #ffffff;
+						font-size: 14px;
 						cursor: pointer;
+						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+						outline: none;
+						box-shadow: 
+							inset 0 2px 4px rgba(0, 0, 0, 0.2),
+							0 2px 4px rgba(0, 0, 0, 0.1);
+						appearance: none;
+						background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+						background-repeat: no-repeat;
+						background-position: right 12px center;
+						padding-right: 40px;
+					}
+					
+					.power-filter-type:focus {
+						background-color: rgba(255, 255, 255, 0.12);
+						border-color: rgba(245, 194, 66, 0.6);
+						box-shadow: 
+							inset 0 2px 4px rgba(0, 0, 0, 0.2),
+							0 0 0 4px rgba(245, 194, 66, 0.2),
+							0 4px 12px rgba(0, 0, 0, 0.2);
+					}
+					
+					.power-filter-type:hover {
+						border-color: rgba(255, 255, 255, 0.2);
+						background-color: rgba(255, 255, 255, 0.1);
 					}
 					
 					.powers-list {
-						max-height: 400px;
+						max-height: 450px;
 						overflow-y: auto;
-						padding-right: 5px;
+						padding-right: 8px;
+						padding-top: 4px;
 					}
 					
 					.powers-list::-webkit-scrollbar {
-						width: 8px;
+						width: 10px;
 					}
 					
 					.powers-list::-webkit-scrollbar-track {
 						background: rgba(0, 0, 0, 0.2);
-						border-radius: 4px;
+						border-radius: 10px;
+						border: 1px solid rgba(255, 255, 255, 0.05);
 					}
 					
 					.powers-list::-webkit-scrollbar-thumb {
-						background: rgba(255, 255, 255, 0.3);
-						border-radius: 4px;
+						background: linear-gradient(180deg, 
+							rgba(245, 194, 66, 0.6) 0%,
+							rgba(230, 126, 34, 0.6) 100%);
+						border-radius: 10px;
+						border: 2px solid rgba(0, 0, 0, 0.2);
+						box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+					}
+					
+					.powers-list::-webkit-scrollbar-thumb:hover {
+						background: linear-gradient(180deg, 
+							rgba(245, 194, 66, 0.8) 0%,
+							rgba(230, 126, 34, 0.8) 100%);
 					}
 					
 					.powers-group {
@@ -251,15 +371,34 @@
 						display: flex;
 						flex-direction: column;
 						gap: 0;
-						padding: 12px 14px;
-						margin-bottom: 8px;
-						background: rgba(10, 12, 18, 0.85);
-						border: 1px solid rgba(255, 255, 255, 0.06);
-						border-radius: 10px;
-						transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease, opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+						padding: 16px 18px;
+						margin-bottom: 12px;
+						background: rgba(22, 26, 35, 0.95);
+						border: 1px solid rgba(255, 255, 255, 0.08);
+						border-radius: 12px;
+						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 						opacity: 0;
 						transform: translateY(-10px);
-						animation: powerItemEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+						animation: powerItemEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+						box-shadow: 
+							0 4px 12px rgba(0, 0, 0, 0.3),
+							inset 0 1px 0 rgba(255, 255, 255, 0.05);
+						position: relative;
+						overflow: hidden;
+					}
+					
+					.power-item::before {
+						content: '';
+						position: absolute;
+						top: 0;
+						left: 0;
+						width: 4px;
+						height: 100%;
+						background: linear-gradient(180deg, 
+							rgba(245, 194, 66, 0.8) 0%,
+							rgba(230, 126, 34, 0.8) 100%);
+						opacity: 0;
+						transition: opacity 0.3s ease;
 					}
 					
 					@keyframes powerItemEnter {
@@ -280,10 +419,17 @@
 					}
 					
 					.power-item:hover {
-						background: rgba(18, 22, 32, 0.98);
-						border-color: rgba(255, 255, 255, 0.16);
-						box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-						transform: translateX(4px);
+						background: rgba(28, 32, 42, 1);
+						border-color: rgba(255, 255, 255, 0.2);
+						box-shadow: 
+							0 8px 24px rgba(0, 0, 0, 0.5),
+							0 0 0 1px rgba(255, 255, 255, 0.1),
+							inset 0 1px 0 rgba(255, 255, 255, 0.08);
+						transform: translateX(6px) translateY(-2px);
+					}
+					
+					.power-item:hover::before {
+						opacity: 1;
 					}
 					
 					.power-item.hidden {
@@ -435,26 +581,53 @@
 					}
 					
 					.power-icon {
-						width: 40px;
-						height: 40px;
-						border-radius: 6px;
+						width: 48px;
+						height: 48px;
+						border-radius: 10px;
 						background-size: cover;
 						background-position: center;
 						flex-shrink: 0;
-						border: 2px solid rgba(255, 255, 255, 0.2);
+						border: 2px solid rgba(255, 255, 255, 0.15);
 						cursor: pointer;
-						transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 						position: relative;
+						box-shadow: 
+							0 2px 8px rgba(0, 0, 0, 0.3),
+							inset 0 1px 0 rgba(255, 255, 255, 0.1);
+					}
+					
+					.power-icon::after {
+						content: '';
+						position: absolute;
+						inset: 0;
+						border-radius: 8px;
+						padding: 2px;
+						background: linear-gradient(135deg, 
+							rgba(255, 255, 255, 0.3) 0%,
+							rgba(255, 255, 255, 0.05) 100%);
+						-webkit-mask: linear-gradient(#fff 0 0) content-box, 
+									   linear-gradient(#fff 0 0);
+						-webkit-mask-composite: xor;
+						mask-composite: exclude;
+						opacity: 0;
+						transition: opacity 0.3s ease;
 					}
 					
 					.power-icon:hover {
-						transform: scale(1.1);
-						box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
-						border-color: rgba(255, 255, 255, 0.4);
+						transform: scale(1.15) rotate(2deg);
+						box-shadow: 
+							0 4px 16px rgba(0, 0, 0, 0.4),
+							0 0 20px rgba(245, 194, 66, 0.4);
+						border-color: rgba(245, 194, 66, 0.6);
+						z-index: 1;
+					}
+					
+					.power-icon:hover::after {
+						opacity: 1;
 					}
 					
 					.power-icon:active {
-						transform: scale(1.05);
+						transform: scale(1.1) rotate(1deg);
 					}
 					
 					.power-info {
@@ -463,17 +636,20 @@
 					}
 					
 					.power-name {
-						font-size: 14px;
+						font-size: 15px;
 						font-weight: 600;
-						color: #fff;
-						margin-bottom: 4px;
+						color: #ffffff;
+						margin-bottom: 6px;
 						cursor: pointer;
 						user-select: none;
-						transition: color 0.2s ease;
+						transition: all 0.3s ease;
+						line-height: 1.4;
+						text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 					}
 					
 					.power-name:hover {
-						color: rgba(255, 255, 255, 0.8);
+						color: rgba(245, 194, 66, 1);
+						text-shadow: 0 2px 4px rgba(245, 194, 66, 0.3);
 					}
 					
 					/* Painel expansível de detalhes do poder */
@@ -627,15 +803,18 @@
 					}
 					
 					.power-control {
-						padding: 6px 10px;
-						background: rgba(255, 255, 255, 0.1);
-						border: 1px solid rgba(255, 255, 255, 0.2);
-						border-radius: 4px;
+						padding: 8px 12px;
+						background: rgba(255, 255, 255, 0.08);
+						border: 2px solid rgba(255, 255, 255, 0.12);
+						border-radius: 8px;
 						color: #fff;
 						cursor: pointer;
-						transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 						position: relative;
 						overflow: hidden;
+						box-shadow: 
+							inset 0 2px 4px rgba(0, 0, 0, 0.2),
+							0 2px 4px rgba(0, 0, 0, 0.1);
 					}
 					
 					.power-control::before {
@@ -652,10 +831,12 @@
 					}
 					
 					.power-control:hover {
-						background: rgba(255, 255, 255, 0.25);
-						border-color: rgba(255, 255, 255, 0.4);
-						transform: translateY(-2px) scale(1.05);
-						box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+						background: rgba(255, 255, 255, 0.15);
+						border-color: rgba(255, 255, 255, 0.3);
+						transform: translateY(-3px) scale(1.08);
+						box-shadow: 
+							0 6px 16px rgba(0, 0, 0, 0.4),
+							inset 0 1px 0 rgba(255, 255, 255, 0.2);
 					}
 					
 					.power-control:hover::before {
@@ -683,6 +864,29 @@
 						background: rgba(74, 144, 226, 0.3);
 						border-color: rgba(74, 144, 226, 0.6);
 						color: #b3d9ff;
+					}
+					
+					.power-control.item-create {
+						background: linear-gradient(135deg, rgba(245, 194, 66, 0.2) 0%, rgba(230, 126, 34, 0.2) 100%);
+						border-color: rgba(245, 194, 66, 0.4);
+						color: #f5c242;
+						font-weight: 600;
+						text-transform: uppercase;
+						letter-spacing: 0.5px;
+						font-size: 12px;
+					}
+					
+					.power-control.item-create:hover {
+						background: linear-gradient(135deg, rgba(245, 194, 66, 0.4) 0%, rgba(230, 126, 34, 0.4) 100%);
+						border-color: rgba(245, 194, 66, 0.7);
+						color: #ffffff;
+						box-shadow: 
+							0 6px 20px rgba(245, 194, 66, 0.4),
+							inset 0 1px 0 rgba(255, 255, 255, 0.2);
+					}
+					
+					.power-control.item-create i {
+						margin-right: 6px;
 					}
 					</style>
 					
