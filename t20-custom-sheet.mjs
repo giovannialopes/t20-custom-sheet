@@ -265,7 +265,7 @@ Hooks.once("ready", async () => {
 		}
 		
 		/**
-		 * Configura ícones flutuantes do lado direito da ficha
+		 * Configura caixinhas flutuantes do lado direito da ficha com label "P"
 		 */
 		_setupFloatingIcons() {
 			if (!this.element || !this.element.length) return;
@@ -273,53 +273,131 @@ Hooks.once("ready", async () => {
 			const $container = this.element.find('#floating-icons-container');
 			if ($container.length === 0) return;
 			
-			// Limpar ícones existentes
+			// Limpar caixinhas existentes
 			$container.empty();
 			
-			// Configuração dos ícones flutuantes
-			// Você pode adicionar, remover ou modificar ícones aqui
-			// Cada ícone precisa de: icon (caminho), tooltip (texto), action (função ao clicar)
-			const floatingIcons = [
-				{
-					icon: 'icons/svg/fire.svg', // Ícone de fogo - pode ser substituído por qualquer ícone
-					tooltip: 'Ícone Flutuante',
-					action: () => {
-						ui.notifications.info('Ícone flutuante clicado!');
-					}
-				}
-				// Adicione mais ícones aqui:
-				// {
-				//     icon: 'caminho/para/icone.png',
-				//     tooltip: 'Descrição do ícone',
-				//     action: () => {
-				//         // Ação ao clicar
-				//     }
-				// }
-			];
+			// Coletar todos os poderes
+			const poderes = this.actor.items.filter(item => item.type === 'poder');
 			
-			// Criar os ícones
-			floatingIcons.forEach((config, index) => {
-				const $icon = $('<div>')
-					.addClass('floating-icon')
-					.attr('title', config.tooltip || '')
-					.css('animation-delay', `${index * 0.1}s`);
+			if (poderes.length === 0) return;
+			
+			// Criar uma caixinha com label "P" para cada poder
+			poderes.forEach((item, index) => {
+				const $box = $('<div>')
+					.addClass('floating-power-box')
+					.attr('data-item-id', item.id)
+					.attr('title', item.name || 'Poder')
+					.html('<span class="power-box-label">P</span>')
+					.css('animation-delay', `${index * 0.05}s`);
 				
-				const $img = $('<img>')
-					.attr('src', config.icon)
-					.attr('alt', config.tooltip || '');
+				// Adicionar evento de clique para usar o poder
+				$box.on('click', async (event) => {
+					event.preventDefault();
+					event.stopPropagation();
+					
+					// Prevenir múltiplos cliques rápidos
+					if ($box.hasClass('processing')) {
+						return;
+					}
+					$box.addClass('processing');
+					
+					try {
+						// 1) Fluxo oficial: tentar usar a habilidade do sistema T20
+						if (typeof item.use === "function") {
+							await item.use();
+							return;
+						}
+
+						// 2) Alternativa: se existir método roll padrão, usar
+						if (typeof item.roll === "function") {
+							await item.roll();
+							return;
+						}
+
+						// 3) Fallback: Mostrar o card do poder no chat
+						const speaker = ChatMessage.getSpeaker({actor: this.actor});
+						
+						let content = '';
+						try {
+							const possibleTemplates = [
+								"systems/tormenta20/templates/chat/item-card.hbs",
+								"systems/tormenta20/templates/chat/power-card.hbs",
+								"systems/tormenta20/templates/items/poder-chat.hbs"
+							];
+							
+							let templateFound = false;
+							for (const templatePath of possibleTemplates) {
+								try {
+									content = await renderTemplate(templatePath, {
+										item: item,
+										actor: this.actor,
+										data: item.system
+									});
+									templateFound = true;
+									break;
+								} catch (e) {
+									// Continuar tentando outros templates
+								}
+							}
+							
+							if (!templateFound) {
+								let descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+								const tipo = item.labels?.tipo || item.system?.tipo || '';
+								const ativacao = item.labels?.ativacao || item.system?.ativacao?.execucao || 'Passivo';
+								const img = item.img || 'icons/svg/mystery-man.svg';
+								
+								if (descricao) {
+									try {
+										descricao = await TextEditor.enrichHTML(descricao, {
+											async: true,
+											relativeTo: this.actor
+										});
+									} catch (e) {
+										// Se falhar, usar descrição original
+									}
+								}
+								
+								content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+									<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+									<div style="flex: 1;">
+										<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+										${tipo ? `<p style="margin: 4px 0;"><strong>Tipo:</strong> ${tipo}</p>` : ''}
+										${ativacao ? `<p style="margin: 4px 0;"><strong>Execução:</strong> ${ativacao}</p>` : ''}
+										${descricao ? `<div class="item-description" style="margin-top: 8px;">${descricao}</div>` : ''}
+									</div>
+								</div>`;
+							}
+						} catch (templateError) {
+							console.warn("T20 Custom Sheet | Erro ao renderizar template, usando card simples:", templateError);
+							const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+							const img = item.img || 'icons/svg/mystery-man.svg';
+							content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+								<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+								<div style="flex: 1;">
+									<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+									${descricao ? `<p>${descricao}</p>` : ''}
+								</div>
+							</div>`;
+						}
+						
+						await ChatMessage.create({
+							user: game.user.id,
+							speaker: speaker,
+							content: content
+						});
+						
+					} catch (error) {
+						console.error("T20 Custom Sheet | Erro ao exibir poder no chat:", error);
+						ui.notifications.error(`Erro ao exibir ${item.name}`);
+					} finally {
+						// Remover classe de processamento após 500ms
+						setTimeout(() => {
+							$box.removeClass('processing');
+						}, 500);
+					}
+				});
 				
-				$icon.append($img);
-				
-				// Adicionar evento de clique
-				if (config.action && typeof config.action === 'function') {
-					$icon.on('click', (event) => {
-						event.preventDefault();
-						event.stopPropagation();
-						config.action();
-					});
-				}
-				
-				$container.append($icon);
+				$container.append($box);
 			});
 		}
 		

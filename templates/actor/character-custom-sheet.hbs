@@ -816,7 +816,7 @@
 		</div>
 	</section>
 	
-	{{!-- Ícones Flutuantes --}}
+	{{!-- Caixinhas Flutuantes de Poderes --}}
 	<div class="floating-icons-container" id="floating-icons-container">
 		<style>
 			.tormenta20.custom-sheet {
@@ -830,11 +830,12 @@
 				transform: translateY(-50%);
 				display: flex;
 				flex-direction: column;
-				gap: 12px;
+				gap: 10px;
 				z-index: 2000;
 				pointer-events: none;
 				max-height: 90vh;
 				overflow-y: auto;
+				padding: 5px;
 			}
 			
 			.floating-icons-container::-webkit-scrollbar {
@@ -846,22 +847,24 @@
 				border-radius: 2px;
 			}
 			
-			.floating-icon {
-				width: 56px;
-				height: 56px;
+			.floating-power-box {
+				min-width: 40px;
+				height: 40px;
 				cursor: pointer;
 				pointer-events: all;
-				border-radius: 50%;
-				transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s ease, box-shadow 0.25s ease;
-				filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
-				background: rgba(0, 0, 0, 0.3);
-				padding: 4px;
-				box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+				border-radius: 8px;
+				transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, background 0.25s ease;
+				background: rgba(10, 12, 18, 0.9);
+				border: 2px solid rgba(255, 255, 255, 0.2);
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+				display: flex;
+				align-items: center;
+				justify-content: center;
 				opacity: 0;
-				animation: floatIconIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+				animation: floatBoxIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 			}
 			
-			@keyframes floatIconIn {
+			@keyframes floatBoxIn {
 				from {
 					opacity: 0;
 					transform: translateX(20px) scale(0.8);
@@ -872,25 +875,30 @@
 				}
 			}
 			
-			.floating-icon:hover {
-				transform: scale(1.2) translateY(-2px);
-				filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.8)) brightness(1.2);
-				box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2), 0 8px 16px rgba(0, 0, 0, 0.5);
+			.floating-power-box:hover {
+				transform: scale(1.1) translateY(-2px);
+				box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 255, 255, 0.3);
+				background: rgba(20, 25, 35, 0.95);
+				border-color: rgba(255, 255, 255, 0.4);
 			}
 			
-			.floating-icon:active {
-				transform: scale(1.1);
+			.floating-power-box:active {
+				transform: scale(1.05);
 			}
 			
-			.floating-icon img {
-				width: 100%;
-				height: 100%;
-				object-fit: contain;
-				border-radius: 50%;
-				image-rendering: -webkit-optimize-contrast;
-				image-rendering: crisp-edges;
+			.floating-power-box.processing {
+				opacity: 0.6;
+				cursor: not-allowed;
+			}
+			
+			.power-box-label {
+				color: #fff;
+				font-size: 18px;
+				font-weight: 700;
+				letter-spacing: 0.05em;
+				text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 			}
 		</style>
-		{{!-- Ícones serão adicionados via JavaScript --}}
+		{{!-- Caixinhas de poderes serão adicionadas via JavaScript --}}
 	</div>
 </form>
