@@ -132,15 +132,30 @@ Hooks.once("ready", async () => {
 				// Atualizar data attribute
 				$item.attr('data-power-type', tipo);
 				
-				// Adicionar badge de tipo
-				const $badgePlaceholder = $item.find('.power-type-placeholder');
-				if ($badgePlaceholder.length > 0 && $badgePlaceholder.hasClass('power-type-placeholder')) {
-					$badgePlaceholder
-						.removeClass('power-type-placeholder')
-						.addClass(`power-type-${tipo.replace(/[^a-z0-9]/g, '-')}`)
-						.text(tipoLabel)
-						.show();
+				// Adicionar badge de tipo dentro do power-name
+				const $nameContainer = $item.find('.power-name');
+				let $badge = $nameContainer.find('.power-type-badge');
+				
+				// Se não existe badge, criar um
+				if ($badge.length === 0) {
+					$badge = $('<span>').addClass('power-type-badge');
+					$nameContainer.append($badge);
 				}
+				
+				// Normalizar o tipo para usar no CSS (substituir espaços e caracteres especiais por hífen)
+				const tipoNormalizado = tipo.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '-').toLowerCase();
+				
+				// Remover classes antigas de tipo
+				$badge.removeClass((index, className) => {
+					return (className.match(/\bpower-type-\S+/g) || []).join(' ');
+				});
+				
+				// Adicionar classe do tipo e mostrar
+				$badge
+					.addClass(`power-type-${tipoNormalizado}`)
+					.addClass('power-type-badge')
+					.text(tipoLabel)
+					.show();
 				
 				// Formatar ativação e custo de mana
 				this._formatPowerActivation($item, item);

@@ -184,10 +184,12 @@
 					.power-type-classe { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); color: #fff; }
 					.power-type-habilidade-de-classe { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: #fff; }
 					.power-type-habilidade_de_classe { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: #fff; }
+					.power-type-habilidade-de-classe { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: #fff; }
 					.power-type-racial { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: #fff; }
 					.power-type-concedido { background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%); color: #fff; }
 					.power-type-distinção { background: linear-gradient(135deg, #16a085 0%, #138d75 100%); color: #fff; }
 					.power-type-distincao { background: linear-gradient(135deg, #16a085 0%, #138d75 100%); color: #fff; }
+					.power-type-distinção { background: linear-gradient(135deg, #16a085 0%, #138d75 100%); color: #fff; }
 					.power-type-complicação { background: linear-gradient(135deg, #c0392b 0%, #a93226 100%); color: #fff; }
 					.power-type-complicacao { background: linear-gradient(135deg, #c0392b 0%, #a93226 100%); color: #fff; }
 					.power-type-complicacão { background: linear-gradient(135deg, #c0392b 0%, #a93226 100%); color: #fff; }
@@ -239,13 +241,15 @@
 						<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="">
 							<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
 							<div class="power-info">
-								<div class="power-name">{{item.name}}</div>
+								<div class="power-name">
+									{{item.name}}
+									<span class="power-type-badge power-type-placeholder" style="display: none;"></span>
+								</div>
 								<div class="power-activation" data-item-id="{{item._id}}">
 									<span class="activation-text">-</span>
 									<span class="mana-cost" style="display: none;"></span>
 								</div>
 							</div>
-							<div class="power-type-badge power-type-placeholder" style="display: none;"></div>
 							<div class="power-controls">
 								<a class="item-control item-edit power-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
 									<i class="fas fa-edit"></i>
