@@ -25,14 +25,17 @@ Hooks.once("ready", async () => {
 		
 		// Método 2: Buscar nas sheets registradas
 		try {
-			const sheetClasses = foundry.documents.collections.Actors.sheetClasses;
-			if (sheetClasses && sheetClasses.tormenta20) {
-				// Procurar a sheet padrão de character
-				for (const [sheetClass, config] of Object.entries(sheetClasses.tormenta20)) {
-					if (config && config.types && config.types.includes("character") && config.makeDefault) {
-						BaseSheetClass = sheetClass;
-						console.log("T20 Custom Sheet | Classe base encontrada nas sheets registradas");
-						break;
+			const sheetClasses = foundry.documents.collections.Actors?.sheetClasses;
+			if (sheetClasses && typeof sheetClasses === 'object' && sheetClasses.tormenta20) {
+				const tormenta20Sheets = sheetClasses.tormenta20;
+				if (tormenta20Sheets && typeof tormenta20Sheets === 'object') {
+					// Procurar a sheet padrão de character
+					for (const [sheetClass, config] of Object.entries(tormenta20Sheets)) {
+						if (config && config.types && Array.isArray(config.types) && config.types.includes("character") && config.makeDefault) {
+							BaseSheetClass = sheetClass;
+							console.log("T20 Custom Sheet | Classe base encontrada nas sheets registradas");
+							break;
+						}
 					}
 				}
 			}
