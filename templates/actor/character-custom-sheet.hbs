@@ -137,8 +137,10 @@
 						content: attr(data-selected-text);
 						position: absolute;
 						left: 16px;
-						top: 50%;
-						transform: translateY(-50%);
+						top: 0;
+						height: 40px;
+						display: flex;
+						align-items: center;
 						color: #ffffff;
 						font-size: 14px;
 						font-weight: 500;
@@ -148,10 +150,13 @@
 						overflow: hidden;
 						text-overflow: ellipsis;
 						white-space: nowrap;
-						line-height: 1.5;
+						line-height: 1;
 						-webkit-font-smoothing: antialiased;
 						-moz-osx-font-smoothing: grayscale;
-						text-rendering: optimizeLegibility;
+						text-rendering: geometricPrecision;
+						will-change: auto;
+						backface-visibility: hidden;
+						transform: translateZ(0);
 					}
 					
 					/* Garantir que o texto selecionado seja visível */
