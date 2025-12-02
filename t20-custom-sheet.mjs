@@ -570,6 +570,9 @@ Hooks.once("ready", async () => {
 			const $combobox = this.element.find('#powers-combobox');
 			if ($combobox.length === 0) return;
 			
+			// Preservar o valor selecionado antes de remover opções
+			const currentSelectedValue = $combobox.val() || '';
+			
 			// Manter a opção "Todos os tipos"
 			$combobox.find('option:not(:first)').remove();
 			
@@ -636,6 +639,19 @@ Hooks.once("ready", async () => {
 				
 				$combobox.append($option);
 			}
+			
+			// Restaurar valor selecionado anteriormente se ainda existir
+			if (currentSelectedValue) {
+				// Verificar se a opção ainda existe
+				const optionExists = $combobox.find(`option[value="${currentSelectedValue}"]`).length > 0;
+				if (optionExists) {
+					$combobox.val(currentSelectedValue);
+					// Forçar atualização visual do select
+					$combobox[0].selectedIndex = $combobox.find(`option[value="${currentSelectedValue}"]`).index();
+					// Disparar evento change para aplicar filtro
+					$combobox.trigger('change.combobox-filter');
+				}
+			}
 		}
 		
 		/**
@@ -691,12 +707,27 @@ Hooks.once("ready", async () => {
 				const $select = $(event.currentTarget);
 				const selectedValue = $select.val() || '';
 				
-				// Garantir que o texto selecionado apareça corretamente
-				const $selectedOption = $select.find('option:selected');
-				if ($selectedOption.length > 0) {
-					// O texto já aparece automaticamente no select HTML
-					// Mas vamos garantir que está visível
-					$select.trigger('blur').trigger('focus');
+				// Garantir que o valor selecionado seja setado corretamente
+				if (selectedValue) {
+					// Verificar se a opção existe
+					const $option = $select.find(`option[value="${selectedValue}"]`);
+					if ($option.length > 0) {
+						// Garantir que a opção está selecionada
+						$option.prop('selected', true);
+						$select.val(selectedValue);
+						// Forçar atualização do selectedIndex para garantir que o texto apareça
+						const nativeSelect = $select[0];
+						if (nativeSelect) {
+							nativeSelect.selectedIndex = $option.index();
+						}
+					}
+				} else {
+					// Se nenhum valor, selecionar primeira opção (Todos os tipos)
+					$select.val('');
+					const nativeSelect = $select[0];
+					if (nativeSelect) {
+						nativeSelect.selectedIndex = 0;
+					}
 				}
 				
 				filterPowers(selectedValue);

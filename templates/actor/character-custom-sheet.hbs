@@ -128,7 +128,15 @@
 						-moz-appearance: none;
 					}
 					
-					.powers-combobox option:checked {
+					/* Garantir que o texto selecionado seja visível */
+					.powers-combobox option {
+						background: #1a1d26;
+						color: #ffffff;
+						padding: 10px;
+					}
+					
+					.powers-combobox option:checked,
+					.powers-combobox option[selected] {
 						background: rgba(245, 194, 66, 0.2);
 						color: #ffffff;
 					}
