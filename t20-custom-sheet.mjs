@@ -149,6 +149,7 @@ Hooks.once("ready", async () => {
 		
 		/**
 		 * Formata a ativação e custo de mana do poder
+		 * Usa os labels do sistema para garantir consistência
 		 */
 		_formatPowerActivation($item, item) {
 			const $activation = $item.find('.power-activation .activation-text');
@@ -156,56 +157,37 @@ Hooks.once("ready", async () => {
 			
 			if ($activation.length === 0) return;
 			
-			// Obter ativação
-			let ativacao = item.system?.ativacao;
-			let ativacaoText = "Passivo";
+			// Usar o label já formatado pelo sistema (mais confiável)
+			let ativacaoText = item.labels?.ativacao || "Passivo";
 			
-			if (ativacao) {
-				// Se for objeto, pegar o valor ou label
-				if (typeof ativacao === 'object' && ativacao !== null) {
-					ativacaoText = ativacao.value || ativacao.label || ativacao.name || "Passivo";
-				} else {
-					ativacaoText = String(ativacao);
+			// Se não tiver label, formatar manualmente usando CONFIG
+			if (!item.labels?.ativacao && item.system?.ativacao) {
+				const ativacao = item.system.ativacao;
+				const execucao = ativacao.execucao;
+				
+				if (execucao) {
+					// Usar CONFIG.T20 para obter o label localizado
+					const execucaoConfig = CONFIG.T20.abilityActivationTypes[execucao];
+					if (execucaoConfig) {
+						ativacaoText = game.i18n.localize(execucaoConfig);
+						
+						// Para minute, hour, day: adicionar quantidade
+						if (["minute", "hour", "day"].includes(execucao) && ativacao.qtd) {
+							ativacaoText = `${ativacao.qtd} ${ativacaoText}`;
+						}
+						// Para special: usar texto especial
+						else if (execucao === "special" && ativacao.special) {
+							ativacaoText = ativacao.special;
+						}
+					} else {
+						// Fallback: usar o valor direto
+						ativacaoText = execucao;
+					}
 				}
 			}
 			
-			// Mapear valores de execução para os labels corretos do sistema
-			const execucaoMap = {
-				"passivo": "Passivo",
-				"passive": "Passivo",
-				"padrão": "Padrão",
-				"padrao": "Padrão",
-				"standard": "Padrão",
-				"movimento": "Movimento",
-				"movement": "Movimento",
-				"completa": "Completa",
-				"complete": "Completa",
-				"reação": "Reação",
-				"reacao": "Reação",
-				"reaction": "Reação",
-				"livre": "Livre",
-				"free": "Livre",
-				"minuto": "Minuto",
-				"minute": "Minuto",
-				"hora": "Hora",
-				"hour": "Hora",
-				"dia": "Dia",
-				"day": "Dia",
-				"especial": "Especial",
-				"special": "Especial"
-			};
-			
-			// Normalizar e mapear o texto
-			const ativacaoLower = String(ativacaoText).toLowerCase().trim();
-			ativacaoText = execucaoMap[ativacaoLower] || ativacaoText;
-			
-			// Obter custo de mana (PM)
-			let manaCost = item.system?.custo?.pm || 
-			               item.system?.custoPM || 
-			               item.system?.pm || 
-			               item.system?.mana || 
-			               (item.system?.custo && typeof item.system.custo === 'object' ? item.system.custo.value || item.system.custo.total || item.system.custo.base : null) ||
-			               null;
+			// Obter custo de mana (PM) - usar item.system.ativacao.custo
+			let manaCost = item.system?.ativacao?.custo || null;
 			
 			if (manaCost !== null && manaCost !== undefined) {
 				// Se for objeto, pegar o valor
@@ -226,66 +208,49 @@ Hooks.once("ready", async () => {
 		
 		/**
 		 * Obtém o tipo de um poder
+		 * Usa item.system.tipo (campo padrão do sistema)
 		 */
 		_getPowerType(item) {
-			let tipo = item.system?.tipo || 
-			           item.system?.type || 
-			           item.system?.categoria?.tipo ||
-			           item.system?.categoria?.type ||
-			           item.system?.categoria ||
-			           item.tipo || 
-			           item.type || 
-			           null;
+			// Priorizar item.system.tipo (campo padrão do sistema)
+			let tipo = item.system?.tipo || null;
 			
+			// Fallbacks para compatibilidade
+			if (!tipo) {
+				tipo = item.system?.type || 
+				       item.system?.categoria?.tipo ||
+				       item.system?.categoria?.type ||
+				       item.tipo || 
+				       item.type || 
+				       null;
+			}
+			
+			// Se for objeto, extrair valor
 			if (typeof tipo === 'object' && tipo !== null) {
 				tipo = tipo.value || tipo.label || tipo.name || null;
 			}
 			
-			if (!tipo && item.system) {
-				for (const key of Object.keys(item.system)) {
-					if (key.toLowerCase().includes('tipo') || key.toLowerCase().includes('type') || key.toLowerCase().includes('categoria')) {
-						const value = item.system[key];
-						if (value && typeof value !== 'object') {
-							tipo = value;
-							break;
-						} else if (value && typeof value === 'object' && value.value) {
-							tipo = value.value;
-							break;
-						}
-					}
-				}
-			}
-			
+			// Normalizar para string minúscula
 			if (tipo) {
 				tipo = String(tipo).toLowerCase().trim();
 			} else {
-				tipo = "geral";
+				tipo = "geral"; // Valor padrão do sistema
 			}
 			
 			return tipo;
 		}
 		
 		/**
-		 * Obtém o label do tipo
+		 * Obtém o label do tipo usando CONFIG.T20 (garante localização correta)
 		 */
 		_getPowerTypeLabel(tipo) {
-			const tipoLabels = {
-				"habilidade de classe": "Habilidade de Classe",
-				"habilidade_de_classe": "Habilidade de Classe",
-				"classe": "Classe",
-				"concedido": "Concedido",
-				"geral": "Geral",
-				"origem": "Origem",
-				"racial": "Racial",
-				"distinção": "Distinção",
-				"distincao": "Distinção",
-				"distinção": "Distinção",
-				"complicação": "Complicação",
-				"complicacao": "Complicação",
-				"complicacão": "Complicação"
-			};
+			// Usar CONFIG.T20.powerType para obter o label localizado
+			const powerTypeConfig = CONFIG.T20.powerType[tipo];
+			if (powerTypeConfig) {
+				return game.i18n.localize(powerTypeConfig);
+			}
 			
-			return tipoLabels[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1);
+			// Fallback: capitalizar primeira letra
+			return tipo.charAt(0).toUpperCase() + tipo.slice(1);
 		}
 		
 		/**
@@ -481,15 +446,13 @@ Hooks.once("ready", async () => {
 			}
 			
 			// Preparar tipos dos poderes para exibição
+			// Os labels já são gerados automaticamente pelo sistema em item.labels.tipo
+			// Mas garantimos que estejam disponíveis para o template
 			if (Array.isArray(sheetData.actor.poderes)) {
 				for (const poder of sheetData.actor.poderes) {
 					if (poder && poder.system) {
-						// Obter o tipo do poder de diferentes possíveis locais
-						let tipo = poder.system.tipo || 
-						           poder.system.type || 
-						           poder.tipo || 
-						           poder.type ||
-						           "geral";
+						// Obter o tipo do poder (campo padrão: system.tipo)
+						let tipo = poder.system.tipo || "geral";
 						
 						// Se o tipo vier como objeto, pegar o valor
 						if (typeof tipo === 'object' && tipo !== null) {
@@ -499,24 +462,16 @@ Hooks.once("ready", async () => {
 						// Normalizar para string minúscula
 						tipo = String(tipo).toLowerCase().trim();
 						
-						// Mapear tipos para labels mais amigáveis
-						const tipoLabels = {
-							"geral": "Geral",
-							"origem": "Origem",
-							"classe": "Classe",
-							"racial": "Racial",
-							"racial_alternativa": "Racial Alternativa",
-							"racial alternativa": "Racial Alternativa",
-							"tormenta": "Tormenta",
-							"devoto": "Devoto",
-							"arquetipo": "Arquétipo",
-							"arquétipo": "Arquétipo",
-							"multiclasse": "Multiclasse",
-							"multi-classe": "Multiclasse"
-						};
+						// Usar CONFIG.T20 para obter o label localizado
+						const powerTypeConfig = CONFIG.T20.powerType[tipo];
+						if (powerTypeConfig) {
+							poder.tipoLabel = game.i18n.localize(powerTypeConfig);
+						} else {
+							// Fallback: usar label do sistema se disponível
+							poder.tipoLabel = poder.labels?.tipo || tipo.charAt(0).toUpperCase() + tipo.slice(1);
+						}
 						
-						// Adicionar label do tipo ao poder
-						poder.tipoLabel = tipoLabels[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1);
+						// Garantir que tipo esteja disponível
 						poder.tipo = tipo;
 					}
 				}
