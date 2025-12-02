@@ -182,26 +182,26 @@ Hooks.once("ready", async () => {
 				// Formatar ativação e custo de mana
 				this._formatPowerActivation($item, item);
 				
-				// Adicionar tooltip rico ao nome do poder
+				// Adicionar painel expansível ao poder (async para enriquecer HTML)
 				this._addPowerTooltip($item, item, tipoLabel);
 			});
 		}
 		
 		/**
-		 * Adiciona tooltip rico ao nome do poder com informações detalhadas
+		 * Adiciona painel expansível ao poder com informações detalhadas
 		 */
 		_addPowerTooltip($item, item, tipoLabel) {
-			const $powerName = $item.find('.power-name');
-			if ($powerName.length === 0) return;
+			// Verificar se já tem painel
+			if ($item.find('.power-details-panel').length > 0) return;
 			
-			// Verificar se já tem tooltip
-			if ($powerName.find('.power-name-tooltip').length > 0) return;
+			const $powerItemRow = $item.find('.power-item-row');
+			if ($powerItemRow.length === 0) return;
 			
 			// Obter ativação já formatada do elemento (já foi formatada por _formatPowerActivation)
 			const $activationText = $item.find('.power-activation .activation-text');
 			let ativacaoText = $activationText.text() || "Passivo";
 			
-			// Obter descrição (primeiros caracteres)
+			// Obter descrição completa (será enriquecida quando expandir)
 			let descricao = '';
 			if (item.system?.descricao?.value) {
 				descricao = item.system.descricao.value;
@@ -209,38 +209,55 @@ Hooks.once("ready", async () => {
 				descricao = item.system.description.value;
 			}
 			
-			// Limitar descrição a 200 caracteres
-			if (descricao && descricao.length > 200) {
-				descricao = descricao.substring(0, 200) + '...';
-			}
+			// Criar container de descrição (será preenchido quando expandir)
+			const $descContainer = $('<div>').addClass('power-details-description');
 			
-			// Remover HTML tags da descrição para o tooltip
-			if (descricao) {
-				const tempDiv = document.createElement('div');
-				tempDiv.innerHTML = descricao;
-				descricao = tempDiv.textContent || tempDiv.innerText || '';
-				// Limpar espaços em branco extras
-				descricao = descricao.trim().replace(/\s+/g, ' ');
-			}
-			
-			// Criar tooltip
-			const $tooltip = $('<div>')
-				.addClass('power-name-tooltip')
+			// Criar painel de detalhes
+			const $panel = $('<div>')
+				.addClass('power-details-panel')
 				.html(`
-					<div class="tooltip-header">${this._escapeHtml(item.name)}</div>
-					<div class="tooltip-row">
-						<span class="tooltip-label">Tipo:</span>
-						<span class="tooltip-value">${this._escapeHtml(tipoLabel || 'Geral')}</span>
+					<div class="power-details-header">
+						<div class="power-details-title">${this._escapeHtml(item.name)}</div>
 					</div>
-					<div class="tooltip-row">
-						<span class="tooltip-label">Execução:</span>
-						<span class="tooltip-value">${this._escapeHtml(ativacaoText)}</span>
+					<div class="power-details-row">
+						<span class="power-details-label">Tipo:</span>
+						<span class="power-details-value">${this._escapeHtml(tipoLabel || 'Geral')}</span>
 					</div>
-					${descricao ? `<div class="tooltip-description">${this._escapeHtml(descricao)}</div>` : ''}
-				`);
+					<div class="power-details-row">
+						<span class="power-details-label">Execução:</span>
+						<span class="power-details-value">${this._escapeHtml(ativacaoText)}</span>
+					</div>
+				`)
+				.append($descContainer);
 			
-			// Adicionar tooltip ao nome (precisa ser position: relative)
-			$powerName.css('position', 'relative').append($tooltip);
+			// Adicionar painel após a row do item
+			$powerItemRow.after($panel);
+			
+			// Variável para controlar se já foi enriquecido
+			let enriched = false;
+			
+			// Adicionar evento de clique no nome para expandir/colapsar
+			const $powerName = $item.find('.power-name');
+			$powerName.off('click.power-expand').on('click.power-expand', async (event) => {
+				event.stopPropagation();
+				
+				// Se expandindo pela primeira vez e tem descrição, enriquecer HTML
+				if (!$item.hasClass('expanded') && descricao && !enriched) {
+					enriched = true;
+					try {
+						const descricaoHtml = await TextEditor.enrichHTML(descricao, {
+							async: true,
+							relativeTo: this.actor
+						});
+						$descContainer.html(descricaoHtml);
+					} catch (e) {
+						// Fallback: escapar HTML se falhar
+						$descContainer.html(this._escapeHtml(descricao));
+					}
+				}
+				
+				$item.toggleClass('expanded');
+			});
 		}
 		
 		/**

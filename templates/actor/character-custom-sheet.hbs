@@ -249,14 +249,20 @@
 					
 					.power-item {
 						display: flex;
-						align-items: center;
-						gap: 12px;
+						flex-direction: column;
+						gap: 0;
 						padding: 12px 14px;
 						margin-bottom: 8px;
 						background: rgba(10, 12, 18, 0.85);
 						border: 1px solid rgba(255, 255, 255, 0.06);
 						border-radius: 10px;
 						transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+					}
+					
+					.power-item-row {
+						display: flex;
+						align-items: center;
+						gap: 12px;
 					}
 					
 					.power-item:hover {
@@ -422,93 +428,90 @@
 						font-weight: 600;
 						color: #fff;
 						margin-bottom: 4px;
-						cursor: help;
-						position: relative;
+						cursor: pointer;
+						user-select: none;
+						transition: color 0.2s ease;
 					}
 					
-					/* Tooltip rico para poderes */
-					.power-name-tooltip {
+					.power-name:hover {
+						color: rgba(255, 255, 255, 0.8);
+					}
+					
+					/* Painel expansível de detalhes do poder */
+					.power-details-panel {
 						display: none;
-						position: absolute;
-						bottom: calc(100% + 10px);
-						left: 0;
-						right: 0;
-						margin: 0 auto;
+						margin-top: 10px;
 						padding: 12px 14px;
-						background: linear-gradient(135deg, #1a1d26 0%, #0f1117 100%);
-						border: 1px solid rgba(255, 255, 255, 0.2);
-						border-radius: 8px;
-						box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
-						z-index: 1000;
-						min-width: 280px;
-						max-width: 350px;
+						background: rgba(245, 245, 240, 0.95);
+						border: 1px solid rgba(200, 200, 190, 0.3);
+						border-radius: 6px;
+						color: #3d3d3d;
 						font-size: 12px;
-						line-height: 1.5;
-						pointer-events: none;
-						white-space: normal;
+						line-height: 1.6;
+						animation: slideDown 0.2s ease-out;
 					}
 					
-					.power-name:hover .power-name-tooltip {
+					.power-item.expanded .power-details-panel {
 						display: block;
 					}
 					
-					.power-name-tooltip::after {
-						content: '';
-						position: absolute;
-						top: 100%;
-						left: 50%;
-						transform: translateX(-50%);
-						border: 6px solid transparent;
-						border-top-color: rgba(255, 255, 255, 0.2);
-						margin-top: -1px;
+					@keyframes slideDown {
+						from {
+							opacity: 0;
+							transform: translateY(-10px);
+						}
+						to {
+							opacity: 1;
+							transform: translateY(0);
+						}
 					}
 					
-					.tooltip-header {
+					.power-details-header {
+						display: flex;
+						justify-content: space-between;
+						margin-bottom: 8px;
+						padding-bottom: 8px;
+						border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+					}
+					
+					.power-details-title {
 						font-weight: 700;
 						font-size: 13px;
-						color: #fff;
-						margin-bottom: 10px;
-						padding-bottom: 8px;
-						border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+						color: #2d2d2d;
 					}
 					
-					.tooltip-row {
+					.power-details-row {
 						display: flex;
 						justify-content: space-between;
 						margin-bottom: 6px;
-						color: rgba(255, 255, 255, 0.9);
+						color: #3d3d3d;
 					}
 					
-					.tooltip-label {
+					.power-details-label {
 						font-weight: 600;
-						color: rgba(255, 255, 255, 0.7);
+						color: #555;
 						margin-right: 8px;
 					}
 					
-					.tooltip-value {
-						color: rgba(255, 255, 255, 0.95);
+					.power-details-value {
+						color: #2d2d2d;
 						text-align: right;
 						flex: 1;
 					}
 					
-					.tooltip-description {
+					.power-details-description {
 						margin-top: 10px;
 						padding-top: 10px;
-						border-top: 1px solid rgba(255, 255, 255, 0.15);
-						color: rgba(255, 255, 255, 0.8);
-						font-size: 11px;
-						line-height: 1.4;
-						max-height: 100px;
-						overflow-y: auto;
+						border-top: 1px solid rgba(0, 0, 0, 0.1);
+						color: #3d3d3d;
+						font-size: 12px;
+						line-height: 1.6;
+						white-space: pre-wrap;
+						word-wrap: break-word;
 					}
 					
-					.tooltip-description::-webkit-scrollbar {
-						width: 4px;
-					}
-					
-					.tooltip-description::-webkit-scrollbar-thumb {
-						background: rgba(255, 255, 255, 0.3);
-						border-radius: 2px;
+					.power-details-description:empty {
+						display: none;
 					}
 					
 					.power-activation {
@@ -599,6 +602,33 @@
 								
 								{{#each grupo.items as |item id|}}
 								<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="{{item.tipo}}">
+									<div class="power-item-row">
+										<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
+										<div class="power-info">
+											<div class="power-name">{{item.name}}</div>
+											<div class="power-activation" data-item-id="{{item._id}}">
+												<span class="activation-text">-</span>
+												<span class="mana-cost" style="display: none;"></span>
+											</div>
+										</div>
+										<div class="power-type-badge power-type-placeholder" style="display: none;"></div>
+										<div class="power-controls">
+											<a class="item-control item-edit power-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
+												<i class="fas fa-edit"></i>
+											</a>
+											<a class="item-control item-delete power-control" title="{{localize 'T20.ItemDelete'}}" data-item-id="{{item._id}}">
+												<i class="fas fa-trash"></i>
+											</a>
+										</div>
+									</div>
+								</div>
+								{{/each}}
+							</div>
+							{{/each}}
+						{{else}}
+							{{#each actor.poderes as |item id|}}
+							<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="">
+								<div class="power-item-row">
 									<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
 									<div class="power-info">
 										<div class="power-name">{{item.name}}</div>
@@ -616,29 +646,6 @@
 											<i class="fas fa-trash"></i>
 										</a>
 									</div>
-								</div>
-								{{/each}}
-							</div>
-							{{/each}}
-						{{else}}
-							{{#each actor.poderes as |item id|}}
-							<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="">
-								<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
-								<div class="power-info">
-									<div class="power-name">{{item.name}}</div>
-									<div class="power-activation" data-item-id="{{item._id}}">
-										<span class="activation-text">-</span>
-										<span class="mana-cost" style="display: none;"></span>
-									</div>
-								</div>
-								<div class="power-type-badge power-type-placeholder" style="display: none;"></div>
-								<div class="power-controls">
-									<a class="item-control item-edit power-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
-										<i class="fas fa-edit"></i>
-									</a>
-									<a class="item-control item-delete power-control" title="{{localize 'T20.ItemDelete'}}" data-item-id="{{item._id}}">
-										<i class="fas fa-trash"></i>
-									</a>
 								</div>
 							</div>
 							{{/each}}
