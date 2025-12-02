@@ -469,10 +469,19 @@ export class WeaponsManager {
 		const tipoUsoLower = tipoUso.toLowerCase();
 		
 		// Verificar se está equipado (empunhado)
-		const isEquipped = system.equipped === true || 
-		                   system.equipado === true || 
+		// No sistema T20:
+		// - equipado pode ser 0 (não equipado), 1 (1 mão) ou 2 (2 mãos)
+		// - tipoUso pode ser 'sim' quando está equipado
+		// - equipped pode ser true/false ou undefined
+		const equipadoValue = system.equipado;
+		const equippedValue = system.equipped;
+		
+		const isEquipped = equippedValue === true || 
+		                   (equipadoValue !== undefined && equipadoValue !== null && Number(equipadoValue) > 0) ||
 		                   tipoUso === 'Empunhado' || 
+		                   tipoUso === 'sim' ||
 		                   tipoUsoLower === 'empunhado' ||
+		                   tipoUsoLower === 'sim' ||
 		                   tipoUsoLower.includes('empunhado');
 		
 		// Aplicar estado visual
@@ -505,8 +514,12 @@ export class WeaponsManager {
 			name: item.name,
 			equipped: system.equipped,
 			equipado: system.equipado,
+			equipadoValue: equipadoValue,
+			equippedValue: equippedValue,
 			tipoUso: tipoUso,
-			isEquipped: isEquipped
+			isEquipped: isEquipped,
+			"equipadoValue > 0": equipadoValue !== undefined && equipadoValue !== null && Number(equipadoValue) > 0,
+			"tipoUso === 'sim'": tipoUso === 'sim'
 		});
 	}
 	
@@ -529,15 +542,39 @@ export class WeaponsManager {
 		if (!item) return;
 		
 		const system = item.system || {};
-		const currentEquipped = system.equipped || system.equipado || false;
+		
+		// Verificar estado atual usando a mesma lógica de setupWeaponToggle
+		const equipadoValue = system.equipado;
+		const equippedValue = system.equipped;
+		const tipoUso = system.tipoUso || system.usageType || '';
+		
+		const currentEquipped = equippedValue === true || 
+		                        (equipadoValue !== undefined && equipadoValue !== null && Number(equipadoValue) > 0) ||
+		                        tipoUso === 'Empunhado' || 
+		                        tipoUso === 'sim';
+		
 		const newEquipped = !currentEquipped;
-		const newTipoUso = newEquipped ? 'Empunhado' : 'Não Empunhado';
+		
+		// No sistema T20, equipado é um número: 0 (não equipado), 1 (1 mão) ou 2 (2 mãos)
+		// Se já estava equipado com 1 mão, manter 1; se estava com 2, manter 2
+		// Se não estava equipado, usar 1 como padrão
+		let newEquipadoValue = 0;
+		if (newEquipped) {
+			// Se já tinha um valor de equipado > 0, manter; senão usar 1 como padrão
+			if (equipadoValue !== undefined && equipadoValue !== null && Number(equipadoValue) > 0) {
+				newEquipadoValue = Number(equipadoValue);
+			} else {
+				newEquipadoValue = 1; // Padrão: 1 mão
+			}
+		}
+		
+		const newTipoUso = newEquipped ? 'sim' : '';
 		
 		try {
 			// Atualizar o item - sincronizar equipado/equipped
 			const updateData = {
 				'system.equipped': newEquipped,
-				'system.equipado': newEquipped,
+				'system.equipado': newEquipadoValue,
 				'system.tipoUso': newTipoUso
 			};
 			
