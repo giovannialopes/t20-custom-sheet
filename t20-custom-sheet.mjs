@@ -132,20 +132,16 @@ Hooks.once("ready", async () => {
 				let tipo = this._getPowerType(item);
 				const tipoLabel = this._getPowerTypeLabel(tipo);
 				
-				// Atualizar data attribute
-				$item.attr('data-power-type', tipo);
+				// Normalizar tipo para uso consistente
+				const tipoNormalizado = this._normalizePowerTypeKey(tipo);
+				
+				// Atualizar data attribute com tipo normalizado
+				$item.attr('data-power-type', tipoNormalizado);
 				
 				// Adicionar badge de tipo
 				const $badgePlaceholder = $item.find('.power-type-placeholder');
 				if ($badgePlaceholder.length > 0 && $badgePlaceholder.hasClass('power-type-placeholder')) {
-					// Normalizar o tipo para usar no CSS (substituir espaços e caracteres especiais por hífen)
-					let tipoCss = tipo;
-					// Tratamento especial: se o label for "Habilidade de Classe", forçamos o tipo CSS correspondente
-					if (tipoLabel && tipoLabel.toLowerCase() === "habilidade de classe") {
-						tipoCss = "habilidade-de-classe";
-					}
-					const tipoNormalizado = tipoCss.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '-').toLowerCase();
-					
+					// Usar o tipo já normalizado
 					$badgePlaceholder
 						.removeClass('power-type-placeholder')
 						.addClass('power-type-badge')
@@ -267,10 +263,21 @@ Hooks.once("ready", async () => {
 		
 		/**
 		 * Normaliza um tipo de poder para uso consistente (remove acentos, espaços, etc)
+		 * Converte para formato padronizado: habilidade-de-classe
 		 */
 		_normalizePowerTypeKey(tipo) {
 			if (!tipo) return '';
-			return String(tipo).toLowerCase().trim();
+			let normalized = String(tipo).toLowerCase().trim();
+			
+			// Substituir espaços e underscores por hífens
+			normalized = normalized.replace(/[\s_]+/g, '-');
+			
+			// Normalizar variações comuns de "habilidade de classe"
+			if (normalized.includes('habilidade') && normalized.includes('classe')) {
+				normalized = 'habilidade-de-classe';
+			}
+			
+			return normalized;
 		}
 		
 		/**
@@ -325,10 +332,12 @@ Hooks.once("ready", async () => {
 			for (const tipo of ordemTipos) {
 				if (gruposPorTipo[tipo]) {
 					const grupo = gruposPorTipo[tipo];
+					// Garantir que o tipo seja normalizado novamente antes de criar o chip
+					const tipoNormalizado = this._normalizePowerTypeKey(grupo.tipo);
 					const $chip = $('<div>')
 						.addClass('power-chip')
-						.attr('data-type', grupo.tipo)
-						.attr('data-filter-type', grupo.tipo)
+						.attr('data-type', tipoNormalizado)
+						.attr('data-filter-type', tipoNormalizado)
 						.html(`${grupo.label} <span class="chip-count">${grupo.count}</span>`);
 					
 					$chipsContainer.append($chip);
@@ -340,10 +349,12 @@ Hooks.once("ready", async () => {
 			for (const tipo in gruposPorTipo) {
 				if (!Object.prototype.hasOwnProperty.call(gruposPorTipo, tipo)) continue;
 				const grupo = gruposPorTipo[tipo];
+				// Garantir que o tipo seja normalizado novamente antes de criar o chip
+				const tipoNormalizado = this._normalizePowerTypeKey(grupo.tipo);
 				const $chip = $('<div>')
 					.addClass('power-chip')
-					.attr('data-type', grupo.tipo)
-					.attr('data-filter-type', grupo.tipo)
+					.attr('data-type', tipoNormalizado)
+					.attr('data-filter-type', tipoNormalizado)
 					.html(`${grupo.label} <span class="chip-count">${grupo.count}</span>`);
 				
 				$chipsContainer.append($chip);

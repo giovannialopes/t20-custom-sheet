@@ -93,6 +93,9 @@
 						transition: all 0.2s ease;
 						border: 2px solid transparent;
 						user-select: none;
+						/* Fallback para garantir que sempre tenha cor */
+						background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+						color: #fff;
 					}
 					
 					.power-chip:hover {
@@ -137,7 +140,9 @@
 						color: #fff;
 					}
 					
-					.power-chip[data-type="habilidade-de-classe"] {
+					.power-chip[data-type="habilidade-de-classe"],
+					.power-chip[data-type="habilidade_de_classe"],
+					.power-chip[data-type*="habilidade"][data-type*="classe"] {
 						background: linear-gradient(135deg, #f5c242 0%, #f39c12 100%);
 						color: #fff;
 					}
