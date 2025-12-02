@@ -236,23 +236,19 @@ Hooks.once("ready", async () => {
 		 */
 		_getPowerTypeLabel(tipo) {
 			const tipoLabels = {
+				"habilidade de classe": "Habilidade de Classe",
+				"habilidade_de_classe": "Habilidade de Classe",
+				"classe": "Classe",
+				"concedido": "Concedido",
 				"geral": "Geral",
 				"origem": "Origem",
-				"classe": "Classe",
 				"racial": "Racial",
-				"racial_alternativa": "Racial Alternativa",
-				"racial alternativa": "Racial Alternativa",
-				"tormenta": "Tormenta",
-				"devoto": "Devoto",
-				"concedido": "Concedido",
-				"complicacao": "Complicação",
+				"distinção": "Distinção",
+				"distincao": "Distinção",
+				"distinção": "Distinção",
 				"complicação": "Complicação",
-				"complicacão": "Complicação",
-				"ability": "Ability",
-				"arquetipo": "Arquétipo",
-				"arquétipo": "Arquétipo",
-				"multiclasse": "Multiclasse",
-				"multi-classe": "Multiclasse"
+				"complicacao": "Complicação",
+				"complicacão": "Complicação"
 			};
 			
 			return tipoLabels[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1);
