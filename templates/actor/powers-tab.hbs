@@ -760,10 +760,10 @@
 		{{#if actor.poderesPorTipo.length}}
 			{{#each actor.poderesPorTipo as |grupo|}}
 			<div class="powers-group" data-power-group="{{grupo.tipo}}">
-				<div class="powers-group-header">
-					<span class="group-title">{{grupo.label + ": "}}</span>
-					<span class="group-count">{{grupo.count}}</span>
-				</div>
+					<div class="powers-group-header">
+						<span class="group-title">{{grupo.label}}:</span>
+						<span class="group-count">{{grupo.count}}</span>
+					</div>
 				
 				{{#each grupo.items as |item id|}}
 				<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="{{item.tipo}}">
