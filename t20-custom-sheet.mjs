@@ -12,6 +12,21 @@ import { WeaponsManager, EquipmentManager } from "./t20-items.mjs";
 
 Hooks.once("ready", async () => {
 	console.log("T20 Custom Sheet | Inicializando módulo de ficha customizada");
+	
+	// Verificar se os imports foram carregados corretamente
+	try {
+		if (typeof PowersManager === 'undefined') {
+			console.error("T20 Custom Sheet | PowersManager não foi importado corretamente");
+		}
+		if (typeof WeaponsManager === 'undefined') {
+			console.error("T20 Custom Sheet | WeaponsManager não foi importado corretamente");
+		}
+		if (typeof EquipmentManager === 'undefined') {
+			console.error("T20 Custom Sheet | EquipmentManager não foi importado corretamente");
+		}
+	} catch (e) {
+		console.error("T20 Custom Sheet | Erro ao verificar imports:", e);
+	}
 
 	// Pré-carregar e registrar partials do powers-tab, items-tab, weapons-custom e equipment-custom
 	try {
@@ -128,18 +143,38 @@ Hooks.once("ready", async () => {
 		async _render(force = false, options = {}) {
 			await super._render(force, options);
 			
-			// Inicializar gerenciadores
-			this.powersManager = new PowersManager(this);
-			this.weaponsManager = new WeaponsManager(this);
-			this.equipmentManager = new EquipmentManager(this);
+			// Inicializar gerenciadores com verificação de segurança
+			try {
+				this.powersManager = new PowersManager(this);
+			} catch (e) {
+				console.error("T20 Custom Sheet | Erro ao inicializar PowersManager:", e);
+			}
+			
+			try {
+				this.weaponsManager = new WeaponsManager(this);
+			} catch (e) {
+				console.error("T20 Custom Sheet | Erro ao inicializar WeaponsManager:", e);
+			}
+			
+			try {
+				this.equipmentManager = new EquipmentManager(this);
+			} catch (e) {
+				console.error("T20 Custom Sheet | Erro ao inicializar EquipmentManager:", e);
+			}
 			
 			// Adicionar badges de tipo aos poderes e configurar filtros
 			setTimeout(() => {
-				this.powersManager.setupPowersSection();
+				if (this.powersManager) {
+					this.powersManager.setupPowersSection();
+				}
 				// Aguardar um pouco mais para garantir que os dados das armas e equipamentos estejam preparados
 				setTimeout(() => {
-					this.weaponsManager.setupWeaponsSection();
-					this.equipmentManager.setupEquipmentSection();
+					if (this.weaponsManager) {
+						this.weaponsManager.setupWeaponsSection();
+					}
+					if (this.equipmentManager) {
+						this.equipmentManager.setupEquipmentSection();
+					}
 				}, 200);
 			}, 100);
 		}
@@ -156,6 +191,8 @@ Hooks.once("ready", async () => {
 			html.off('click', '.weapons-list-custom .weapon-icon').on('click', '.weapons-list-custom .weapon-icon', (event) => {
 				if (this.weaponsManager) {
 					this.weaponsManager.onWeaponIconClick(event);
+				} else {
+					console.warn("T20 Custom Sheet | WeaponsManager não inicializado");
 				}
 			});
 			
