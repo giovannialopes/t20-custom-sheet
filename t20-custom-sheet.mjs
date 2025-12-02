@@ -105,6 +105,44 @@ Hooks.once("ready", async () => {
 			// Usar o método da classe base para obter todos os dados
 			const sheetData = await super.getData();
 			
+			// Garantir que seja character
+			if (this.actor.type !== "character") return sheetData;
+			
+			// Configurações do sistema (igual ao padrão)
+			const limitedSetting = game.settings.get("tormenta20", "limitedSheet");
+			sheetData.limited = !game.user.isGM && limitedSetting === "limited" && this.actor.limited;
+			sheetData.disableExperience = game.settings.get("tormenta20", "disableExperience");
+			sheetData.disableJournal = game.settings.get("tormenta20", "disableJournal");
+			
+			const levelConfig = this.actor.getFlag("tormenta20", "lvlconfig");
+			sheetData.autoCalcResources = levelConfig ? !levelConfig.manual : true;
+			
+			sheetData.layout = this.layout;
+			
+			// Garantir que defesa.pda exista
+			if (this.actor.system.attributes.defesa) {
+				this.actor.system.attributes.defesa.pda = this.actor.system.attributes.defesa.pda ?? 0;
+			}
+			
+			// Enriquecer campos HTML do diário (igual ao padrão)
+			if (sheetData.system?.detalhes) {
+				if (sheetData.system.detalhes.diario?.value) {
+					sheetData.htmlFields.diario = await this.enrichHTML(sheetData.system.detalhes.diario.value, sheetData);
+				}
+				if (sheetData.system.detalhes.diario1?.value) {
+					sheetData.htmlFields.diario1 = await this.enrichHTML(sheetData.system.detalhes.diario1.value, sheetData);
+				}
+				if (sheetData.system.detalhes.diario2?.value) {
+					sheetData.htmlFields.diario2 = await this.enrichHTML(sheetData.system.detalhes.diario2.value, sheetData);
+				}
+				if (sheetData.system.detalhes.diario3?.value) {
+					sheetData.htmlFields.diario3 = await this.enrichHTML(sheetData.system.detalhes.diario3.value, sheetData);
+				}
+				if (sheetData.system.detalhes.diario4?.value) {
+					sheetData.htmlFields.diario4 = await this.enrichHTML(sheetData.system.detalhes.diario4.value, sheetData);
+				}
+			}
+			
 			// Garantir que nivel tenha um valor válido
 			if (sheetData.system?.attributes?.nivel) {
 				if (sheetData.system.attributes.nivel.value === undefined || 

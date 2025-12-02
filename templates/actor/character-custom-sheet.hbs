@@ -1,201 +1,89 @@
 <form class="tormenta20 base custom-sheet" autocomplete="off">
 	{{!-- Sheet Tab Navigation --}}
-	<nav class="sheet-tabs tabs primary flexrow" data-group="primary">
-		<a class="item active" data-tab="attributes"><i class="fa-solid fa-file-invoice"></i> {{localize "T20.Sheet"}}</a>
-		<a class="item" data-tab="journal"><i class="fas fa-book"></i> {{localize "T20.Journal"}}</a>
-		<a class="item" data-tab="effects"><i class="fas fa-wand-magic-sparkles"></i> {{localize "T20.Effects"}}</a>
-	</nav>
+	{{> "tormenta20.nav-bar"}}
 
 	{{!-- Sheet Body --}}
 	<section class="sheet-body">
 		{{!-- Attributes Tab --}}
-		<div class="tab attributes" data-group="primary" data-tab="attributes">
-			
-			{{!-- Sheet Header --}}
-			<div class="sheet-header">
-				<img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
-				<div class="header-fields">
-					<h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="{{localize 'T20.Name'}}"/></h1>
-					<div class="resource">
-						<label>{{localize "T20.Level"}}:</label>
-						<input type="number" name="system.attributes.nivel.value" value="{{system.attributes.nivel.value}}" min="1" max="20"/>
-					</div>
-				</div>
-			</div>
+		<div class="tab attributes flexrow" data-group="primary" data-tab="attributes">
 
-			<div class="flexrow" style="gap: 15px;">
+			{{!-- Sheet Header --}}
+			{{> "tormenta20.sheet-header-base"}}
+
 			<div class="attributes-left flexcol">
 				{{!-- Abilities --}}
-				<ul class="ability-scores flexrow">
-					{{#each system.atributos as |atr key|}}
-					<li class="ability" data-item-id="{{key}}">
-						<h4 class="ability-name box-title rollable atributo-rollable">
-							{{localize (lookup ../config.atributosAbr key)}}
-						</h4>
-						<span class="rollable atributo-rollable">
-							<div class="atributo-value">{{numberFormat atr.value decimals=0 sign=true}}</div>
-						</span>
-						<footer class="attribute-footer flexrow">
-							<input type="number" name="system.atributos.{{key}}.base" value="{{atr.base}}"
-							title="{{ localize 'T20.AbilityBase'}}"/>
-							{{#if @root.mostrarAtributoRacial }}
-							<input type="number" name="system.atributos.{{key}}.racial" value="{{atr.racial}}" title="{{ localize 'T20.AbilityRacial'}}"/>
-							{{/if}}
-							{{#if @root.mostrarAtributoTemp }}
-							<input type="number" name="system.atributos.{{key}}.bonus" value="{{atr.bonus}}" 
-							title="{{ localize 'T20.AbilityBonus'}}" />
-							{{/if}}
-						</footer>
-					</li>
-					{{/each}}
-				</ul>
+				{{> "tormenta20.abilities"}}
 
 				{{!-- HP/MP Resources --}}
 				<div class="resources-main">
 					<ul class="attributes flexrow">
-						<li class="attribute health flexcol">
-							<h4 class="attribute-name box-title">{{localize "T20.HitPoints"}}</h4>
-							<div class="attribute-value multiple flexrow">
-								<input type="number" data-dtype="Number" placeholder="0" name="system.attributes.pv.value" value="{{system.attributes.pv.value}}" max="{{system.attributes.pv.max}}">
-								<span class="sep">/</span>
-								<input type="number" placeholder="0" name="system.attributes.pv.max" value="{{system.attributes.pv.max}}">
-							</div>
-							<footer class="attribute-footer">
-								<input type="number" data-dtype="Number" placeholder="+ {{localize 'T20.Temp'}}" name="system.attributes.pv.temp" value="{{system.attributes.pv.temp}}">
-							</footer>
-						</li>
-						<li class="attribute mana flexcol">
-							<h4 class="attribute-name box-title">{{localize "T20.ManaPoints"}}</h4>
-							<div class="attribute-value multiple flexrow">
-								<input type="number" data-dtype="Number" placeholder="0" name="system.attributes.pm.value" value="{{system.attributes.pm.value}}" max="{{system.attributes.pm.max}}">
-								<span class="sep">/</span>
-								<input type="number" placeholder="0" name="system.attributes.pm.max" value="{{system.attributes.pm.max}}">
-							</div>
-							<footer class="attribute-footer">
-								<input type="number" data-dtype="Number" placeholder="+ {{localize 'T20.Temp'}}" name="system.attributes.pm.temp" value="{{system.attributes.pm.temp}}">
-							</footer>
-						</li>
-						<li class="attribute">
-							<h4 class="attribute-name box-title">{{localize "T20.Defense"}}</h4>
-							<div class="attribute-value">
-								{{system.attributes.defesa.total}}
-							</div>
-						</li>
+					{{> "tormenta20.resources"}}
+					{{> "tormenta20.defense"}}
 					</ul>
 				</div>
 
+				{{!-- Extra Resources --}}
+				{{#if (or system.resources.shadow system.resources.shadow ) }}
+				<div class="resource">
+					{{> "tormenta20.resources-extra"}}
+				</div>
+				{{/if}}
 
 				{{!-- Inventory Weapons --}}
 				<div class="inventory-weapons">
-					<h3>{{localize "T20.Weapons"}}</h3>
-					<ul class="item-list">
-						{{#if owner}}
-						<li class="item flexrow item-header">
-							<div class="item-controls">
-								<a class="item-control item-create" title="{{localize 'T20.Add'}} {{localize 'T20.Weapons'}}" data-type="arma"><i class="fas fa-plus"></i> {{localize 'T20.Add'}}</a>
-							</div>
-						</li>
-						{{/if}}
-						{{#each actor.inventario.arma.items as |item id|}}
-						<li class="item flexrow" data-item-id="{{item._id}}">
-							<div class="item-name flexrow rollable">
-								<div class="item-image" style="background-image: url('{{item.img}}')"></div>
-								<label>{{item.name}}</label>
-							</div>
-							{{#if ../owner}}
-							{{> "tormenta20.actor-item-controls" item=item }}
-							{{/if}}
-						</li>
-						{{/each}}
-					</ul>
+					{{> "tormenta20.list-weapon"}}
 				</div>
 
-				{{!-- Powers --}}
+				{{!-- Defense Inventory Equipment --}}
+				<div class="inventory-equipment flexrow">
+					<!-- <ul class="attributes flexrow"></ul> -->
+					{{> "tormenta20.list-equipment"}}
+				</div>
+
+				{{!--Powers --}}
 				<div class="list-powers">
-					<h3>{{localize "T20.Powers"}}</h3>
-					<ul class="item-list">
-						{{#if owner}}
-						<li class="item flexrow item-header">
-							<div class="item-controls">
-								<a class="item-control item-create" title="{{localize 'T20.Add'}} {{localize 'T20.Powers'}}" data-type="poder"><i class="fas fa-plus"></i> {{localize 'T20.Add'}}</a>
-							</div>
-						</li>
-						{{/if}}
-						{{#each actor.poderes as |item id|}}
-						<li class="item flexrow" data-item-id="{{item._id}}">
-							<div class="item-name flexrow rollable" data-label="{{item.name}}">
-								<div class="item-image" style="background-image: url('{{item.img}}')"></div>
-								<label>{{item.name}}</label>
-							</div>
-							{{#if ../owner}}
-							{{> "tormenta20.actor-item-controls" item=item }}
-							{{/if}}
-						</li>
-						{{/each}}
-					</ul>
+					{{> "tormenta20.list-powers"}}
+				</div>
+
+				{{#if actor.maiorCirculo}}
+				{{!-- Spells --}}
+				<div class="list-spells">
+					{{> "tormenta20.list-spells"}}
+				</div>
+				{{/if}}
+
+				{{!-- Traits --}}
+				<div class="traits">
+					{{> "tormenta20.traits"}}
+					<textarea name="system.detalhes.info" rows="10">{{system.detalhes.info}}</textarea>
 				</div>
 			</div>
-
 			<div class="attributes-right flexcol">
 				{{!-- Skills --}}
-				<div class="skills-section">
-					<h3>{{localize "T20.Skills"}}</h3>
-					<ul class="skills-list">
-						{{#each skills as |skill s|}}
-						{{#if skill.exibir}}
-						<li class="skill flexrow" data-item-id="{{skill.key}}">
-							<input type="hidden" name="system.pericias.{{skill.key}}.value" value="{{skill.value}}" data-dtype="Number"/>
-							<span class="skill-name rollable pericia-rollable">{{skill.label}}</span>
-							<span class="skill-mod">{{numberFormat skill.value decimals=0 sign=true}}</span>
-							<span class="skill-prof">{{{skill.symbol}}}</span>
-						</li>
-						{{/if}}
-						{{/each}}
-					</ul>
-				</div>
+				{{> "tormenta20.list-skills"}}
 
 				{{!-- Inventory General --}}
 				<div class="inventory-list">
-					<h3>{{localize "T20.Inventory"}}</h3>
-					<ul class="item-list">
-						{{#if owner}}
-						<li class="item flexrow item-header">
-							<div class="item-controls">
-								<a class="item-control item-dialog" data-type="gerais"><i class="fas fa-plus"></i> {{localize 'T20.Add'}} {{localize 'T20.Item'}}</a>
-							</div>
-						</li>
-						{{/if}}
-						{{#each actor.inventario.itens.items as |item id|}}
-						<li class="item flexrow" data-item-id="{{item._id}}">
-							<div class="item-name flexrow rollable">
-								<div class="item-image" style="background-image: url('{{item.img}}')"></div>
-								<label>{{item.name}}</label>
-							</div>
-							{{#if ../owner}}
-							{{> "tormenta20.actor-item-controls" item=item }}
-							{{/if}}
-						</li>
-						{{/each}}
-					</ul>
+					{{> "tormenta20.list-general"}}
+					{{> "tormenta20.currency"}}
+					{{> "tormenta20.encumbrance"}}
 				</div>
-			</div>
 			</div>
 		</div>
 
 		{{!-- Biography Tab --}}
-		<div class="tab journal flexrow" data-group="primary" data-tab="journal">
-			<div class="biography-section">
-				<h3>{{localize "T20.Biography"}}</h3>
-				{{editor htmlFields.biography target="system.detalhes.biography.value" button=true owner=owner editable=editable}}
-			</div>
+		<div class="tab journal flexrow flex-between" data-group="primary" data-tab="journal">
+			{{> "tormenta20.journal"}}
+		</div>
+
+		{{!-- Modifiers Tab --}}
+		<div class="tab modifiers" data-group="primary" data-tab="modifiers">
+			{{> "tormenta20.modifiers"}}
 		</div>
 
 		{{!-- Efeitos Tab --}}
 		<div class="tab effects" data-group="primary" data-tab="effects">
-			<div class="effects-section">
-				<h3>{{localize "T20.Effects"}}</h3>
-				<p>Seção de efeitos ativos será implementada aqui</p>
-			</div>
+			{{> "tormenta20.active-effects"}}
 		</div>
 	</section>
 </form>
