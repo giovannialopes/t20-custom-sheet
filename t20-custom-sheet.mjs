@@ -71,8 +71,8 @@ Hooks.once("ready", async () => {
 			return foundry.utils.mergeObject(super.defaultOptions, {
 				classes: ["tormenta20", "sheet", "actor", "character", "custom-sheet"],
 				template: "modules/t20-custom-sheet/templates/actor/character-custom-sheet.hbs",
-				width: 800,
-				height: 600,
+				width: 960,
+				height: 720,
 				left: null,
 				top: null,
 				resizable: true
