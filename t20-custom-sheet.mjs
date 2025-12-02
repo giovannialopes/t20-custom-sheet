@@ -163,6 +163,34 @@ Hooks.once("ready", async () => {
 				}
 			}
 			
+			// Garantir que o inventário sempre exista com estrutura válida
+			if (!sheetData.actor.inventario) {
+				sheetData.actor.inventario = {
+					arma: { items: [] },
+					equipamento: { items: [] },
+					consumivel: { items: [] },
+					tesouro: { items: [] },
+					itens: { items: [] }
+				};
+			} else {
+				// Garantir que cada categoria tenha items array
+				if (!sheetData.actor.inventario.arma) sheetData.actor.inventario.arma = { items: [] };
+				if (!sheetData.actor.inventario.arma.items) sheetData.actor.inventario.arma.items = [];
+				if (!sheetData.actor.inventario.equipamento) sheetData.actor.inventario.equipamento = { items: [] };
+				if (!sheetData.actor.inventario.equipamento.items) sheetData.actor.inventario.equipamento.items = [];
+				if (!sheetData.actor.inventario.consumivel) sheetData.actor.inventario.consumivel = { items: [] };
+				if (!sheetData.actor.inventario.consumivel.items) sheetData.actor.inventario.consumivel.items = [];
+				if (!sheetData.actor.inventario.tesouro) sheetData.actor.inventario.tesouro = { items: [] };
+				if (!sheetData.actor.inventario.tesouro.items) sheetData.actor.inventario.tesouro.items = [];
+				if (!sheetData.actor.inventario.itens) sheetData.actor.inventario.itens = { items: [] };
+				if (!sheetData.actor.inventario.itens.items) sheetData.actor.inventario.itens.items = [];
+			}
+			
+			// Garantir que poderes seja um array
+			if (!Array.isArray(sheetData.actor.poderes)) {
+				sheetData.actor.poderes = [];
+			}
+			
 			return sheetData;
 		}
 	}

@@ -96,7 +96,7 @@
 							</div>
 						</li>
 						{{/if}}
-						{{#each (lookup actor.inventario "arma").items as |item id|}}
+						{{#each actor.inventario.arma.items as |item id|}}
 						<li class="item flexrow" data-item-id="{{item._id}}">
 							<div class="item-name flexrow rollable">
 								<div class="item-image" style="background-image: url('{{item.img}}')"></div>
@@ -165,7 +165,7 @@
 							</div>
 						</li>
 						{{/if}}
-						{{#each (lookup actor.inventario "itens").items as |item id|}}
+						{{#each actor.inventario.itens.items as |item id|}}
 						<li class="item flexrow" data-item-id="{{item._id}}">
 							<div class="item-name flexrow rollable">
 								<div class="item-image" style="background-image: url('{{item.img}}')"></div>
