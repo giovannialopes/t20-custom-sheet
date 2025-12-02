@@ -442,6 +442,19 @@
 						background-position: center;
 						flex-shrink: 0;
 						border: 2px solid rgba(255, 255, 255, 0.2);
+						cursor: pointer;
+						transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+						position: relative;
+					}
+					
+					.power-icon:hover {
+						transform: scale(1.1);
+						box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+						border-color: rgba(255, 255, 255, 0.4);
+					}
+					
+					.power-icon:active {
+						transform: scale(1.05);
 					}
 					
 					.power-info {
@@ -711,7 +724,7 @@
 								{{#each grupo.items as |item id|}}
 								<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="{{item.tipo}}">
 									<div class="power-item-row">
-										<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
+										<div class="power-icon item-image rollable" data-item-id="{{item._id}}" style="background-image: url('{{item.img}}')" title="{{item.name}}"></div>
 										<div class="power-info">
 											<div class="power-name">{{item.name}}</div>
 											<div class="power-activation" data-item-id="{{item._id}}">
@@ -737,7 +750,7 @@
 							{{#each actor.poderes as |item id|}}
 							<div class="power-item" data-item-id="{{item._id}}" data-power-name="{{item.name}}" data-power-type="">
 								<div class="power-item-row">
-									<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
+									<div class="power-icon item-image rollable" data-item-id="{{item._id}}" style="background-image: url('{{item.img}}')" title="{{item.name}}"></div>
 									<div class="power-info">
 										<div class="power-name">{{item.name}}</div>
 										<div class="power-activation" data-item-id="{{item._id}}">

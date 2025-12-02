@@ -187,6 +187,9 @@ Hooks.once("ready", async () => {
 				
 				// Adicionar painel expansível ao poder (async para enriquecer HTML)
 				this._addPowerTooltip($item, item, tipoLabel);
+				
+				// Configurar rolagem do dado ao clicar no ícone
+				this._setupPowerIconRoll($item, item);
 			});
 		}
 		
@@ -260,6 +263,57 @@ Hooks.once("ready", async () => {
 				}
 				
 				$item.toggleClass('expanded');
+			});
+		}
+		
+		/**
+		 * Configura a rolagem do dado ao clicar no ícone do poder
+		 */
+		_setupPowerIconRoll($item, item) {
+			const $powerIcon = $item.find('.power-icon');
+			if ($powerIcon.length === 0) return;
+			
+			// Adicionar classe rollable e atributos
+			$powerIcon.addClass('rollable').attr('data-item-id', item.id);
+			
+			// Remover listeners anteriores para evitar duplicação
+			$powerIcon.off('click.power-roll');
+			
+			// Adicionar evento de clique para rolar o dado
+			$powerIcon.on('click.power-roll', async (event) => {
+				event.stopPropagation();
+				event.preventDefault();
+				
+				// Tentar usar o handler padrão da classe base primeiro
+				if (typeof this._onItemRoll === 'function') {
+					this._onItemRoll(event);
+					return;
+				}
+				
+				// Se não tiver handler padrão, tentar rolar diretamente
+				if (item) {
+					try {
+						// Tentar diferentes métodos de rolagem comuns no Foundry
+						if (typeof item.roll === 'function') {
+							await item.roll();
+						} else if (typeof item.use === 'function') {
+							await item.use();
+						} else if (item.system && typeof item.rollItem === 'function') {
+							await item.rollItem();
+						} else {
+							// Último recurso: mostrar o item no chat
+							const chatData = {
+								user: game.user.id,
+								speaker: ChatMessage.getSpeaker({actor: this.actor}),
+								content: `<div class="t20-item-card"><h4>${item.name}</h4><p>${item.system?.descricao?.value || item.system?.description?.value || ''}</p></div>`
+							};
+							await ChatMessage.create(chatData);
+						}
+					} catch (error) {
+						console.error("T20 Custom Sheet | Erro ao rolar poder:", error);
+						ui.notifications.warn(`Não foi possível rolar ${item.name}`);
+					}
+				}
 			});
 		}
 		
