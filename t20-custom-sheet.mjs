@@ -100,26 +100,7 @@ Hooks.once("ready", async () => {
 		/** @override */
 		async _render(force = false, options = {}) {
 			await super._render(force, options);
-			
-			// Adicionar classe específica para CSS poder posicionar
-			setTimeout(() => {
-				if (this.element && this.element.length) {
-					const domElement = this.element[0] || this.element.get?.(0);
-					if (domElement) {
-						const windowElement = domElement.closest?.('.window-app') || 
-						                       domElement.parentElement?.closest?.('.window-app') ||
-						                       $(domElement).parents('.window-app')[0];
-						
-						if (windowElement) {
-							if (windowElement.classList) {
-								windowElement.classList.add('t20-custom-sheet-window');
-							} else if ($(windowElement).length) {
-								$(windowElement).addClass('t20-custom-sheet-window');
-							}
-						}
-					}
-				}
-			}, 100);
+			// O Foundry já posiciona as fichas à direita por padrão, não precisamos fazer nada
 		}
 
 		/** @override */
@@ -130,6 +111,80 @@ Hooks.once("ready", async () => {
 		/** @override */
 		get template() {
 			return "modules/t20-custom-sheet/templates/actor/character-custom-sheet.hbs";
+		}
+
+		/** @override */
+		async getData() {
+			// Usar o método da classe base para obter todos os dados
+			const sheetData = await super.getData();
+			
+			// Garantir que nivel tenha um valor válido
+			if (sheetData.system?.attributes?.nivel) {
+				if (sheetData.system.attributes.nivel.value === undefined || 
+				    sheetData.system.attributes.nivel.value === null || 
+				    isNaN(sheetData.system.attributes.nivel.value)) {
+					sheetData.system.attributes.nivel.value = 1;
+				} else {
+					sheetData.system.attributes.nivel.value = Number(sheetData.system.attributes.nivel.value) || 1;
+				}
+			}
+			
+			// Garantir que os atributos tenham valores numéricos válidos
+			if (sheetData.system?.atributos) {
+				for (const [key, atr] of Object.entries(sheetData.system.atributos)) {
+					if (atr) {
+						atr.value = Number(atr.value) || 0;
+						atr.base = Number(atr.base) || 0;
+						atr.bonus = Number(atr.bonus) || 0;
+						// Garantir que não sejam NaN
+						if (isNaN(atr.value)) atr.value = 0;
+						if (isNaN(atr.base)) atr.base = 0;
+						if (isNaN(atr.bonus)) atr.bonus = 0;
+					}
+				}
+			}
+			
+			// Garantir que defesa tenha um valor válido
+			if (sheetData.system?.attributes?.defesa) {
+				const defTotal = sheetData.system.attributes.defesa.total;
+				if (defTotal === undefined || defTotal === null || isNaN(defTotal)) {
+					sheetData.system.attributes.defesa.total = 0;
+				} else {
+					sheetData.system.attributes.defesa.total = Number(defTotal) || 0;
+				}
+				// Garantir que não seja NaN
+				if (isNaN(sheetData.system.attributes.defesa.total)) {
+					sheetData.system.attributes.defesa.total = 0;
+				}
+			}
+			
+			// Garantir que as perícias tenham valores numéricos válidos
+			// O sistema calcula skill.value como o total através do prepareSkill
+			// O template espera skill.total, então vamos garantir que total = value
+			if (sheetData.skills) {
+				for (const skill of Object.values(sheetData.skills)) {
+					if (skill) {
+						// O sistema calcula skill.value através do prepareSkill (é o total calculado)
+						// Converter para número válido
+						skill.value = Number(skill.value) || 0;
+						if (isNaN(skill.value)) skill.value = 0;
+						
+						// O template espera skill.total, então vamos usar skill.value como total
+						// (pois value já é o total calculado pelo sistema)
+						skill.total = skill.value;
+						
+						// Garantir que bonus seja um número válido (se existir)
+						if (skill.bonus !== undefined && skill.bonus !== null) {
+							skill.bonus = Number(skill.bonus) || 0;
+							if (isNaN(skill.bonus)) skill.bonus = 0;
+						} else {
+							skill.bonus = 0;
+						}
+					}
+				}
+			}
+			
+			return sheetData;
 		}
 	}
 

@@ -48,29 +48,8 @@
    ESTILOS BASE - FUNDO E CONTAINER
    ============================================ */
 
-/* Forçar posicionamento da janela no lado direito */
-/* Usar múltiplos seletores para garantir que funcione */
-.window-app.t20-custom-sheet-window,
-.window-app[data-app-id*="t20-custom-sheet"],
-.app.tormenta20.sheet.actor.custom-sheet,
-.window-app.tormenta20.sheet.actor.custom-sheet {
-	left: auto !important;
-	right: 20px !important;
-	top: 50% !important;
-	transform: translateY(-50%) !important;
-	display: block !important;
-	visibility: visible !important;
-	opacity: 1 !important;
-	z-index: 100 !important;
-}
-
-/* Garantir que a janela seja visível mesmo quando minimizada */
-.window-app.t20-custom-sheet-window:not(.minimized),
-.window-app[data-app-id*="t20-custom-sheet"]:not(.minimized) {
-	display: block !important;
-	visibility: visible !important;
-	opacity: 1 !important;
-}
+/* REMOVIDO: O Foundry já posiciona as fichas à direita por padrão
+   Não precisamos forçar posicionamento via CSS */
 
 .tormenta20.sheet.actor.custom-sheet {
 	font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
