@@ -137,11 +137,11 @@ Hooks.once("ready", async () => {
 				if ($badgePlaceholder.length > 0 && $badgePlaceholder.hasClass('power-type-placeholder')) {
 					// Normalizar o tipo para usar no CSS (substituir espaços e caracteres especiais por hífen)
 					let tipoCss = tipo;
-					// Tratamento especial: se o label for \"Habilidade de Classe\", forçamos o tipo CSS correspondente
-					if (tipoLabel?.toLowerCase() === \"habilidade de classe\") {
-						tipoCss = \"habilidade-de-classe\";
+					// Tratamento especial: se o label for "Habilidade de Classe", forçamos o tipo CSS correspondente
+					if (tipoLabel && tipoLabel.toLowerCase() === "habilidade de classe") {
+						tipoCss = "habilidade-de-classe";
 					}
-					const tipoNormalizado = tipoCss.replace(/\\s+/g, '-').replace(/[^a-z0-9-]/g, '-').toLowerCase();
+					const tipoNormalizado = tipoCss.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '-').toLowerCase();
 					
 					$badgePlaceholder
 						.removeClass('power-type-placeholder')
