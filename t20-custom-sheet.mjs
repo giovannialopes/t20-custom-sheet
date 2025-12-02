@@ -112,8 +112,9 @@ Hooks.once("ready", async () => {
 			event.stopPropagation();
 			
 			const $icon = $(event.currentTarget);
-			const itemId = $icon.data('item-id');
+			let itemId = $icon.data('item-id');
 			
+			// Se não tiver no ícone, procurar no elemento pai
 			if (!itemId) {
 				const $item = $icon.closest('[data-item-id]');
 				if ($item.length) {
@@ -121,43 +122,82 @@ Hooks.once("ready", async () => {
 				}
 			}
 			
-			if (!itemId) return;
+			if (!itemId) {
+				console.warn("T20 Custom Sheet | Não foi possível encontrar o ID do item");
+				return;
+			}
 			
 			const item = this.actor.items.get(itemId);
-			if (!item || item.type !== 'poder') return;
+			if (!item) {
+				console.warn("T20 Custom Sheet | Item não encontrado:", itemId);
+				return;
+			}
 			
-			// Tentar usar o handler padrão da classe base se disponível
+			if (item.type !== 'poder') {
+				console.warn("T20 Custom Sheet | Item não é um poder:", item.type);
+				return;
+			}
+			
+			// Mostrar o card do poder no chat
 			try {
-				// Primeiro, tentar o método padrão do Foundry
-				if (typeof super._onItemRoll === 'function') {
-					super._onItemRoll(event);
-					return;
+				const speaker = ChatMessage.getSpeaker({actor: this.actor});
+				
+				// Tentar usar o template padrão do sistema T20 para o card do item
+				let content = '';
+				try {
+					// Tentar diferentes possíveis caminhos de template
+					const possibleTemplates = [
+						"systems/tormenta20/templates/chat/item-card.hbs",
+						"systems/tormenta20/templates/chat/power-card.hbs",
+						"systems/tormenta20/templates/items/poder-chat.hbs"
+					];
+					
+					let templateFound = false;
+					for (const templatePath of possibleTemplates) {
+						try {
+							content = await renderTemplate(templatePath, {
+								item: item,
+								actor: this.actor,
+								data: item.system
+							});
+							templateFound = true;
+							break;
+						} catch (e) {
+							// Continuar tentando outros templates
+						}
+					}
+					
+					// Se nenhum template funcionou, criar um card simples
+					if (!templateFound) {
+						const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+						const tipo = item.labels?.tipo || item.system?.tipo || '';
+						const ativacao = item.labels?.ativacao || item.system?.ativacao?.execucao || 'Passivo';
+						
+						content = `<div class="t20-item-card">
+							<h4>${item.name}</h4>
+							${tipo ? `<p><strong>Tipo:</strong> ${tipo}</p>` : ''}
+							${ativacao ? `<p><strong>Execução:</strong> ${ativacao}</p>` : ''}
+							${descricao ? `<div class="item-description">${descricao}</div>` : ''}
+						</div>`;
+					}
+				} catch (templateError) {
+					console.warn("T20 Custom Sheet | Erro ao renderizar template, usando card simples:", templateError);
+					const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+					content = `<div class="t20-item-card">
+						<h4>${item.name}</h4>
+						${descricao ? `<p>${descricao}</p>` : ''}
+					</div>`;
 				}
 				
-				// Se não tiver, tentar métodos diretos do item
-				if (typeof item.roll === 'function') {
-					await item.roll();
-				} else if (typeof item.use === 'function') {
-					await item.use();
-				} else {
-					// Como último recurso, mostrar o card do item no chat
-					const speaker = ChatMessage.getSpeaker({actor: this.actor});
-					const content = await renderTemplate("systems/tormenta20/templates/chat/item-card.hbs", {
-						item: item,
-						actor: this.actor
-					}).catch(() => {
-						return `<div class="t20-item-card"><h4>${item.name}</h4><p>${item.system?.descricao?.value || item.system?.description?.value || ''}</p></div>`;
-					});
-					
-					await ChatMessage.create({
-						user: game.user.id,
-						speaker: speaker,
-						content: content
-					});
-				}
+				await ChatMessage.create({
+					user: game.user.id,
+					speaker: speaker,
+					content: content
+				});
+				
 			} catch (error) {
-				console.error("T20 Custom Sheet | Erro ao rolar poder:", error);
-				ui.notifications.error(`Erro ao rolar ${item.name}`);
+				console.error("T20 Custom Sheet | Erro ao exibir poder no chat:", error);
+				ui.notifications.error(`Erro ao exibir ${item.name}`);
 			}
 		}
 		
