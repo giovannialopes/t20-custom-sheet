@@ -98,10 +98,8 @@ Hooks.once("ready", async () => {
 		activateListeners(html) {
 			super.activateListeners(html);
 			
-			// Handler para ícones roláveis de poderes usando evento delegado
-			// Usar evento delegado para funcionar mesmo com elementos adicionados dinamicamente
-			html.on('click', '.power-icon.rollable', this._onPowerIconClick.bind(this));
-			html.on('click', '.list-powers-custom .power-icon', this._onPowerIconClick.bind(this));
+			// Handler para ícones roláveis de poderes usando evento delegado (apenas um listener)
+			html.off('click', '.list-powers-custom .power-icon').on('click', '.list-powers-custom .power-icon', this._onPowerIconClick.bind(this));
 		}
 		
 		/**
@@ -110,6 +108,12 @@ Hooks.once("ready", async () => {
 		async _onPowerIconClick(event) {
 			event.preventDefault();
 			event.stopPropagation();
+			
+			// Prevenir múltiplos cliques rápidos
+			if ($(event.currentTarget).hasClass('processing')) {
+				return;
+			}
+			$(event.currentTarget).addClass('processing');
 			
 			const $icon = $(event.currentTarget);
 			let itemId = $icon.data('item-id');
@@ -169,23 +173,43 @@ Hooks.once("ready", async () => {
 					
 					// Se nenhum template funcionou, criar um card simples
 					if (!templateFound) {
-						const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+						let descricao = item.system?.descricao?.value || item.system?.description?.value || '';
 						const tipo = item.labels?.tipo || item.system?.tipo || '';
 						const ativacao = item.labels?.ativacao || item.system?.ativacao?.execucao || 'Passivo';
+						const img = item.img || 'icons/svg/mystery-man.svg';
 						
-						content = `<div class="t20-item-card">
-							<h4>${item.name}</h4>
-							${tipo ? `<p><strong>Tipo:</strong> ${tipo}</p>` : ''}
-							${ativacao ? `<p><strong>Execução:</strong> ${ativacao}</p>` : ''}
-							${descricao ? `<div class="item-description">${descricao}</div>` : ''}
+						// Enriquecer HTML da descrição se necessário
+						if (descricao) {
+							try {
+								descricao = await TextEditor.enrichHTML(descricao, {
+									async: true,
+									relativeTo: this.actor
+								});
+							} catch (e) {
+								// Se falhar, usar descrição original
+							}
+						}
+						
+						content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+							<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+							<div style="flex: 1;">
+								<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+								${tipo ? `<p style="margin: 4px 0;"><strong>Tipo:</strong> ${tipo}</p>` : ''}
+								${ativacao ? `<p style="margin: 4px 0;"><strong>Execução:</strong> ${ativacao}</p>` : ''}
+								${descricao ? `<div class="item-description" style="margin-top: 8px;">${descricao}</div>` : ''}
+							</div>
 						</div>`;
 					}
 				} catch (templateError) {
 					console.warn("T20 Custom Sheet | Erro ao renderizar template, usando card simples:", templateError);
 					const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
-					content = `<div class="t20-item-card">
-						<h4>${item.name}</h4>
-						${descricao ? `<p>${descricao}</p>` : ''}
+					const img = item.img || 'icons/svg/mystery-man.svg';
+					content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+						<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+						<div style="flex: 1;">
+							<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+							${descricao ? `<p>${descricao}</p>` : ''}
+						</div>
 					</div>`;
 				}
 				
@@ -198,6 +222,11 @@ Hooks.once("ready", async () => {
 			} catch (error) {
 				console.error("T20 Custom Sheet | Erro ao exibir poder no chat:", error);
 				ui.notifications.error(`Erro ao exibir ${item.name}`);
+			} finally {
+				// Remover classe de processamento após 500ms
+				setTimeout(() => {
+					$(event.currentTarget).removeClass('processing');
+				}, 500);
 			}
 		}
 		
@@ -298,11 +327,6 @@ Hooks.once("ready", async () => {
 				// Configurar rolagem do dado ao clicar no ícone
 				this._setupPowerIconRoll($item, item);
 			});
-			
-			// Garantir que os listeners de rolagem sejam configurados após todos os elementos serem criados
-			setTimeout(() => {
-				this.element.off('click', '.power-icon').on('click', '.power-icon', this._onPowerIconClick.bind(this));
-			}, 150);
 		}
 		
 		/**
