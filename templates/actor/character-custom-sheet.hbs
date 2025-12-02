@@ -128,10 +128,8 @@
 						-moz-appearance: none;
 						position: relative;
 						z-index: 2;
-						display: flex;
-						align-items: center;
 						height: 40px;
-						line-height: 1;
+						line-height: 40px;
 					}
 					
 					/* Overlay para mostrar o texto selecionado */
@@ -150,9 +148,10 @@
 						overflow: hidden;
 						text-overflow: ellipsis;
 						white-space: nowrap;
-						line-height: 1;
-						display: flex;
-						align-items: center;
+						line-height: 1.5;
+						-webkit-font-smoothing: antialiased;
+						-moz-osx-font-smoothing: grayscale;
+						text-rendering: optimizeLegibility;
 					}
 					
 					/* Garantir que o texto selecionado seja visível */
