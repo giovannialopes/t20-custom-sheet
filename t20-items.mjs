@@ -620,11 +620,13 @@ export class EquipmentManager {
 			
 			// Verificar se está equipado (vestido)
 			// Pode estar em equipped/equipado ou tipoUso === 'Vestido'
+			const tipoUsoLower = tipoUso.toLowerCase();
 			const isEquipped = system.equipped === true || 
 			                   system.equipado === true || 
 			                   tipoUso === 'Vestido' || 
-			                   tipoUso === 'vestido' ||
-			                   tipoUso === 'Vestido/a';
+			                   tipoUsoLower === 'vestido' ||
+			                   tipoUsoLower === 'vestido/a' ||
+			                   tipoUsoLower.includes('vestido');
 			
 			// Formatar defesa
 			let defesaText = '';
@@ -665,11 +667,11 @@ export class EquipmentManager {
 			const $toggleBtn = $item.find('.equipment-toggle-btn');
 			if ($toggleBtn.length > 0) {
 				if (isEquipped) {
-					$toggleBtn.addClass('equipped').attr('title', 'Desequipar');
-					$toggleBtn.find('i').removeClass('fa-shield-alt').addClass('fa-shield-alt');
+					$toggleBtn.addClass('equipped').removeClass('not-equipped').attr('title', 'Desequipar');
+					console.log("T20 Items Manager | Botão marcado como EQUIPADO (azul) para:", item.name);
 				} else {
-					$toggleBtn.removeClass('equipped').attr('title', 'Equipar');
-					$toggleBtn.find('i').removeClass('fa-shield-alt').addClass('fa-shield-alt');
+					$toggleBtn.removeClass('equipped').addClass('not-equipped').attr('title', 'Equipar');
+					console.log("T20 Items Manager | Botão marcado como NÃO EQUIPADO (vermelho) para:", item.name);
 				}
 			}
 			
