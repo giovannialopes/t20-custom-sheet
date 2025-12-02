@@ -239,14 +239,9 @@
 							<div class="power-icon" style="background-image: url('{{item.img}}')"></div>
 							<div class="power-info">
 								<div class="power-name">{{item.name}}</div>
-								<div class="power-activation">
-									{{#if item.system.ativacao.value}}
-										{{item.system.ativacao.value}}
-									{{else if item.system.ativacao}}
-										{{item.system.ativacao}}
-									{{else}}
-										Passivo
-									{{/if}}
+								<div class="power-activation" data-item-id="{{item._id}}">
+									<span class="activation-text">-</span>
+									<span class="mana-cost" style="display: none;"></span>
 								</div>
 							</div>
 							<div class="power-type-badge power-type-placeholder" style="display: none;"></div>

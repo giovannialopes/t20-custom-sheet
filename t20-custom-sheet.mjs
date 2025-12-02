@@ -111,7 +111,7 @@ Hooks.once("ready", async () => {
 		}
 		
 		/**
-		 * Adiciona badges de tipo aos poderes
+		 * Adiciona badges de tipo aos poderes e formata ativação/custo
 		 */
 		_addPowerTypeBadges() {
 			const $powerItems = this.element.find('.list-powers-custom .power-item');
@@ -125,9 +125,6 @@ Hooks.once("ready", async () => {
 				const item = this.actor.items.get(itemId);
 				if (!item || item.type !== 'poder') return;
 				
-				// Verificar se já tem badge
-				if ($item.find('.power-type-badge:not(.power-type-placeholder)').length > 0) return;
-				
 				// Obter tipo do poder
 				let tipo = this._getPowerType(item);
 				const tipoLabel = this._getPowerTypeLabel(tipo);
@@ -135,14 +132,62 @@ Hooks.once("ready", async () => {
 				// Atualizar data attribute
 				$item.attr('data-power-type', tipo);
 				
-				// Adicionar badge
+				// Adicionar badge de tipo
 				const $badgePlaceholder = $item.find('.power-type-placeholder');
-				$badgePlaceholder
-					.removeClass('power-type-placeholder')
-					.addClass(`power-type-${tipo.replace(/[^a-z0-9]/g, '-')}`)
-					.text(tipoLabel)
-					.show();
+				if ($badgePlaceholder.length > 0 && $badgePlaceholder.hasClass('power-type-placeholder')) {
+					$badgePlaceholder
+						.removeClass('power-type-placeholder')
+						.addClass(`power-type-${tipo.replace(/[^a-z0-9]/g, '-')}`)
+						.text(tipoLabel)
+						.show();
+				}
+				
+				// Formatar ativação e custo de mana
+				this._formatPowerActivation($item, item);
 			});
+		}
+		
+		/**
+		 * Formata a ativação e custo de mana do poder
+		 */
+		_formatPowerActivation($item, item) {
+			const $activation = $item.find('.power-activation .activation-text');
+			const $manaCost = $item.find('.power-activation .mana-cost');
+			
+			if ($activation.length === 0) return;
+			
+			// Obter ativação
+			let ativacao = item.system?.ativacao;
+			let ativacaoText = "Passivo";
+			
+			if (ativacao) {
+				// Se for objeto, pegar o valor ou label
+				if (typeof ativacao === 'object' && ativacao !== null) {
+					ativacaoText = ativacao.value || ativacao.label || ativacao.name || "Passivo";
+				} else {
+					ativacaoText = String(ativacao);
+				}
+			}
+			
+			// Obter custo de mana (PM)
+			let manaCost = item.system?.custo || item.system?.custoPM || item.system?.pm || item.system?.mana || null;
+			
+			if (manaCost) {
+				// Se for objeto, pegar o valor
+				if (typeof manaCost === 'object' && manaCost !== null) {
+					manaCost = manaCost.value || manaCost.total || manaCost.base || null;
+				}
+				
+				// Converter para número
+				manaCost = Number(manaCost);
+				
+				if (!isNaN(manaCost) && manaCost > 0) {
+					$manaCost.text(`${manaCost} PM`).show();
+					ativacaoText = ativacaoText !== "Passivo" ? `${ativacaoText}, ${manaCost} PM` : `${ativacaoText} ${manaCost} PM`;
+				}
+			}
+			
+			$activation.text(ativacaoText);
 		}
 		
 		/**
