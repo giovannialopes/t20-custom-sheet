@@ -53,30 +53,31 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 	async _render(force = false, options = {}) {
 		await super._render(force, options);
 		
-		// Centralizar a ficha quando renderizada pela primeira vez
+		// Posicionar a ficha no lado esquerdo quando renderizada pela primeira vez
 		// Aguardar um frame para garantir que o DOM está pronto
 		requestAnimationFrame(() => {
-			this._centerSheet();
+			this._positionSheet();
 		});
 	}
 
 	/**
-	 * Centraliza a ficha na tela
+	 * Posiciona a ficha no lado esquerdo da tela
 	 */
-	_centerSheet() {
+	_positionSheet() {
 		if (!this.element || !this.element.length) return;
 		
 		const width = this.options.width || 900;
 		const height = this.options.height || 600;
 		
-		// Calcular posição central da viewport
+		// Calcular posição no lado esquerdo da viewport
 		const viewportWidth = window.innerWidth || 1920;
 		const viewportHeight = window.innerHeight || 1080;
 		
-		const left = Math.max(0, (viewportWidth - width) / 2);
-		const top = Math.max(0, (viewportHeight - height) / 2);
+		// Posicionar no lado esquerdo com um pequeno espaçamento da borda
+		const left = 20; // 20px da borda esquerda
+		const top = Math.max(0, (viewportHeight - height) / 2); // Centralizado verticalmente
 		
-		// Aplicar posição centralizada
+		// Aplicar posição
 		// Usar jQuery se disponível, senão usar método nativo
 		if (this.element && this.element.css) {
 			this.element.css({
