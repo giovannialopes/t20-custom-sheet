@@ -136,6 +136,20 @@ Hooks.once("ready", async () => {
 				const tipoNormalizadoParaFiltro = this._normalizePowerTypeKey(tipo);
 				$item.attr('data-power-type', tipoNormalizadoParaFiltro);
 				
+				// Adicionar classe CSS ao item para garantir que os estilos sejam aplicados
+				// Remove todas as classes power-type-item-* antigas
+				const classesParaRemover = [];
+				$item[0].classList.forEach(cls => {
+					if (cls.startsWith('power-type-item-')) {
+						classesParaRemover.push(cls);
+					}
+				});
+				$item.removeClass(classesParaRemover.join(' '));
+				// Adiciona a classe normalizada
+				if (tipoNormalizadoParaFiltro) {
+					$item.addClass(`power-type-item-${tipoNormalizadoParaFiltro}`);
+				}
+				
 				// Adicionar badge de tipo
 				const $badgePlaceholder = $item.find('.power-type-placeholder');
 				if ($badgePlaceholder.length > 0 && $badgePlaceholder.hasClass('power-type-placeholder')) {
