@@ -14,41 +14,28 @@ Hooks.once("ready", async () => {
 	// Tentar obter a classe base do sistema
 	let BaseSheetClass;
 	
-	// Método 1: Buscar nas sheets registradas usando getSheetClass
+	// Método 1: Buscar diretamente no Map de sheetClasses
 	try {
-		// Tentar obter a classe padrão de character usando o método do Foundry
-		BaseSheetClass = foundry.documents.collections.Actors.getSheetClass("character", "tormenta20");
-		if (BaseSheetClass) {
-			console.log("T20 Custom Sheet | Classe base encontrada usando getSheetClass");
-		}
-	} catch (e) {
-		console.warn("T20 Custom Sheet | Erro ao usar getSheetClass", e);
-	}
-	
-	// Método 2: Se não funcionou, buscar diretamente no Map de sheetClasses
-	if (!BaseSheetClass) {
-		try {
-			const sheetClasses = foundry.documents.collections.Actors?.sheetClasses;
-			if (sheetClasses && sheetClasses instanceof Map) {
-				// sheetClasses é um Map onde a chave é o scope (ex: "tormenta20")
-				const tormenta20Sheets = sheetClasses.get("tormenta20");
-				if (tormenta20Sheets && tormenta20Sheets instanceof Map) {
-					// tormenta20Sheets é um Map onde a chave é a classe e o valor é a config
-					for (const [sheetClass, config] of tormenta20Sheets.entries()) {
-						if (config && config.types && Array.isArray(config.types) && config.types.includes("character") && config.makeDefault) {
-							BaseSheetClass = sheetClass;
-							console.log("T20 Custom Sheet | Classe base encontrada nas sheets registradas (Map)");
-							break;
-						}
+		const sheetClasses = foundry.documents.collections.Actors?.sheetClasses;
+		if (sheetClasses && sheetClasses instanceof Map) {
+			// sheetClasses é um Map onde a chave é o scope (ex: "tormenta20")
+			const tormenta20Sheets = sheetClasses.get("tormenta20");
+			if (tormenta20Sheets && tormenta20Sheets instanceof Map) {
+				// tormenta20Sheets é um Map onde a chave é a classe e o valor é a config
+				for (const [sheetClass, config] of tormenta20Sheets.entries()) {
+					if (config && config.types && Array.isArray(config.types) && config.types.includes("character") && config.makeDefault) {
+						BaseSheetClass = sheetClass;
+						console.log("T20 Custom Sheet | Classe base encontrada nas sheets registradas");
+						break;
 					}
 				}
 			}
-		} catch (e2) {
-			console.warn("T20 Custom Sheet | Erro ao buscar nas sheets registradas", e2);
 		}
+	} catch (e) {
+		console.warn("T20 Custom Sheet | Erro ao buscar nas sheets registradas", e);
 	}
 	
-	// Método 3: Última tentativa - criar uma instância temporária para pegar a classe
+	// Método 2: Fallback - buscar através de uma instância existente
 	if (!BaseSheetClass) {
 		try {
 			// Buscar um actor de character para pegar a classe da sheet
@@ -64,8 +51,8 @@ Hooks.once("ready", async () => {
 					}
 				}
 			}
-		} catch (e3) {
-			console.warn("T20 Custom Sheet | Erro ao buscar através de instância", e3);
+		} catch (e2) {
+			console.warn("T20 Custom Sheet | Erro ao buscar através de instância", e2);
 		}
 	}
 	
