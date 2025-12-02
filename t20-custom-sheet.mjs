@@ -14,26 +14,30 @@ Hooks.once("ready", async () => {
 	// Tentar obter a classe base do sistema
 	let BaseSheetClass;
 	
-	// Método 1: Tentar importar do sistema usando o caminho correto
+	// Método 1: Buscar nas sheets registradas usando getSheetClass
 	try {
-		const systemId = game.system.id || "tormenta20";
-		const module = await import(`systems/${systemId}/module/sheets/actor-character.mjs`);
-		BaseSheetClass = module.default;
-		console.log("T20 Custom Sheet | Classe base importada com sucesso");
+		// Tentar obter a classe padrão de character usando o método do Foundry
+		BaseSheetClass = foundry.documents.collections.Actors.getSheetClass("character", "tormenta20");
+		if (BaseSheetClass) {
+			console.log("T20 Custom Sheet | Classe base encontrada usando getSheetClass");
+		}
 	} catch (e) {
-		console.warn("T20 Custom Sheet | Não foi possível importar a classe base diretamente, tentando método alternativo", e);
-		
-		// Método 2: Buscar nas sheets registradas
+		console.warn("T20 Custom Sheet | Erro ao usar getSheetClass", e);
+	}
+	
+	// Método 2: Se não funcionou, buscar diretamente no Map de sheetClasses
+	if (!BaseSheetClass) {
 		try {
 			const sheetClasses = foundry.documents.collections.Actors?.sheetClasses;
-			if (sheetClasses && typeof sheetClasses === 'object' && sheetClasses.tormenta20) {
-				const tormenta20Sheets = sheetClasses.tormenta20;
-				if (tormenta20Sheets && typeof tormenta20Sheets === 'object') {
-					// Procurar a sheet padrão de character
-					for (const [sheetClass, config] of Object.entries(tormenta20Sheets)) {
+			if (sheetClasses && sheetClasses instanceof Map) {
+				// sheetClasses é um Map onde a chave é o scope (ex: "tormenta20")
+				const tormenta20Sheets = sheetClasses.get("tormenta20");
+				if (tormenta20Sheets && tormenta20Sheets instanceof Map) {
+					// tormenta20Sheets é um Map onde a chave é a classe e o valor é a config
+					for (const [sheetClass, config] of tormenta20Sheets.entries()) {
 						if (config && config.types && Array.isArray(config.types) && config.types.includes("character") && config.makeDefault) {
 							BaseSheetClass = sheetClass;
-							console.log("T20 Custom Sheet | Classe base encontrada nas sheets registradas");
+							console.log("T20 Custom Sheet | Classe base encontrada nas sheets registradas (Map)");
 							break;
 						}
 					}
@@ -42,11 +46,33 @@ Hooks.once("ready", async () => {
 		} catch (e2) {
 			console.warn("T20 Custom Sheet | Erro ao buscar nas sheets registradas", e2);
 		}
-		
-		if (!BaseSheetClass) {
-			console.error("T20 Custom Sheet | Não foi possível encontrar a classe base do sistema. A ficha customizada não será registrada.");
-			return;
+	}
+	
+	// Método 3: Última tentativa - criar uma instância temporária para pegar a classe
+	if (!BaseSheetClass) {
+		try {
+			// Buscar um actor de character para pegar a classe da sheet
+			const characterActor = game.actors?.find(a => a.type === "character");
+			if (characterActor) {
+				const currentSheet = characterActor.sheet;
+				if (currentSheet && currentSheet.constructor) {
+					// Verificar se é do sistema tormenta20
+					if (currentSheet.constructor.name.includes("T20") || 
+					    currentSheet.options?.classes?.includes("tormenta20")) {
+						BaseSheetClass = currentSheet.constructor;
+						console.log("T20 Custom Sheet | Classe base encontrada através de instância existente");
+					}
+				}
+			}
+		} catch (e3) {
+			console.warn("T20 Custom Sheet | Erro ao buscar através de instância", e3);
 		}
+	}
+	
+	if (!BaseSheetClass) {
+		console.error("T20 Custom Sheet | Não foi possível encontrar a classe base do sistema. A ficha customizada não será registrada.");
+		console.error("T20 Custom Sheet | Debug - sheetClasses:", foundry.documents.collections.Actors?.sheetClasses);
+		return;
 	}
 
 	// Estender da classe base do sistema
