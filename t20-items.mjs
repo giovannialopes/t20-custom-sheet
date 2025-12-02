@@ -26,7 +26,6 @@ export class WeaponsManager {
 			const itemId = $item.data('item-id') || $item.attr('data-item-id');
 			
 			if (!itemId) {
-				console.warn("T20 Items Manager | Item ID não encontrado para arma");
 				return;
 			}
 			
@@ -35,12 +34,10 @@ export class WeaponsManager {
 			
 			const item = this.actor.items.get(itemId);
 			if (!item) {
-				console.warn("T20 Items Manager | Item não encontrado:", itemId);
 				return;
 			}
 			
 			if (item.type !== 'arma') {
-				console.warn("T20 Items Manager | Item não é uma arma:", item.type);
 				return;
 			}
 			
@@ -65,7 +62,6 @@ export class WeaponsManager {
 		const $attackText = $item.find('.weapon-attack-text');
 		
 		if ($attackText.length === 0) {
-			console.warn("T20 Items Manager | Elemento .weapon-attack-text não encontrado");
 			return;
 		}
 		
@@ -79,22 +75,6 @@ export class WeaponsManager {
 		                '';
 		
 		const system = item.system || {};
-		
-		// Debug completo para ver estrutura da arma
-		console.log("T20 Items Manager | Estrutura completa do item (arma):", {
-			name: item.name,
-			labels: item.labels,
-			labelsKeys: Object.keys(item.labels || {}),
-			systemKeys: Object.keys(system),
-			system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
-			ataque: system.ataque,
-			dano: system.dano,
-			critico: system.critico,
-			equipped: system.equipped,
-			equipado: system.equipado,
-			tipoUso: system.tipoUso,
-			usageType: system.usageType
-		});
 		
 		// Se não tiver label formatado, construir manualmente
 		if (!finalText || finalText === '' || finalText === '-') {
@@ -193,12 +173,6 @@ export class WeaponsManager {
 			} else if (criticoText) {
 				finalText = criticoText;
 			}
-			
-			console.log("T20 Items Manager | Texto formatado (arma):", finalText, "de", {
-				ataqueValue,
-				danoText,
-				criticoText
-			});
 		}
 		
 		$attackText.text(finalText || '-');
@@ -302,18 +276,15 @@ export class WeaponsManager {
 		}
 		
 		if (!itemId) {
-			console.warn("T20 Items Manager | Não foi possível encontrar o ID do item");
 			return;
 		}
 		
 		const item = this.actor.items.get(itemId);
 		if (!item) {
-			console.warn("T20 Items Manager | Item não encontrado:", itemId);
 			return;
 		}
 		
 		if (item.type !== 'arma') {
-			console.warn("T20 Items Manager | Item não é uma arma:", item.type);
 			return;
 		}
 		
@@ -384,7 +355,6 @@ export class WeaponsManager {
 					</div>`;
 				}
 			} catch (templateError) {
-				console.warn("T20 Items Manager | Erro ao renderizar template, usando card simples:", templateError);
 				const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
 				const img = item.img || 'icons/svg/mystery-man.svg';
 				content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
@@ -493,7 +463,6 @@ export class WeaponsManager {
 				'color': '#ADD8E6 !important',
 				'background': 'rgba(173, 216, 230, 0.15) !important'
 			});
-			console.log("T20 Items Manager | Arma marcada como EQUIPADA (azul #ADD8E6) para:", item.name);
 		} else {
 			// Cor vermelha (já existe), highlight = false
 			$toggleBtn.removeClass('equipped').addClass('not-equipped').attr('title', 'Equipar');
@@ -502,25 +471,12 @@ export class WeaponsManager {
 				'color': 'rgba(192, 57, 43, 1)',
 				'background': 'transparent'
 			});
-			console.log("T20 Items Manager | Arma marcada como NÃO EQUIPADA (vermelho) para:", item.name);
 		}
 		
 		// Aplicar cor ao item também se necessário
 		if (isEquipped) {
 			$item.css('border-left-color', '#ADD8E6');
 		}
-		
-		console.log("T20 Items Manager | Estado da arma:", {
-			name: item.name,
-			equipped: system.equipped,
-			equipado: system.equipado,
-			equipadoValue: equipadoValue,
-			equippedValue: equippedValue,
-			tipoUso: tipoUso,
-			isEquipped: isEquipped,
-			"equipadoValue > 0": equipadoValue !== undefined && equipadoValue !== null && Number(equipadoValue) > 0,
-			"tipoUso === 'sim'": tipoUso === 'sim'
-		});
 	}
 	
 	/**
@@ -623,7 +579,6 @@ export class EquipmentManager {
 			const itemId = $item.data('item-id') || $item.attr('data-item-id');
 			
 			if (!itemId) {
-				console.warn("T20 Items Manager | Item ID não encontrado para equipamento");
 				return;
 			}
 			
@@ -632,53 +587,12 @@ export class EquipmentManager {
 			
 			const item = this.actor.items.get(itemId);
 			if (!item) {
-				console.warn("T20 Items Manager | Item não encontrado:", itemId);
 				return;
 			}
 			
 			if (item.type !== 'equipamento') {
-				console.warn("T20 Items Manager | Item não é um equipamento:", item.type);
 				return;
 			}
-			
-			// Debug: verificar estrutura completa do equipamento
-			const system = item.system || {};
-			let tipoStrDebug = '';
-			if (system.tipo) {
-				if (typeof system.tipo === 'object') {
-					tipoStrDebug = system.tipo.value || system.tipo.label || '';
-				} else {
-					tipoStrDebug = String(system.tipo);
-				}
-			}
-			const labelsTipoDebug = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
-			const tipoLowerDebug = tipoStrDebug.toLowerCase();
-			const isArmaduraDebug = tipoLowerDebug.includes('armadura') || labelsTipoDebug.includes('armadura');
-			
-			console.log("T20 Items Manager | Estrutura completa do item (equipamento):", {
-				name: item.name,
-				labels: item.labels,
-				labelsKeys: Object.keys(item.labels || {}),
-				systemKeys: Object.keys(system),
-				system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
-				tipo: system.tipo,
-				tipoStr: tipoStrDebug,
-				tipoLower: tipoLowerDebug,
-				labelsTipo: item.labels?.tipo,
-				labelsTipoLower: labelsTipoDebug,
-				tipoUso: system.tipoUso,
-				subtipo: system.subtipo,
-				categoria: system.categoria,
-				defesa: system.defesa,
-				penalidade: system.penalidade,
-				equipped: system.equipped,
-				equipado: system.equipado,
-				espaco: system.espaco,
-				peso: system.peso,
-				isArmadura: isArmaduraDebug,
-				"tipoLower.includes('armadura')": tipoLowerDebug.includes('armadura'),
-				"labelsTipo.includes('armadura')": labelsTipoDebug.includes('armadura')
-			});
 			
 			// Formatar estatísticas (defesa/espaço)
 			this.formatEquipmentStats($item, item);
@@ -699,7 +613,6 @@ export class EquipmentManager {
 		const $statsText = $item.find('.equipment-stats-text');
 		
 		if ($statsText.length === 0) {
-			console.warn("T20 Items Manager | Elemento .equipment-stats-text não encontrado");
 			return;
 		}
 		
@@ -724,18 +637,6 @@ export class EquipmentManager {
 		                   tipoLower.includes('armadura') ||
 		                   system.armadura !== undefined ||
 		                   nomeItem.includes('armadura');
-		
-		console.log("T20 Items Manager | Verificação de armadura para", item.name, ":", {
-			tipoStr,
-			tipoLower,
-			labelsTipo,
-			nomeItem,
-			"system.armadura": system.armadura,
-			isArmadura,
-			"labelsTipo.includes('armadura')": labelsTipo.includes('armadura'),
-			"tipoLower.includes('armadura')": tipoLower.includes('armadura'),
-			"nomeItem.includes('armadura')": nomeItem.includes('armadura')
-		});
 		
 		let finalText = '';
 		
@@ -906,40 +807,25 @@ export class EquipmentManager {
 					// itemColor = "#ADD8E6" (Azul clarinho), highlight = true
 					$toggleBtn.addClass('equipped').removeClass('not-equipped').attr('title', 'Desequipar');
 					$toggleBtn.css({
-						'border-color': '#ADD8E6 !important',
-						'color': '#ADD8E6 !important',
-						'background': 'rgba(173, 216, 230, 0.15) !important'
-					});
-					console.log("T20 Items Manager | Botão marcado como EQUIPADO (azul #ADD8E6) para:", item.name);
-				} else {
+					'border-color': '#ADD8E6 !important',
+					'color': '#ADD8E6 !important',
+					'background': 'rgba(173, 216, 230, 0.15) !important'
+				});
+			} else {
 					// Cor vermelha (já existe), highlight = false
 					$toggleBtn.removeClass('equipped').addClass('not-equipped').attr('title', 'Equipar');
 					$toggleBtn.css({
-						'border-color': 'rgba(192, 57, 43, 0.8)',
-						'color': 'rgba(192, 57, 43, 1)',
-						'background': 'transparent'
-					});
-					console.log("T20 Items Manager | Botão marcado como NÃO EQUIPADO (vermelho) para:", item.name);
-				}
+					'border-color': 'rgba(192, 57, 43, 0.8)',
+					'color': 'rgba(192, 57, 43, 1)',
+					'background': 'transparent'
+				});
+			}
 			}
 			
 			// Aplicar cor ao item também se necessário
 			if (isEquipped && isArmadura) {
 				$item.css('border-left-color', '#ADD8E6');
 			}
-			
-			console.log("T20 Items Manager | Estatísticas formatadas da armadura:", finalText, "de", {
-				tipoArmadura: tipoArmaduraFinal,
-				defesaValue: system.armadura.value,
-				penalidadeValue: system.armadura.penalidade,
-				tipoUso,
-				isEquipped,
-				equipado: system.equipado,
-				equipped: system.equipped,
-				categoria: system.categoria,
-				"system.armadura": system.armadura,
-				systemKeys: Object.keys(system)
-			});
 			
 		} else {
 			// Não é armadura - mostrar espaço/peso como antes
@@ -966,10 +852,6 @@ export class EquipmentManager {
 				}
 				
 				finalText = espacoText || '-';
-				
-				console.log("T20 Items Manager | Estatísticas formatadas do equipamento:", finalText, "de", {
-					espacoText
-				});
 			}
 		}
 		
@@ -1074,18 +956,15 @@ export class EquipmentManager {
 		}
 		
 		if (!itemId) {
-			console.warn("T20 Items Manager | Não foi possível encontrar o ID do item");
 			return;
 		}
 		
 		const item = this.actor.items.get(itemId);
 		if (!item) {
-			console.warn("T20 Items Manager | Item não encontrado:", itemId);
 			return;
 		}
 		
 		if (item.type !== 'equipamento') {
-			console.warn("T20 Items Manager | Item não é um equipamento:", item.type);
 			return;
 		}
 		
@@ -1153,7 +1032,6 @@ export class EquipmentManager {
 					</div>`;
 				}
 			} catch (templateError) {
-				console.warn("T20 Items Manager | Erro ao renderizar template, usando card simples:", templateError);
 				const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
 				const img = item.img || 'icons/svg/mystery-man.svg';
 				content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
@@ -1289,13 +1167,14 @@ export class InventoryManager {
 	/**
 	 * Configura a seção de inventário
 	 */
-	setupInventorySection() {
+		setupInventorySection() {
 		if (!this.element || !this.element.length) return;
 
 		const $inventoryList = this.element.find('.inventory-list-custom');
 		if ($inventoryList.length === 0) return;
 
 		const $inventoryItems = $inventoryList.find('.inventory-item');
+		console.log("T20 Items Manager | Configurando seção de inventário, encontrados", $inventoryItems.length, "itens");
 
 		$inventoryItems.each((index, element) => {
 			const $item = $(element);
@@ -1379,6 +1258,12 @@ export class InventoryManager {
 		}
 
 		const finalText = parts.join(' | ') || '-';
+		console.log("T20 Items Manager | Estatísticas formatadas do inventário:", finalText, "para", item.name, "de", {
+			qtd: system.qtd,
+			peso: system.peso,
+			espaco: system.espaco,
+			preco: system.preco
+		});
 		$statsText.text(finalText);
 	}
 
@@ -1480,15 +1365,17 @@ export class InventoryManager {
 		}
 
 		if (!itemId) {
-			console.warn("T20 Items Manager | Não foi possível encontrar o ID do item");
+			console.warn("T20 Items Manager | Não foi possível encontrar o ID do item (inventário)");
 			return;
 		}
 
 		const item = this.actor.items.get(itemId);
 		if (!item) {
-			console.warn("T20 Items Manager | Item não encontrado:", itemId);
+			console.warn("T20 Items Manager | Item não encontrado (inventário):", itemId);
 			return;
 		}
+
+		console.log("T20 Items Manager | Clique no ícone do inventário:", item.name, "tipo:", item.type);
 
 		// Aceitar todos os tipos de itens de inventário
 		// Não filtrar por tipo específico
@@ -1558,7 +1445,6 @@ export class InventoryManager {
 					</div>`;
 				}
 			} catch (templateError) {
-				console.warn("T20 Items Manager | Erro ao renderizar template, usando card simples:", templateError);
 				const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
 				const img = item.img || 'icons/svg/mystery-man.svg';
 				content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
@@ -1604,6 +1490,9 @@ export class InventoryManager {
 
 		const item = this.actor.items.get(itemId);
 		if (!item) return;
+
+		const isExpanded = $item.hasClass('expanded');
+		console.log("T20 Items Manager | Clique no nome do inventário:", item.name, "expandido:", !isExpanded);
 
 		// Toggle expanded class
 		$item.toggleClass('expanded');
