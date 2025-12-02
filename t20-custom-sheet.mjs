@@ -123,6 +123,11 @@ Hooks.once("ready", async () => {
 						atr.value = Number(atr.value) || 0;
 						atr.base = Number(atr.base) || 0;
 						atr.bonus = Number(atr.bonus) || 0;
+						// Validar atributo racial se existir
+						if (atr.racial !== undefined && atr.racial !== null) {
+							atr.racial = Number(atr.racial) || 0;
+							if (isNaN(atr.racial)) atr.racial = 0;
+						}
 						// Garantir que não sejam NaN
 						if (isNaN(atr.value)) atr.value = 0;
 						if (isNaN(atr.base)) atr.base = 0;
@@ -147,7 +152,6 @@ Hooks.once("ready", async () => {
 			
 			// Garantir que as perícias tenham valores numéricos válidos
 			// O sistema calcula skill.value como o total através do prepareSkill
-			// O template espera skill.total, então vamos garantir que total = value
 			if (sheetData.skills) {
 				for (const skill of Object.values(sheetData.skills)) {
 					if (skill) {
@@ -155,18 +159,6 @@ Hooks.once("ready", async () => {
 						// Converter para número válido
 						skill.value = Number(skill.value) || 0;
 						if (isNaN(skill.value)) skill.value = 0;
-						
-						// O template espera skill.total, então vamos usar skill.value como total
-						// (pois value já é o total calculado pelo sistema)
-						skill.total = skill.value;
-						
-						// Garantir que bonus seja um número válido (se existir)
-						if (skill.bonus !== undefined && skill.bonus !== null) {
-							skill.bonus = Number(skill.bonus) || 0;
-							if (isNaN(skill.bonus)) skill.bonus = 0;
-						} else {
-							skill.bonus = 0;
-						}
 					}
 				}
 			}
