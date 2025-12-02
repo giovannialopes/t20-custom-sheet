@@ -44,11 +44,12 @@
 				<div class="list-powers-custom">
 					<style>
 					.list-powers-custom {
-						background: rgba(20, 20, 30, 0.6);
-						border-radius: 12px;
-						padding: 15px;
+						background: linear-gradient(135deg, #2b2f3a 0%, #1f232c 100%);
+						border-radius: 14px;
+						padding: 18px;
 						margin: 10px 0;
-						box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+						box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+						border: 1px solid rgba(255, 255, 255, 0.06);
 					}
 					
 					.powers-header {
@@ -123,18 +124,19 @@
 						display: flex;
 						align-items: center;
 						gap: 12px;
-						padding: 12px;
+						padding: 12px 14px;
 						margin-bottom: 8px;
-						background: rgba(255, 255, 255, 0.05);
-						border: 1px solid rgba(255, 255, 255, 0.1);
-						border-radius: 8px;
-						transition: all 0.3s ease;
+						background: rgba(10, 12, 18, 0.85);
+						border: 1px solid rgba(255, 255, 255, 0.06);
+						border-radius: 10px;
+						transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 					}
 					
 					.power-item:hover {
-						background: rgba(255, 255, 255, 0.1);
-						border-color: rgba(255, 255, 255, 0.3);
-						transform: translateX(3px);
+						background: rgba(18, 22, 32, 0.98);
+						border-color: rgba(255, 255, 255, 0.16);
+						box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+						transform: translateX(4px);
 					}
 					
 					.power-item.hidden {
@@ -184,8 +186,8 @@
 					.power-type-geral { background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%); color: #fff; }
 					.power-type-origem { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: #fff; }
 					.power-type-classe { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); color: #fff; }
-					.power-type-habilidade-de-classe { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: #fff; }
-					.power-type-habilidade_de_classe { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: #fff; }
+					.power-type-habilidade-de-classe { background: linear-gradient(135deg, #f5c242 0%, #f39c12 100%); color: #fff; }
+					.power-type-habilidade_de_classe { background: linear-gradient(135deg, #f5c242 0%, #f39c12 100%); color: #fff; }
 					.power-type-racial { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: #fff; }
 					.power-type-concedido { background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%); color: #fff; }
 					.power-type-distinção { background: linear-gradient(135deg, #16a085 0%, #138d75 100%); color: #fff; }
@@ -225,7 +227,7 @@
 						<input type="text" class="power-filter-input" id="power-filter-name" placeholder="Filtrar por nome...">
 						<select class="power-filter-type" id="power-filter-type">
 							<option value="">Todos os tipos</option>
-							<option value="habilidade de classe">Habilidade de Classe</option>
+							<option value="habilidade-de-classe">Habilidade de Classe</option>
 							<option value="classe">Classe</option>
 							<option value="concedido">Concedido</option>
 							<option value="geral">Geral</option>
