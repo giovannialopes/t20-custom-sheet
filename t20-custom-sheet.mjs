@@ -94,6 +94,73 @@ Hooks.once("ready", async () => {
 			}, 100);
 		}
 		
+		/** @override */
+		activateListeners(html) {
+			super.activateListeners(html);
+			
+			// Handler para ícones roláveis de poderes usando evento delegado
+			// Usar evento delegado para funcionar mesmo com elementos adicionados dinamicamente
+			html.on('click', '.power-icon.rollable', this._onPowerIconClick.bind(this));
+			html.on('click', '.list-powers-custom .power-icon', this._onPowerIconClick.bind(this));
+		}
+		
+		/**
+		 * Handler para clique no ícone do poder
+		 */
+		async _onPowerIconClick(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			
+			const $icon = $(event.currentTarget);
+			const itemId = $icon.data('item-id');
+			
+			if (!itemId) {
+				const $item = $icon.closest('[data-item-id]');
+				if ($item.length) {
+					itemId = $item.data('item-id');
+				}
+			}
+			
+			if (!itemId) return;
+			
+			const item = this.actor.items.get(itemId);
+			if (!item || item.type !== 'poder') return;
+			
+			// Tentar usar o handler padrão da classe base se disponível
+			try {
+				// Primeiro, tentar o método padrão do Foundry
+				if (typeof super._onItemRoll === 'function') {
+					super._onItemRoll(event);
+					return;
+				}
+				
+				// Se não tiver, tentar métodos diretos do item
+				if (typeof item.roll === 'function') {
+					await item.roll();
+				} else if (typeof item.use === 'function') {
+					await item.use();
+				} else {
+					// Como último recurso, mostrar o card do item no chat
+					const speaker = ChatMessage.getSpeaker({actor: this.actor});
+					const content = await renderTemplate("systems/tormenta20/templates/chat/item-card.hbs", {
+						item: item,
+						actor: this.actor
+					}).catch(() => {
+						return `<div class="t20-item-card"><h4>${item.name}</h4><p>${item.system?.descricao?.value || item.system?.description?.value || ''}</p></div>`;
+					});
+					
+					await ChatMessage.create({
+						user: game.user.id,
+						speaker: speaker,
+						content: content
+					});
+				}
+			} catch (error) {
+				console.error("T20 Custom Sheet | Erro ao rolar poder:", error);
+				ui.notifications.error(`Erro ao rolar ${item.name}`);
+			}
+		}
+		
 		/**
 		 * Configura a seção de poderes com tipos e filtros
 		 */
@@ -191,6 +258,11 @@ Hooks.once("ready", async () => {
 				// Configurar rolagem do dado ao clicar no ícone
 				this._setupPowerIconRoll($item, item);
 			});
+			
+			// Garantir que os listeners de rolagem sejam configurados após todos os elementos serem criados
+			setTimeout(() => {
+				this.element.off('click', '.power-icon').on('click', '.power-icon', this._onPowerIconClick.bind(this));
+			}, 150);
 		}
 		
 		/**
@@ -273,47 +345,10 @@ Hooks.once("ready", async () => {
 			const $powerIcon = $item.find('.power-icon');
 			if ($powerIcon.length === 0) return;
 			
-			// Adicionar classe rollable e atributos
-			$powerIcon.addClass('rollable').attr('data-item-id', item.id);
-			
-			// Remover listeners anteriores para evitar duplicação
-			$powerIcon.off('click.power-roll');
-			
-			// Adicionar evento de clique para rolar o dado
-			$powerIcon.on('click.power-roll', async (event) => {
-				event.stopPropagation();
-				event.preventDefault();
-				
-				// Tentar usar o handler padrão da classe base primeiro
-				if (typeof this._onItemRoll === 'function') {
-					this._onItemRoll(event);
-					return;
-				}
-				
-				// Se não tiver handler padrão, tentar rolar diretamente
-				if (item) {
-					try {
-						// Tentar diferentes métodos de rolagem comuns no Foundry
-						if (typeof item.roll === 'function') {
-							await item.roll();
-						} else if (typeof item.use === 'function') {
-							await item.use();
-						} else if (item.system && typeof item.rollItem === 'function') {
-							await item.rollItem();
-						} else {
-							// Último recurso: mostrar o item no chat
-							const chatData = {
-								user: game.user.id,
-								speaker: ChatMessage.getSpeaker({actor: this.actor}),
-								content: `<div class="t20-item-card"><h4>${item.name}</h4><p>${item.system?.descricao?.value || item.system?.description?.value || ''}</p></div>`
-							};
-							await ChatMessage.create(chatData);
-						}
-					} catch (error) {
-						console.error("T20 Custom Sheet | Erro ao rolar poder:", error);
-						ui.notifications.warn(`Não foi possível rolar ${item.name}`);
-					}
-				}
+			// Adicionar classe rollable e atributos necessários
+			$powerIcon.addClass('rollable item-image').attr({
+				'data-item-id': item.id,
+				'data-item-type': 'poder'
 			});
 		}
 		
