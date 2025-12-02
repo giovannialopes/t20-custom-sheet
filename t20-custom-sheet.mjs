@@ -191,17 +191,24 @@ Hooks.once("ready", async () => {
 			
 			// Tentar usar labels do sistema primeiro (mais confiável)
 			// O sistema T20 geralmente formata tudo em item.labels.ataque
-			let finalText = item.labels?.ataque || item.labels?.attack || '';
+			// Verificar todas as chaves possíveis em labels
+			let finalText = item.labels?.ataque || 
+			                item.labels?.attack || 
+			                item.labels?.dano ||
+			                item.labels?.damage ||
+			                '';
 			
 			// Se não tiver label formatado, construir manualmente
 			if (!finalText || finalText === '' || finalText === '-') {
 				const system = item.system || {};
 				
-				// Debug temporário para ver estrutura
+				// Debug temporário para ver estrutura completa
 				console.log("T20 Custom Sheet | Estrutura completa do item:", {
 					name: item.name,
 					labels: item.labels,
-					system: system,
+					labelsKeys: Object.keys(item.labels || {}),
+					systemKeys: Object.keys(system),
+					system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
 					ataque: system.ataque,
 					dano: system.dano,
 					critico: system.critico
