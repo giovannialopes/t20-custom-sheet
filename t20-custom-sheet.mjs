@@ -143,21 +143,35 @@ Hooks.once("ready", async () => {
 			
 			$weaponItems.each((index, element) => {
 				const $item = $(element);
-				const itemId = $item.data('item-id');
+				const itemId = $item.data('item-id') || $item.attr('data-item-id');
 				
-				if (!itemId) return;
+				if (!itemId) {
+					console.warn("T20 Custom Sheet | Item ID não encontrado para arma");
+					return;
+				}
 				
 				// Adicionar delay escalonado para animação de entrada
 				$item.css('animation-delay', `${index * 0.05}s`);
 				
 				const item = this.actor.items.get(itemId);
-				if (!item || item.type !== 'arma') return;
+				if (!item) {
+					console.warn("T20 Custom Sheet | Item não encontrado:", itemId);
+					return;
+				}
+				
+				if (item.type !== 'arma') {
+					console.warn("T20 Custom Sheet | Item não é uma arma:", item.type);
+					return;
+				}
 				
 				// Formatar ataque, dano e crítico
 				this._formatWeaponStats($item, item);
 				
 				// Configurar rolagem do dado ao clicar no ícone
 				this._setupWeaponIconRoll($item, item);
+				
+				// Adicionar painel expansível com descrição
+				this._addWeaponTooltip($item, item);
 			});
 		}
 		
@@ -167,41 +181,48 @@ Hooks.once("ready", async () => {
 		_formatWeaponStats($item, item) {
 			const $attackText = $item.find('.weapon-attack-text');
 			
-			if ($attackText.length === 0) return;
+			if ($attackText.length === 0) {
+				console.warn("T20 Custom Sheet | Elemento .weapon-attack-text não encontrado");
+				return;
+			}
 			
 			// Tentar usar labels do sistema primeiro (mais confiável)
-			let finalText = item.labels?.ataque || '';
+			let finalText = item.labels?.ataque || item.labels?.attack || '';
 			
 			// Se não tiver label, formatar manualmente
-			if (!finalText) {
-				const ataque = item.system?.ataque || {};
-				const dano = item.system?.dano || {};
-				const critico = item.system?.critico || {};
+			if (!finalText || finalText === '') {
+				const ataque = item.system?.ataque || item.system?.attack || {};
+				const dano = item.system?.dano || item.system?.damage || {};
+				const critico = item.system?.critico || item.system?.critical || {};
 				
-				// Formatar ataque
+				// Formatar ataque - tentar diferentes campos
 				let ataqueValue = '';
 				if (ataque.total !== undefined && ataque.total !== null) {
 					ataqueValue = ataque.total >= 0 ? `+${ataque.total}` : `${ataque.total}`;
 				} else if (ataque.value !== undefined && ataque.value !== null) {
 					ataqueValue = ataque.value >= 0 ? `+${ataque.value}` : `${ataque.value}`;
+				} else if (ataque.bonus !== undefined && ataque.bonus !== null) {
+					ataqueValue = ataque.bonus >= 0 ? `+${ataque.bonus}` : `${ataque.bonus}`;
 				}
 				
 				// Formatar dano
 				let danoText = '';
-				if (dano.dado) {
-					danoText = dano.dado;
-					if (dano.bonus !== undefined && dano.bonus !== null && dano.bonus !== 0) {
-						const bonus = Number(dano.bonus);
-						danoText += bonus >= 0 ? ` + ${bonus}` : ` ${bonus}`;
+				if (dano.dado || dano.dice) {
+					danoText = dano.dado || dano.dice;
+					const bonus = dano.bonus !== undefined ? dano.bonus : (dano.mod !== undefined ? dano.mod : null);
+					if (bonus !== undefined && bonus !== null && bonus !== 0) {
+						const bonusNum = Number(bonus);
+						danoText += bonusNum >= 0 ? ` + ${bonusNum}` : ` ${bonusNum}`;
 					}
 				}
 				
 				// Formatar crítico
 				let criticoText = '';
-				if (critico.range) {
-					criticoText = critico.range;
-					if (critico.multiplier && critico.multiplier !== 2) {
-						criticoText += `/${critico.multiplier}x`;
+				if (critico.range || critico.threat) {
+					criticoText = critico.range || critico.threat;
+					const multiplier = critico.multiplier || critico.mult;
+					if (multiplier && multiplier !== 2) {
+						criticoText += `/${multiplier}x`;
 					}
 				}
 				
@@ -243,12 +264,75 @@ Hooks.once("ready", async () => {
 			});
 		}
 		
+		/**
+		 * Adiciona painel expansível à arma com informações detalhadas
+		 */
+		_addWeaponTooltip($item, item) {
+			if ($item.find('.weapon-details-panel').length > 0) return;
+			
+			const $weaponItemRow = $item.find('.weapon-item-row');
+			if ($weaponItemRow.length === 0) return;
+			
+			let descricao = '';
+			if (item.system?.descricao?.value) {
+				descricao = item.system.descricao.value;
+			} else if (item.system?.description?.value) {
+				descricao = item.system.description.value;
+			}
+			
+			const $descContainer = $('<div>').addClass('weapon-details-description');
+			
+			// Obter estatísticas formatadas
+			const $attackText = $item.find('.weapon-attack-text');
+			const attackStats = $attackText.text() || '-';
+			
+			const $panel = $('<div>')
+				.addClass('weapon-details-panel')
+				.html(`
+					<div class="weapon-details-header">
+						<div class="weapon-details-title">${this._escapeHtml(item.name)}</div>
+					</div>
+					<div class="weapon-details-row">
+						<span class="weapon-details-label">Ataque:</span>
+						<span class="weapon-details-value">${this._escapeHtml(attackStats)}</span>
+					</div>
+				`)
+				.append($descContainer);
+			
+			$weaponItemRow.after($panel);
+			
+			let enriched = false;
+			
+			const $weaponName = $item.find('.weapon-name');
+			$weaponName.off('click.weapon-expand').on('click.weapon-expand', async (event) => {
+				event.stopPropagation();
+				
+				if (!$item.hasClass('expanded') && descricao && !enriched) {
+					enriched = true;
+					try {
+						const descricaoHtml = await TextEditor.enrichHTML(descricao, {
+							async: true,
+							relativeTo: this.actor
+						});
+						$descContainer.html(descricaoHtml);
+					} catch (e) {
+						$descContainer.html(this._escapeHtml(descricao));
+					}
+				}
+				
+				$item.toggleClass('expanded');
+			});
+		}
+		
 		/** @override */
 		activateListeners(html) {
 			super.activateListeners(html);
 			
 			// Handler para ícones roláveis de poderes usando evento delegado (apenas um listener)
 			html.off('click', '.list-powers-custom .power-icon').on('click', '.list-powers-custom .power-icon', this._onPowerIconClick.bind(this));
+			
+			// Handler para ícones roláveis de armas
+			html.off('click', '.weapons-list-custom .weapon-icon').on('click', '.weapons-list-custom .weapon-icon', this._onWeaponIconClick.bind(this));
 			
 			// Handler para controles de editar e deletar armas
 			html.find('.weapons-list-custom .item-edit').off('click').on('click', (event) => {
@@ -269,6 +353,142 @@ Hooks.once("ready", async () => {
 					}, 100);
 				}
 			});
+		}
+		
+		/**
+		 * Handler para clique no ícone da arma
+		 */
+		async _onWeaponIconClick(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			
+			// Prevenir múltiplos cliques rápidos
+			if ($(event.currentTarget).hasClass('processing')) {
+				return;
+			}
+			$(event.currentTarget).addClass('processing');
+			
+			const $icon = $(event.currentTarget);
+			let itemId = $icon.data('item-id');
+			
+			// Se não tiver no ícone, procurar no elemento pai
+			if (!itemId) {
+				const $item = $icon.closest('[data-item-id]');
+				if ($item.length) {
+					itemId = $item.data('item-id');
+				}
+			}
+			
+			if (!itemId) {
+				console.warn("T20 Custom Sheet | Não foi possível encontrar o ID do item");
+				return;
+			}
+			
+			const item = this.actor.items.get(itemId);
+			if (!item) {
+				console.warn("T20 Custom Sheet | Item não encontrado:", itemId);
+				return;
+			}
+			
+			if (item.type !== 'arma') {
+				console.warn("T20 Custom Sheet | Item não é uma arma:", item.type);
+				return;
+			}
+			
+			try {
+				// 1) Fluxo oficial: tentar usar a arma do sistema T20
+				if (typeof item.use === "function") {
+					await item.use();
+					return;
+				}
+
+				// 2) Alternativa: se existir método roll padrão, usar
+				if (typeof item.roll === "function") {
+					await item.roll();
+					return;
+				}
+
+				// 3) Fallback: Mostrar o card da arma no chat
+				const speaker = ChatMessage.getSpeaker({actor: this.actor});
+				
+				let content = '';
+				try {
+					const possibleTemplates = [
+						"systems/tormenta20/templates/chat/item-card.hbs",
+						"systems/tormenta20/templates/chat/weapon-card.hbs",
+						"systems/tormenta20/templates/items/arma-chat.hbs"
+					];
+					
+					let templateFound = false;
+					for (const templatePath of possibleTemplates) {
+						try {
+							content = await renderTemplate(templatePath, {
+								item: item,
+								actor: this.actor,
+								data: item.system
+							});
+							templateFound = true;
+							break;
+						} catch (e) {
+							// Continuar tentando outros templates
+						}
+					}
+					
+					// Se nenhum template funcionou, criar um card simples
+					if (!templateFound) {
+						let descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+						const img = item.img || 'icons/svg/mystery-man.svg';
+						
+						if (descricao) {
+							try {
+								descricao = await TextEditor.enrichHTML(descricao, {
+									async: true,
+									relativeTo: this.actor
+								});
+							} catch (e) {
+								// Se falhar, usar descrição original
+							}
+						}
+						
+						const ataque = item.labels?.ataque || '-';
+						
+						content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+							<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+							<div style="flex: 1;">
+								<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+								${ataque ? `<p style="margin: 4px 0;"><strong>Ataque:</strong> ${ataque}</p>` : ''}
+								${descricao ? `<div class="item-description" style="margin-top: 8px;">${descricao}</div>` : ''}
+							</div>
+						</div>`;
+					}
+				} catch (templateError) {
+					console.warn("T20 Custom Sheet | Erro ao renderizar template, usando card simples:", templateError);
+					const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+					const img = item.img || 'icons/svg/mystery-man.svg';
+					content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+						<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+						<div style="flex: 1;">
+							<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+							${descricao ? `<p>${descricao}</p>` : ''}
+						</div>
+					</div>`;
+				}
+				
+				await ChatMessage.create({
+					user: game.user.id,
+					speaker: speaker,
+					content: content
+				});
+				
+			} catch (error) {
+				console.error("T20 Custom Sheet | Erro ao exibir arma no chat:", error);
+				ui.notifications.error(`Erro ao exibir ${item.name}`);
+			} finally {
+				// Remover classe de processamento após 500ms
+				setTimeout(() => {
+					$(event.currentTarget).removeClass('processing');
+				}, 500);
+			}
 		}
 		
 		/**
