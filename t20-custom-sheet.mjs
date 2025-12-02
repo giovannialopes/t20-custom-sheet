@@ -26,7 +26,7 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 			template: "modules/t20-custom-sheet/templates/actor/character-custom-sheet.hbs",
 			width: 800,
 			height: 600,
-			left: 20,
+			left: 60, // Posição após a barra de ferramentas esquerda
 			top: null,
 			resizable: true,
 			dragDrop: [{ dragSelector: ".item-list .item:not(.item-header)" }],
@@ -65,7 +65,7 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 	}
 
 	/**
-	 * Força a ficha a ficar no lado esquerdo da tela
+	 * Força a ficha a ficar no lado esquerdo da tela (onde fica a lista de atores)
 	 */
 	_forceLeftPosition() {
 		if (!this.element || !this.element.length) return;
@@ -73,9 +73,10 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 		const width = 800;
 		const height = 600;
 		
-		// Calcular posição no lado esquerdo
+		// Calcular posição no lado esquerdo, após a barra de ferramentas
+		// Posição similar à lista de atores do Foundry
 		const viewportHeight = window.innerHeight || 1080;
-		const left = 20;
+		const left = 60; // Após a barra de ferramentas esquerda (~50px) + pequeno espaçamento
 		const top = Math.max(20, (viewportHeight - height) / 2);
 		
 		// Método 1: Usar setPosition se disponível
