@@ -4,6 +4,7 @@
  */
 
 import { PowersManager } from "./t20-powers.mjs";
+import { WeaponsManager, EquipmentManager } from "./t20-items.mjs";
 
 /* -------------------------------------------- */
 /*  Module Initialization                       */
@@ -12,12 +13,13 @@ import { PowersManager } from "./t20-powers.mjs";
 Hooks.once("ready", async () => {
 	console.log("T20 Custom Sheet | Inicializando módulo de ficha customizada");
 
-	// Pré-carregar e registrar partials do powers-tab, items-tab e weapons-custom
+	// Pré-carregar e registrar partials do powers-tab, items-tab, weapons-custom e equipment-custom
 	try {
 		await loadTemplates([
 			"modules/t20-custom-sheet/templates/actor/powers-tab.hbs",
 			"modules/t20-custom-sheet/templates/actor/items-tab.hbs",
-			"modules/t20-custom-sheet/templates/actor/list-weapons-custom.hbs"
+			"modules/t20-custom-sheet/templates/actor/list-weapons-custom.hbs",
+			"modules/t20-custom-sheet/templates/actor/list-equipment-custom.hbs"
 		]);
 		
 		// Registrar os partials manualmente no Handlebars
@@ -37,6 +39,12 @@ Hooks.once("ready", async () => {
 		if (weaponsTemplate) {
 			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/list-weapons-custom", weaponsTemplate);
 			console.log("T20 Custom Sheet | Partial list-weapons-custom registrado com sucesso");
+		}
+		
+		const equipmentTemplate = await fetch("modules/t20-custom-sheet/templates/actor/list-equipment-custom.hbs").then(r => r.text());
+		if (equipmentTemplate) {
+			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/list-equipment-custom", equipmentTemplate);
+			console.log("T20 Custom Sheet | Partial list-equipment-custom registrado com sucesso");
 		}
 	} catch (error) {
 		console.error("T20 Custom Sheet | Erro ao carregar/registrar partials:", error);
@@ -120,277 +128,22 @@ Hooks.once("ready", async () => {
 		async _render(force = false, options = {}) {
 			await super._render(force, options);
 			
-			// Inicializar gerenciador de poderes
+			// Inicializar gerenciadores
 			this.powersManager = new PowersManager(this);
+			this.weaponsManager = new WeaponsManager(this);
+			this.equipmentManager = new EquipmentManager(this);
 			
 			// Adicionar badges de tipo aos poderes e configurar filtros
 			setTimeout(() => {
 				this.powersManager.setupPowersSection();
-				// Aguardar um pouco mais para garantir que os dados das armas estejam preparados
+				// Aguardar um pouco mais para garantir que os dados das armas e equipamentos estejam preparados
 				setTimeout(() => {
-					this._setupWeaponsSection();
+					this.weaponsManager.setupWeaponsSection();
+					this.equipmentManager.setupEquipmentSection();
 				}, 200);
 			}, 100);
 		}
 		
-		/**
-		 * Configura a seção de armas com formatação de ataque/dano/crítico
-		 */
-		_setupWeaponsSection() {
-			if (!this.element || !this.element.length) return;
-			
-			const $weaponsList = this.element.find('.weapons-list-custom');
-			if ($weaponsList.length === 0) return;
-			
-			const $weaponItems = $weaponsList.find('.weapon-item');
-			
-			$weaponItems.each((index, element) => {
-				const $item = $(element);
-				const itemId = $item.data('item-id') || $item.attr('data-item-id');
-				
-				if (!itemId) {
-					console.warn("T20 Custom Sheet | Item ID não encontrado para arma");
-					return;
-				}
-				
-				// Adicionar delay escalonado para animação de entrada
-				$item.css('animation-delay', `${index * 0.05}s`);
-				
-				const item = this.actor.items.get(itemId);
-				if (!item) {
-					console.warn("T20 Custom Sheet | Item não encontrado:", itemId);
-					return;
-				}
-				
-				if (item.type !== 'arma') {
-					console.warn("T20 Custom Sheet | Item não é uma arma:", item.type);
-					return;
-				}
-				
-				// Formatar ataque, dano e crítico
-				this._formatWeaponStats($item, item);
-				
-				// Configurar rolagem do dado ao clicar no ícone
-				this._setupWeaponIconRoll($item, item);
-				
-				// Adicionar painel expansível com descrição
-				this._addWeaponTooltip($item, item);
-			});
-		}
-		
-		/**
-		 * Formata as estatísticas de ataque, dano e crítico da arma
-		 */
-		_formatWeaponStats($item, item) {
-			const $attackText = $item.find('.weapon-attack-text');
-			
-			if ($attackText.length === 0) {
-				console.warn("T20 Custom Sheet | Elemento .weapon-attack-text não encontrado");
-				return;
-			}
-			
-			// Tentar usar labels do sistema primeiro (mais confiável)
-			// O sistema T20 geralmente formata tudo em item.labels.ataque
-			// Verificar todas as chaves possíveis em labels
-			let finalText = item.labels?.ataque || 
-			                item.labels?.attack || 
-			                item.labels?.dano ||
-			                item.labels?.damage ||
-			                '';
-			
-			// Se não tiver label formatado, construir manualmente
-			if (!finalText || finalText === '' || finalText === '-') {
-				const system = item.system || {};
-				
-				// Debug temporário para ver estrutura completa
-				console.log("T20 Custom Sheet | Estrutura completa do item:", {
-					name: item.name,
-					labels: item.labels,
-					labelsKeys: Object.keys(item.labels || {}),
-					systemKeys: Object.keys(system),
-					system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
-					ataque: system.ataque,
-					dano: system.dano,
-					critico: system.critico
-				});
-				
-				const ataque = system.ataque || system.attack || {};
-				const dano = system.dano || system.damage || {};
-				const critico = system.critico || system.critical || {};
-				
-				// Formatar ataque - tentar diferentes campos
-				let ataqueValue = '';
-				if (ataque.total !== undefined && ataque.total !== null && ataque.total !== '') {
-					ataqueValue = ataque.total >= 0 ? `+${ataque.total}` : `${ataque.total}`;
-				} else if (ataque.value !== undefined && ataque.value !== null && ataque.value !== '') {
-					ataqueValue = ataque.value >= 0 ? `+${ataque.value}` : `${ataque.value}`;
-				} else if (ataque.bonus !== undefined && ataque.bonus !== null && ataque.bonus !== '') {
-					ataqueValue = ataque.bonus >= 0 ? `+${ataque.bonus}` : `${ataque.bonus}`;
-				}
-				
-				// Formatar dano - o sistema T20 pode ter dano em formato de array ou objeto complexo
-				let danoText = '';
-				
-				// Verificar se dano é um array (sistema T20 pode usar arrays para múltiplos danos)
-				if (Array.isArray(dano)) {
-					// Pegar o primeiro elemento do array
-					const primeiroDano = dano[0] || {};
-					if (primeiroDano.dado || primeiroDano.dice) {
-						danoText = primeiroDano.dado || primeiroDano.dice;
-						if (primeiroDano.bonus !== undefined && primeiroDano.bonus !== null && primeiroDano.bonus !== 0) {
-							const bonusNum = Number(primeiroDano.bonus);
-							if (!isNaN(bonusNum)) {
-								danoText += bonusNum >= 0 ? ` + ${bonusNum}` : ` ${bonusNum}`;
-							}
-						}
-					}
-				} else if (typeof dano === 'string' && dano.trim() !== '') {
-					danoText = dano;
-				} else if (dano && typeof dano === 'object') {
-					// Verificar diferentes campos possíveis
-					if (dano.dado || dano.dice) {
-						danoText = dano.dado || dano.dice;
-						// Tentar diferentes campos para bonus
-						const bonus = dano.bonus !== undefined ? dano.bonus : 
-						             (dano.mod !== undefined ? dano.mod : 
-						             (dano.value !== undefined ? dano.value : 
-						             (dano.total !== undefined ? dano.total : null)));
-						if (bonus !== undefined && bonus !== null && bonus !== 0 && bonus !== '') {
-							const bonusNum = Number(bonus);
-							if (!isNaN(bonusNum)) {
-								danoText += bonusNum >= 0 ? ` + ${bonusNum}` : ` ${bonusNum}`;
-							}
-						}
-					} else if (dano.total) {
-						// Se tiver total formatado, usar direto
-						danoText = String(dano.total);
-					} else if (dano.formula) {
-						// Se tiver fórmula, usar
-						danoText = String(dano.formula);
-					}
-				}
-				
-				// Formatar crítico
-				let criticoText = '';
-				if (critico && typeof critico === 'object') {
-					if (critico.range || critico.threat) {
-						criticoText = String(critico.range || critico.threat);
-						const multiplier = critico.multiplier || critico.mult;
-						if (multiplier && multiplier !== 2 && multiplier !== '2') {
-							criticoText += `/${multiplier}x`;
-						}
-					} else if (critico.total) {
-						criticoText = String(critico.total);
-					} else if (critico.value) {
-						criticoText = String(critico.value);
-					}
-				} else if (critico) {
-					criticoText = String(critico);
-				}
-				
-				// Montar texto final no formato: +9 (1d4 + 5, 19)
-				if (ataqueValue) {
-					finalText = ataqueValue;
-					if (danoText) {
-						finalText += ` (${danoText}`;
-						if (criticoText) {
-							finalText += `, ${criticoText}`;
-						}
-						finalText += ')';
-					} else if (criticoText) {
-						finalText += ` (${criticoText})`;
-					}
-				} else if (danoText) {
-					finalText = danoText;
-					if (criticoText) {
-						finalText += `, ${criticoText}`;
-					}
-				} else if (criticoText) {
-					finalText = criticoText;
-				}
-				
-				console.log("T20 Custom Sheet | Texto formatado:", finalText, "de", {
-					ataqueValue,
-					danoText,
-					criticoText
-				});
-			}
-			
-			$attackText.text(finalText || '-');
-		}
-		
-		/**
-		 * Configura a rolagem do dado ao clicar no ícone da arma
-		 */
-		_setupWeaponIconRoll($item, item) {
-			const $weaponIcon = $item.find('.weapon-icon');
-			if ($weaponIcon.length === 0) return;
-			
-			$weaponIcon.addClass('rollable item-image').attr({
-				'data-item-id': item.id,
-				'data-item-type': 'arma'
-			});
-		}
-		
-		/**
-		 * Adiciona painel expansível à arma com informações detalhadas
-		 */
-		_addWeaponTooltip($item, item) {
-			if ($item.find('.weapon-details-panel').length > 0) return;
-			
-			const $weaponItemRow = $item.find('.weapon-item-row');
-			if ($weaponItemRow.length === 0) return;
-			
-			let descricao = '';
-			if (item.system?.descricao?.value) {
-				descricao = item.system.descricao.value;
-			} else if (item.system?.description?.value) {
-				descricao = item.system.description.value;
-			}
-			
-			const $descContainer = $('<div>').addClass('weapon-details-description');
-			
-			// Obter estatísticas formatadas
-			const $attackText = $item.find('.weapon-attack-text');
-			const attackStats = $attackText.text() || '-';
-			
-			const $panel = $('<div>')
-				.addClass('weapon-details-panel')
-				.html(`
-					<div class="weapon-details-header">
-						<div class="weapon-details-title">${this._escapeHtml(item.name)}</div>
-					</div>
-					<div class="weapon-details-row">
-						<span class="weapon-details-label">Ataque:</span>
-						<span class="weapon-details-value">${this._escapeHtml(attackStats)}</span>
-					</div>
-				`)
-				.append($descContainer);
-			
-			$weaponItemRow.after($panel);
-			
-			let enriched = false;
-			
-			const $weaponName = $item.find('.weapon-name');
-			$weaponName.off('click.weapon-expand').on('click.weapon-expand', async (event) => {
-				event.stopPropagation();
-				
-				if (!$item.hasClass('expanded') && descricao && !enriched) {
-					enriched = true;
-					try {
-						const descricaoHtml = await TextEditor.enrichHTML(descricao, {
-							async: true,
-							relativeTo: this.actor
-						});
-						$descContainer.html(descricaoHtml);
-					} catch (e) {
-						$descContainer.html(this._escapeHtml(descricao));
-					}
-				}
-				
-				$item.toggleClass('expanded');
-			});
-		}
 		
 		/** @override */
 		activateListeners(html) {
@@ -400,7 +153,33 @@ Hooks.once("ready", async () => {
 			html.off('click', '.list-powers-custom .power-icon').on('click', '.list-powers-custom .power-icon', this._onPowerIconClick.bind(this));
 			
 			// Handler para ícones roláveis de armas
-			html.off('click', '.weapons-list-custom .weapon-icon').on('click', '.weapons-list-custom .weapon-icon', this._onWeaponIconClick.bind(this));
+			html.off('click', '.weapons-list-custom .weapon-icon').on('click', '.weapons-list-custom .weapon-icon', (event) => {
+				if (this.weaponsManager) {
+					this.weaponsManager.onWeaponIconClick(event);
+				}
+			});
+			
+			// Handler para controles de editar e deletar equipamentos
+			html.find('.equipment-list-custom .item-edit').off('click').on('click', (event) => {
+				event.preventDefault();
+				const itemId = $(event.currentTarget).data('item-id');
+				const item = this.actor.items.get(itemId);
+				if (item) item.sheet.render(true);
+			});
+			
+			html.find('.equipment-list-custom .item-delete').off('click').on('click', (event) => {
+				event.preventDefault();
+				const itemId = $(event.currentTarget).data('item-id');
+				const item = this.actor.items.get(itemId);
+				if (item) {
+					item.delete();
+					setTimeout(() => {
+						if (this.equipmentManager) {
+							this.equipmentManager.setupEquipmentSection();
+						}
+					}, 100);
+				}
+			});
 			
 			// Handler para controles de editar e deletar armas
 			html.find('.weapons-list-custom .item-edit').off('click').on('click', (event) => {
@@ -417,147 +196,14 @@ Hooks.once("ready", async () => {
 				if (item) {
 					item.delete();
 					setTimeout(() => {
-						this._setupWeaponsSection();
+						if (this.weaponsManager) {
+							this.weaponsManager.setupWeaponsSection();
+						}
 					}, 100);
 				}
 			});
 		}
 		
-		/**
-		 * Handler para clique no ícone da arma
-		 */
-		async _onWeaponIconClick(event) {
-			event.preventDefault();
-			event.stopPropagation();
-			
-			// Prevenir múltiplos cliques rápidos
-			if ($(event.currentTarget).hasClass('processing')) {
-				return;
-			}
-			$(event.currentTarget).addClass('processing');
-			
-			const $icon = $(event.currentTarget);
-			let itemId = $icon.data('item-id');
-			
-			// Se não tiver no ícone, procurar no elemento pai
-			if (!itemId) {
-				const $item = $icon.closest('[data-item-id]');
-				if ($item.length) {
-					itemId = $item.data('item-id');
-				}
-			}
-			
-			if (!itemId) {
-				console.warn("T20 Custom Sheet | Não foi possível encontrar o ID do item");
-				return;
-			}
-			
-			const item = this.actor.items.get(itemId);
-			if (!item) {
-				console.warn("T20 Custom Sheet | Item não encontrado:", itemId);
-				return;
-			}
-			
-			if (item.type !== 'arma') {
-				console.warn("T20 Custom Sheet | Item não é uma arma:", item.type);
-				return;
-			}
-			
-			try {
-				// 1) Fluxo oficial: tentar usar a arma do sistema T20
-				if (typeof item.use === "function") {
-					await item.use();
-					return;
-				}
-
-				// 2) Alternativa: se existir método roll padrão, usar
-				if (typeof item.roll === "function") {
-					await item.roll();
-					return;
-				}
-
-				// 3) Fallback: Mostrar o card da arma no chat
-				const speaker = ChatMessage.getSpeaker({actor: this.actor});
-				
-				let content = '';
-				try {
-					const possibleTemplates = [
-						"systems/tormenta20/templates/chat/item-card.hbs",
-						"systems/tormenta20/templates/chat/weapon-card.hbs",
-						"systems/tormenta20/templates/items/arma-chat.hbs"
-					];
-					
-					let templateFound = false;
-					for (const templatePath of possibleTemplates) {
-						try {
-							content = await renderTemplate(templatePath, {
-								item: item,
-								actor: this.actor,
-								data: item.system
-							});
-							templateFound = true;
-							break;
-						} catch (e) {
-							// Continuar tentando outros templates
-						}
-					}
-					
-					// Se nenhum template funcionou, criar um card simples
-					if (!templateFound) {
-						let descricao = item.system?.descricao?.value || item.system?.description?.value || '';
-						const img = item.img || 'icons/svg/mystery-man.svg';
-						
-						if (descricao) {
-							try {
-								descricao = await TextEditor.enrichHTML(descricao, {
-									async: true,
-									relativeTo: this.actor
-								});
-							} catch (e) {
-								// Se falhar, usar descrição original
-							}
-						}
-						
-						const ataque = item.labels?.ataque || '-';
-						
-						content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
-							<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
-							<div style="flex: 1;">
-								<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
-								${ataque ? `<p style="margin: 4px 0;"><strong>Ataque:</strong> ${ataque}</p>` : ''}
-								${descricao ? `<div class="item-description" style="margin-top: 8px;">${descricao}</div>` : ''}
-							</div>
-						</div>`;
-					}
-				} catch (templateError) {
-					console.warn("T20 Custom Sheet | Erro ao renderizar template, usando card simples:", templateError);
-					const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
-					const img = item.img || 'icons/svg/mystery-man.svg';
-					content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
-						<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
-						<div style="flex: 1;">
-							<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
-							${descricao ? `<p>${descricao}</p>` : ''}
-						</div>
-					</div>`;
-				}
-				
-				await ChatMessage.create({
-					user: game.user.id,
-					speaker: speaker,
-					content: content
-				});
-				
-			} catch (error) {
-				console.error("T20 Custom Sheet | Erro ao exibir arma no chat:", error);
-				ui.notifications.error(`Erro ao exibir ${item.name}`);
-			} finally {
-				// Remover classe de processamento após 500ms
-				setTimeout(() => {
-					$(event.currentTarget).removeClass('processing');
-				}, 500);
-			}
-		}
 		
 		/**
 		 * Handler para clique no ícone do poder
