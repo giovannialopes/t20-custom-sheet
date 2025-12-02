@@ -3,6 +3,8 @@
  * Módulo que adiciona uma nova ficha de personagem personalizada para Tormenta20
  */
 
+import { PowersManager } from "./t20-powers.mjs";
+
 /* -------------------------------------------- */
 /*  Module Initialization                       */
 /* -------------------------------------------- */
@@ -88,9 +90,12 @@ Hooks.once("ready", async () => {
 		async _render(force = false, options = {}) {
 			await super._render(force, options);
 			
+			// Inicializar gerenciador de poderes
+			this.powersManager = new PowersManager(this);
+			
 			// Adicionar badges de tipo aos poderes e configurar filtros
 			setTimeout(() => {
-				this._setupPowersSection();
+				this.powersManager.setupPowersSection();
 			}, 100);
 		}
 		
@@ -246,24 +251,18 @@ Hooks.once("ready", async () => {
 		
 		/**
 		 * Configura a seção de poderes com tipos e filtros
+		 * @deprecated - Use powersManager.setupPowersSection() instead
 		 */
 		_setupPowersSection() {
-			if (!this.element || !this.element.length) return;
-			
-			const $powersSection = this.element.find('.list-powers-custom');
-			if ($powersSection.length === 0) return;
-			
-			// Adicionar tipos aos poderes
-			this._addPowerTypeBadges();
-			
-			// Criar chips de resumo
-			this._createPowerChips();
-			
-			// Configurar filtros
-			this._setupPowerFilters();
+			if (!this.powersManager) {
+				this.powersManager = new PowersManager(this);
+			}
+			this.powersManager.setupPowersSection();
 		}
+		
+		// Métodos antigos removidos - agora estão em t20-powers.mjs
 		/**
-		 * Adiciona badges de tipo aos poderes e formata ativação/custo
+		 * @deprecated - Moved to PowersManager
 		 */
 		_addPowerTypeBadges() {
 			const $powerItems = this.element.find('.list-powers-custom .power-item');
@@ -1032,4 +1031,31 @@ Hooks.once("ready", async () => {
 	});
 
 	console.log("T20 Custom Sheet | Ficha customizada registrada com sucesso!");
+	
+	// Adicionar aba "Poderes" no nav-bar
+	Hooks.on("renderActorSheet", (app, html, data) => {
+		if (app.constructor.name !== "ActorSheetT20CustomCharacter") return;
+		
+		const $navBar = html.find('.sheet-navigation');
+		if ($navBar.length === 0) return;
+		
+		// Verificar se a aba já existe
+		if ($navBar.find('a[data-tab="powers"]').length > 0) return;
+		
+		// Criar elemento da aba
+		const $powersTab = $(`
+			<a class="item" data-tab="powers" title="${game.i18n.localize("T20.Powers")}">
+				<i class="fas fa-magic"></i>
+				${game.i18n.localize("T20.Powers")}
+			</a>
+		`);
+		
+		// Inserir antes da aba "effects"
+		const $effectsTab = $navBar.find('a[data-tab="effects"]');
+		if ($effectsTab.length > 0) {
+			$powersTab.insertBefore($effectsTab);
+		} else {
+			$navBar.append($powersTab);
+		}
+	});
 });

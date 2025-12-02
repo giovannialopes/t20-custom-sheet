@@ -2,7 +2,7 @@
   "id": "t20-custom-sheet",
   "title": "T20 Custom Sheet",
   "description": "Módulo que adiciona uma nova ficha de personagem personalizada para o sistema Tormenta20",
-  "version": "1.0.31",
+  "version": "1.1.0",
   "compatibility": {
     "minimum": "13",
     "verified": "13",
@@ -13,7 +13,7 @@
       "name": "Giovanni Assis Lopes"
     }
   ],
-  "esmodules": ["t20-custom-sheet.mjs"],
+  "esmodules": ["t20-custom-sheet.mjs", "t20-powers.mjs"],
   "relationships": {
     "requires": [
       {
