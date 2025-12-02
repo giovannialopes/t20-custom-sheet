@@ -89,61 +89,119 @@ Hooks.once("ready", async () => {
 			await super._render(force, options);
 			
 			// Adicionar badges de tipo aos poderes após o render
-			if (this.element && this.element.length) {
-				const powerList = this.element.find('.list-powers .item-list .item');
-				powerList.each((index, element) => {
-					const $item = $(element);
-					const itemId = $item.data('item-id');
-					if (itemId) {
-						const item = this.actor.items.get(itemId);
-						if (item && item.type === 'poder') {
-							// Buscar o nome do poder
-							const $name = $item.find('.item-name h4, .item-name .item-name-input');
-							
-							// Verificar se já tem badge
-							if ($name.find('.power-type-badge').length === 0) {
-								// Obter tipo do poder
-								let tipo = item.system?.tipo || item.system?.type || item.tipo || item.type || "geral";
-								if (typeof tipo === 'object' && tipo !== null) {
-									tipo = tipo.value || tipo.label || "geral";
-								}
-								tipo = String(tipo).toLowerCase().trim();
-								
-								// Mapear tipos
-								const tipoLabels = {
-									"geral": "Geral",
-									"origem": "Origem",
-									"classe": "Classe",
-									"racial": "Racial",
-									"racial_alternativa": "Racial Alternativa",
-									"racial alternativa": "Racial Alternativa",
-									"tormenta": "Tormenta",
-									"devoto": "Devoto",
-									"concedido": "Concedido",
-									"complicacao": "Complicação",
-									"complicação": "Complicação",
-									"complicacão": "Complicação",
-									"ability": "Ability",
-									"arquetipo": "Arquétipo",
-									"arquétipo": "Arquétipo",
-									"multiclasse": "Multiclasse",
-									"multi-classe": "Multiclasse"
-								};
-								
-								const tipoLabel = tipoLabels[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1);
-								
-								// Adicionar badge
-								const badge = $('<span>')
-									.addClass('power-type-badge')
-									.addClass(`power-type-${tipo}`)
-									.text(tipoLabel);
-								
-								$name.append(badge);
+			// Usar setTimeout para garantir que o DOM está totalmente renderizado
+			setTimeout(() => {
+				this._addPowerTypeBadges();
+			}, 100);
+		}
+		
+		/**
+		 * Adiciona badges de tipo aos poderes
+		 */
+		_addPowerTypeBadges() {
+			if (!this.element || !this.element.length) return;
+			
+			// Buscar todos os itens na lista de poderes
+			const powerList = this.element.find('.list-powers .item-list .item, .list-powers .item');
+			
+			powerList.each((index, element) => {
+				const $item = $(element);
+				const itemId = $item.data('item-id') || $item.attr('data-item-id');
+				
+				if (!itemId) return;
+				
+				const item = this.actor.items.get(itemId);
+				if (!item || item.type !== 'poder') return;
+				
+				// Buscar o nome do poder - tentar diferentes seletores
+				let $name = $item.find('.item-name h4');
+				if ($name.length === 0) {
+					$name = $item.find('.item-name .item-name-input');
+				}
+				if ($name.length === 0) {
+					$name = $item.find('.item-name');
+				}
+				
+				if ($name.length === 0) return;
+				
+				// Verificar se já tem badge
+				if ($name.find('.power-type-badge').length > 0) return;
+				
+				// Obter tipo do poder - verificar múltiplos locais
+				let tipo = item.system?.tipo || 
+				           item.system?.type || 
+				           item.system?.categoria?.tipo ||
+				           item.system?.categoria?.type ||
+				           item.system?.categoria ||
+				           item.tipo || 
+				           item.type || 
+				           null;
+				
+				// Se o tipo vier como objeto, pegar o valor
+				if (typeof tipo === 'object' && tipo !== null) {
+					tipo = tipo.value || tipo.label || tipo.name || null;
+				}
+				
+				// Se ainda não encontrou, verificar se há uma propriedade categoria no sistema
+				if (!tipo && item.system) {
+					// Tentar todas as propriedades do system que possam conter o tipo
+					for (const key of Object.keys(item.system)) {
+						if (key.toLowerCase().includes('tipo') || key.toLowerCase().includes('type') || key.toLowerCase().includes('categoria')) {
+							const value = item.system[key];
+							if (value && typeof value !== 'object') {
+								tipo = value;
+								break;
+							} else if (value && typeof value === 'object' && value.value) {
+								tipo = value.value;
+								break;
 							}
 						}
 					}
-				});
-			}
+				}
+				
+				// Normalizar para string minúscula
+				if (tipo) {
+					tipo = String(tipo).toLowerCase().trim();
+				} else {
+					tipo = "geral"; // Default
+				}
+				
+				// Debug - remover depois
+				if (tipo === "geral") {
+					console.log("T20 Custom Sheet | Poder sem tipo encontrado:", item.name, "System:", item.system);
+				}
+				
+				// Mapear tipos para labels mais amigáveis
+				const tipoLabels = {
+					"geral": "Geral",
+					"origem": "Origem",
+					"classe": "Classe",
+					"racial": "Racial",
+					"racial_alternativa": "Racial Alternativa",
+					"racial alternativa": "Racial Alternativa",
+					"tormenta": "Tormenta",
+					"devoto": "Devoto",
+					"concedido": "Concedido",
+					"complicacao": "Complicação",
+					"complicação": "Complicação",
+					"complicacão": "Complicação",
+					"ability": "Ability",
+					"arquetipo": "Arquétipo",
+					"arquétipo": "Arquétipo",
+					"multiclasse": "Multiclasse",
+					"multi-classe": "Multiclasse"
+				};
+				
+				const tipoLabel = tipoLabels[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1);
+				
+				// Adicionar badge
+				const badge = $('<span>')
+					.addClass('power-type-badge')
+					.addClass(`power-type-${tipo.replace(/[^a-z0-9]/g, '-')}`)
+					.text(tipoLabel);
+				
+				$name.append(badge);
+			});
 		}
 
 		/** @override */
