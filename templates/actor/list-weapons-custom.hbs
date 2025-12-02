@@ -1,0 +1,247 @@
+{{!-- Weapons Custom List --}}
+<div class="weapons-list-custom">
+	{{#each actor.inventario.arma.items as |item id|}}
+	<div class="weapon-item" data-item-id="{{item._id}}" data-weapon-name="{{item.name}}">
+		<div class="weapon-item-row">
+			<div class="weapon-icon item-image rollable" data-item-id="{{item._id}}" style="background-image: url('{{item.img}}')" title="{{item.name}}"></div>
+			<div class="weapon-info">
+				<div class="weapon-name">{{item.name}}</div>
+				<div class="weapon-stats" data-item-id="{{item._id}}">
+					<span class="weapon-attack-text">-</span>
+				</div>
+			</div>
+			<div class="weapon-controls">
+				<a class="item-control item-edit weapon-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
+					<i class="fas fa-edit"></i>
+				</a>
+				<a class="item-control item-delete weapon-control" title="{{localize 'T20.ItemDelete'}}" data-item-id="{{item._id}}">
+					<i class="fas fa-trash"></i>
+				</a>
+			</div>
+		</div>
+	</div>
+	{{/each}}
+</div>
+
+<style>
+.weapons-list-custom {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.weapon-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: 16px 18px;
+	background: rgba(22, 26, 35, 0.95);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 12px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	opacity: 0;
+	transform: translateY(-10px);
+	animation: weaponItemEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+	box-shadow: 
+		0 4px 12px rgba(0, 0, 0, 0.3),
+		inset 0 1px 0 rgba(255, 255, 255, 0.05);
+	position: relative;
+	overflow: hidden;
+}
+
+.weapon-item::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 4px;
+	height: 100%;
+	background: linear-gradient(180deg, 
+		rgba(245, 194, 66, 0.8) 0%,
+		rgba(230, 126, 34, 0.8) 100%);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+@keyframes weaponItemEnter {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.weapon-item-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.weapon-item:hover {
+	background: rgba(28, 32, 42, 1);
+	border-color: rgba(255, 255, 255, 0.2);
+	box-shadow: 
+		0 8px 24px rgba(0, 0, 0, 0.5),
+		0 0 0 1px rgba(255, 255, 255, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.08);
+	transform: translateX(6px) translateY(-2px);
+}
+
+.weapon-item:hover::before {
+	opacity: 1;
+}
+
+.weapon-icon {
+	width: 48px;
+	height: 48px;
+	border-radius: 10px;
+	background-size: cover;
+	background-position: center;
+	flex-shrink: 0;
+	border: 2px solid rgba(255, 255, 255, 0.15);
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	box-shadow: 
+		0 2px 8px rgba(0, 0, 0, 0.3),
+		inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.weapon-icon::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: 8px;
+	padding: 2px;
+	background: linear-gradient(135deg, 
+		rgba(255, 255, 255, 0.3) 0%,
+		rgba(255, 255, 255, 0.05) 100%);
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, 
+				   linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.weapon-icon:hover {
+	transform: scale(1.15) rotate(2deg);
+	box-shadow: 
+		0 4px 16px rgba(0, 0, 0, 0.4),
+		0 0 20px rgba(245, 194, 66, 0.4);
+	border-color: rgba(245, 194, 66, 0.6);
+	z-index: 1;
+}
+
+.weapon-icon:hover::after {
+	opacity: 1;
+}
+
+.weapon-icon:active {
+	transform: scale(1.1) rotate(1deg);
+}
+
+.weapon-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.weapon-name {
+	font-size: 15px;
+	font-weight: 600;
+	color: #ffffff;
+	margin-bottom: 6px;
+	cursor: pointer;
+	user-select: none;
+	transition: all 0.3s ease;
+	line-height: 1.4;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.weapon-name:hover {
+	color: rgba(245, 194, 66, 1);
+	text-shadow: 0 2px 4px rgba(245, 194, 66, 0.3);
+}
+
+.weapon-stats {
+	font-size: 11px;
+	color: rgba(255, 255, 255, 0.7);
+}
+
+.weapon-attack-text {
+	font-weight: 500;
+}
+
+.weapon-controls {
+	display: flex;
+	gap: 5px;
+}
+
+.weapon-control {
+	padding: 8px 12px;
+	background: rgba(255, 255, 255, 0.08);
+	border: 2px solid rgba(255, 255, 255, 0.12);
+	border-radius: 8px;
+	color: #fff;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+	box-shadow: 
+		inset 0 2px 4px rgba(0, 0, 0, 0.2),
+		0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.weapon-control::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 0;
+	height: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.2);
+	transform: translate(-50%, -50%);
+	transition: width 0.4s ease, height 0.4s ease;
+}
+
+.weapon-control:hover {
+	background: rgba(255, 255, 255, 0.15);
+	border-color: rgba(255, 255, 255, 0.3);
+	transform: translateY(-3px) scale(1.08);
+	box-shadow: 
+		0 6px 16px rgba(0, 0, 0, 0.4),
+		inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.weapon-control:hover::before {
+	width: 200px;
+	height: 200px;
+}
+
+.weapon-control i {
+	position: relative;
+	z-index: 1;
+	transition: transform 0.25s ease;
+}
+
+.weapon-control:hover i {
+	transform: scale(1.15);
+}
+
+.weapon-control.item-delete:hover {
+	background: rgba(192, 57, 43, 0.3);
+	border-color: rgba(192, 57, 43, 0.6);
+	color: #ffcccc;
+}
+
+.weapon-control.item-edit:hover {
+	background: rgba(74, 144, 226, 0.3);
+	border-color: rgba(74, 144, 226, 0.6);
+	color: #b3d9ff;
+}
+</style>
+

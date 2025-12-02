@@ -12,11 +12,12 @@ import { PowersManager } from "./t20-powers.mjs";
 Hooks.once("ready", async () => {
 	console.log("T20 Custom Sheet | Inicializando módulo de ficha customizada");
 
-	// Pré-carregar e registrar partials do powers-tab e items-tab
+	// Pré-carregar e registrar partials do powers-tab, items-tab e weapons-custom
 	try {
 		await loadTemplates([
 			"modules/t20-custom-sheet/templates/actor/powers-tab.hbs",
-			"modules/t20-custom-sheet/templates/actor/items-tab.hbs"
+			"modules/t20-custom-sheet/templates/actor/items-tab.hbs",
+			"modules/t20-custom-sheet/templates/actor/list-weapons-custom.hbs"
 		]);
 		
 		// Registrar os partials manualmente no Handlebars
@@ -30,6 +31,12 @@ Hooks.once("ready", async () => {
 		if (itemsTemplate) {
 			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/items-tab", itemsTemplate);
 			console.log("T20 Custom Sheet | Partial items-tab registrado com sucesso");
+		}
+		
+		const weaponsTemplate = await fetch("modules/t20-custom-sheet/templates/actor/list-weapons-custom.hbs").then(r => r.text());
+		if (weaponsTemplate) {
+			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/list-weapons-custom", weaponsTemplate);
+			console.log("T20 Custom Sheet | Partial list-weapons-custom registrado com sucesso");
 		}
 	} catch (error) {
 		console.error("T20 Custom Sheet | Erro ao carregar/registrar partials:", error);
@@ -119,7 +126,121 @@ Hooks.once("ready", async () => {
 			// Adicionar badges de tipo aos poderes e configurar filtros
 			setTimeout(() => {
 				this.powersManager.setupPowersSection();
+				this._setupWeaponsSection();
 			}, 100);
+		}
+		
+		/**
+		 * Configura a seção de armas com formatação de ataque/dano/crítico
+		 */
+		_setupWeaponsSection() {
+			if (!this.element || !this.element.length) return;
+			
+			const $weaponsList = this.element.find('.weapons-list-custom');
+			if ($weaponsList.length === 0) return;
+			
+			const $weaponItems = $weaponsList.find('.weapon-item');
+			
+			$weaponItems.each((index, element) => {
+				const $item = $(element);
+				const itemId = $item.data('item-id');
+				
+				if (!itemId) return;
+				
+				// Adicionar delay escalonado para animação de entrada
+				$item.css('animation-delay', `${index * 0.05}s`);
+				
+				const item = this.actor.items.get(itemId);
+				if (!item || item.type !== 'arma') return;
+				
+				// Formatar ataque, dano e crítico
+				this._formatWeaponStats($item, item);
+				
+				// Configurar rolagem do dado ao clicar no ícone
+				this._setupWeaponIconRoll($item, item);
+			});
+		}
+		
+		/**
+		 * Formata as estatísticas de ataque, dano e crítico da arma
+		 */
+		_formatWeaponStats($item, item) {
+			const $attackText = $item.find('.weapon-attack-text');
+			
+			if ($attackText.length === 0) return;
+			
+			// Tentar usar labels do sistema primeiro (mais confiável)
+			let finalText = item.labels?.ataque || '';
+			
+			// Se não tiver label, formatar manualmente
+			if (!finalText) {
+				const ataque = item.system?.ataque || {};
+				const dano = item.system?.dano || {};
+				const critico = item.system?.critico || {};
+				
+				// Formatar ataque
+				let ataqueValue = '';
+				if (ataque.total !== undefined && ataque.total !== null) {
+					ataqueValue = ataque.total >= 0 ? `+${ataque.total}` : `${ataque.total}`;
+				} else if (ataque.value !== undefined && ataque.value !== null) {
+					ataqueValue = ataque.value >= 0 ? `+${ataque.value}` : `${ataque.value}`;
+				}
+				
+				// Formatar dano
+				let danoText = '';
+				if (dano.dado) {
+					danoText = dano.dado;
+					if (dano.bonus !== undefined && dano.bonus !== null && dano.bonus !== 0) {
+						const bonus = Number(dano.bonus);
+						danoText += bonus >= 0 ? ` + ${bonus}` : ` ${bonus}`;
+					}
+				}
+				
+				// Formatar crítico
+				let criticoText = '';
+				if (critico.range) {
+					criticoText = critico.range;
+					if (critico.multiplier && critico.multiplier !== 2) {
+						criticoText += `/${critico.multiplier}x`;
+					}
+				}
+				
+				// Montar texto final
+				if (ataqueValue) {
+					finalText = ataqueValue;
+					if (danoText) {
+						finalText += ` (${danoText}`;
+						if (criticoText) {
+							finalText += `, ${criticoText}`;
+						}
+						finalText += ')';
+					} else if (criticoText) {
+						finalText += ` (${criticoText})`;
+					}
+				} else if (danoText) {
+					finalText = danoText;
+					if (criticoText) {
+						finalText += `, ${criticoText}`;
+					}
+				} else if (criticoText) {
+					finalText = criticoText;
+				}
+			}
+			
+			$attackText.text(finalText || '-');
+		}
+		
+		/**
+		 * Configura a rolagem do dado ao clicar no ícone da arma
+		 */
+		_setupWeaponIconRoll($item, item) {
+			const $weaponIcon = $item.find('.weapon-icon');
+			if ($weaponIcon.length === 0) return;
+			
+			$weaponIcon.addClass('rollable item-image').attr({
+				'data-item-id': item.id,
+				'data-item-type': 'arma'
+			});
 		}
 		
 		/** @override */
@@ -128,6 +249,26 @@ Hooks.once("ready", async () => {
 			
 			// Handler para ícones roláveis de poderes usando evento delegado (apenas um listener)
 			html.off('click', '.list-powers-custom .power-icon').on('click', '.list-powers-custom .power-icon', this._onPowerIconClick.bind(this));
+			
+			// Handler para controles de editar e deletar armas
+			html.find('.weapons-list-custom .item-edit').off('click').on('click', (event) => {
+				event.preventDefault();
+				const itemId = $(event.currentTarget).data('item-id');
+				const item = this.actor.items.get(itemId);
+				if (item) item.sheet.render(true);
+			});
+			
+			html.find('.weapons-list-custom .item-delete').off('click').on('click', (event) => {
+				event.preventDefault();
+				const itemId = $(event.currentTarget).data('item-id');
+				const item = this.actor.items.get(itemId);
+				if (item) {
+					item.delete();
+					setTimeout(() => {
+						this._setupWeaponsSection();
+					}, 100);
+				}
+			});
 		}
 		
 		/**
