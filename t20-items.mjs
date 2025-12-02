@@ -1,4 +1,4 @@
-/**
+﻿/**
  * T20 Items Manager
  * Gerencia a lógica de armas, equipamentos e inventário
  */
@@ -1269,6 +1269,371 @@ export class EquipmentManager {
 		}
 	}
 	
+	/**
+	 * Escapa HTML para prevenir XSS
+	 */
+	escapeHtml(text) {
+		const div = document.createElement('div');
+		div.textContent = text;
+		return div.innerHTML;
+	}
+}
+
+export class InventoryManager {
+	constructor(sheet) {
+		this.sheet = sheet;
+		this.actor = sheet.actor;
+		this.element = sheet.element;
+	}
+
+	/**
+	 * Configura a seção de inventário
+	 */
+	setupInventorySection() {
+		if (!this.element || !this.element.length) return;
+
+		const $inventoryList = this.element.find('.inventory-list-custom');
+		if ($inventoryList.length === 0) return;
+
+		const $inventoryItems = $inventoryList.find('.inventory-item');
+
+		$inventoryItems.each((index, element) => {
+			const $item = $(element);
+			const itemId = $item.data('item-id') || $item.attr('data-item-id');
+
+			if (!itemId) {
+				console.warn("T20 Items Manager | Item ID não encontrado para inventário");
+				return;
+			}
+
+			// Adicionar delay escalonado para animação de entrada
+			$item.css('animation-delay', `${index * 0.05}s`);
+
+			const item = this.actor.items.get(itemId);
+			if (!item) {
+				console.warn("T20 Items Manager | Item não encontrado:", itemId);
+				return;
+			}
+
+			if (item.type !== 'consumivel') {
+				console.warn("T20 Items Manager | Item não é um consumível:", item.type);
+				return;
+			}
+
+			// Log completo do item do inventário
+			const system = item.system || {};
+			console.log("T20 Items Manager | Estrutura completa do item (inventário):", {
+				name: item.name,
+				type: item.type,
+				labels: item.labels,
+				labelsKeys: Object.keys(item.labels || {}),
+				systemKeys: Object.keys(system),
+				system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
+				qtd: system.qtd,
+				peso: system.peso,
+				espaco: system.espaco,
+				preco: system.preco,
+				descricao: system.descricao,
+				description: system.description
+			});
+
+			// Formatar estatísticas
+			this.formatInventoryStats($item, item);
+
+			// Configurar rolagem do dado ao clicar no ícone
+			this.setupInventoryIconRoll($item, item);
+
+			// Adicionar painel expansível com descrição
+			this.addInventoryTooltip($item, item);
+		});
+	}
+
+	/**
+	 * Formata as estatísticas do item do inventário
+	 */
+	formatInventoryStats($item, item) {
+		const $statsText = $item.find('.inventory-stats-text');
+
+		if ($statsText.length === 0) {
+			console.warn("T20 Items Manager | Elemento .inventory-stats-text não encontrado");
+			return;
+		}
+
+		const system = item.system || {};
+
+		// Montar informações: quantidade, peso, espaço, preço
+		const parts = [];
+
+		if (system.qtd !== undefined && system.qtd !== null && system.qtd !== '') {
+			parts.push(`Qtd: ${system.qtd}`);
+		}
+
+		if (system.peso !== undefined && system.peso !== null && system.peso !== '') {
+			parts.push(`Peso: ${system.peso}`);
+		}
+
+		if (system.espaco !== undefined && system.espaco !== null && system.espaco !== '') {
+			parts.push(`Espaço: ${system.espaco}`);
+		}
+
+		if (system.preco !== undefined && system.preco !== null && system.preco !== '') {
+			parts.push(`Preço: ${system.preco}`);
+		}
+
+		const finalText = parts.join(' | ') || '-';
+		$statsText.text(finalText);
+	}
+
+	/**
+	 * Configura a rolagem do dado ao clicar no ícone do inventário
+	 */
+	setupInventoryIconRoll($item, item) {
+		const $inventoryIcon = $item.find('.inventory-icon');
+		if ($inventoryIcon.length === 0) return;
+
+		$inventoryIcon.addClass('rollable item-image').attr({
+			'data-item-id': item.id,
+			'data-item-type': 'consumivel'
+		});
+	}
+
+	/**
+	 * Adiciona painel expansível ao item do inventário com informações detalhadas
+	 */
+	addInventoryTooltip($item, item) {
+		if ($item.find('.inventory-details-panel').length > 0) return;
+
+		const $inventoryItemRow = $item.find('.inventory-item-row');
+		if ($inventoryItemRow.length === 0) return;
+
+		let descricao = '';
+		if (item.system?.descricao?.value) {
+			descricao = item.system.descricao.value;
+		} else if (item.system?.description?.value) {
+			descricao = item.system.description.value;
+		}
+
+		const $descContainer = $('<div>').addClass('inventory-details-description');
+
+		// Obter estatísticas formatadas
+		const $statsText = $item.find('.inventory-stats-text');
+		const statsText = $statsText.text() || '-';
+
+		const $panel = $('<div>')
+			.addClass('inventory-details-panel')
+			.html(`
+				<div class="inventory-details-header">
+					<div class="inventory-details-title">${this.escapeHtml(item.name)}</div>
+				</div>
+				<div class="inventory-details-row">
+					<span class="inventory-details-label">Estatísticas:</span>
+					<span class="inventory-details-value">${this.escapeHtml(statsText)}</span>
+				</div>
+			`)
+			.append($descContainer);
+
+		$inventoryItemRow.after($panel);
+
+		let enriched = false;
+
+		const $inventoryName = $item.find('.inventory-name');
+		$inventoryName.off('click.inventory-expand').on('click.inventory-expand', async (event) => {
+			event.stopPropagation();
+
+			if (!$item.hasClass('expanded') && descricao && !enriched) {
+				enriched = true;
+				try {
+					const descricaoHtml = await TextEditor.enrichHTML(descricao, {
+						async: true,
+						relativeTo: this.actor
+					});
+					$descContainer.html(descricaoHtml);
+				} catch (e) {
+					$descContainer.html(this.escapeHtml(descricao));
+				}
+			}
+
+			$item.toggleClass('expanded');
+		});
+	}
+
+	/**
+	 * Handler para clique no ícone do inventário
+	 */
+	async onInventoryIconClick(event) {
+		event.preventDefault();
+		event.stopPropagation();
+
+		// Prevenir múltiplos cliques rápidos
+		if ($(event.currentTarget).hasClass('processing')) {
+			return;
+		}
+		$(event.currentTarget).addClass('processing');
+
+		const $icon = $(event.currentTarget);
+		let itemId = $icon.data('item-id');
+
+		// Se não tiver no ícone, procurar no elemento pai
+		if (!itemId) {
+			const $item = $icon.closest('[data-item-id]');
+			if ($item.length) {
+				itemId = $item.data('item-id');
+			}
+		}
+
+		if (!itemId) {
+			console.warn("T20 Items Manager | Não foi possível encontrar o ID do item");
+			return;
+		}
+
+		const item = this.actor.items.get(itemId);
+		if (!item) {
+			console.warn("T20 Items Manager | Item não encontrado:", itemId);
+			return;
+		}
+
+		if (item.type !== 'consumivel') {
+			console.warn("T20 Items Manager | Item não é um consumível:", item.type);
+			return;
+		}
+
+		try {
+			// Tentar usar o item do sistema T20
+			if (typeof item.use === "function") {
+				await item.use();
+				return;
+			}
+
+			// Alternativa: se existir método roll padrão, usar
+			if (typeof item.roll === "function") {
+				await item.roll();
+				return;
+			}
+
+			// Fallback: Mostrar o card do item no chat
+			const speaker = ChatMessage.getSpeaker({actor: this.actor});
+
+			let content = '';
+			try {
+				const possibleTemplates = [
+					"systems/tormenta20/templates/chat/item-card.hbs",
+					"systems/tormenta20/templates/chat/consumable-card.hbs",
+					"systems/tormenta20/templates/items/consumivel-chat.hbs"
+				];
+
+				let templateFound = false;
+				for (const templatePath of possibleTemplates) {
+					try {
+						content = await renderTemplate(templatePath, {
+							item: item,
+							actor: this.actor,
+							data: item.system
+						});
+						templateFound = true;
+						break;
+					} catch (e) {
+						// Continuar tentando outros templates
+					}
+				}
+
+				// Se nenhum template funcionou, criar um card simples
+				if (!templateFound) {
+					let descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+					const img = item.img || 'icons/svg/mystery-man.svg';
+
+					if (descricao) {
+						try {
+							descricao = await TextEditor.enrichHTML(descricao, {
+								async: true,
+								relativeTo: this.actor
+							});
+						} catch (e) {
+							// Se falhar, usar descrição original
+						}
+					}
+
+					content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+						<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+						<div style="flex: 1;">
+							<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+							${descricao ? `<div class="item-description" style="margin-top: 8px;">${descricao}</div>` : ''}
+						</div>
+					</div>`;
+				}
+			} catch (templateError) {
+				console.warn("T20 Items Manager | Erro ao renderizar template, usando card simples:", templateError);
+				const descricao = item.system?.descricao?.value || item.system?.description?.value || '';
+				const img = item.img || 'icons/svg/mystery-man.svg';
+				content = `<div class="t20-item-card" style="display: flex; gap: 10px; align-items: flex-start;">
+					<img src="${img}" style="width: 64px; height: 64px; flex-shrink: 0; border: none; border-radius: 4px;" />
+					<div style="flex: 1;">
+						<h4 style="margin: 0 0 8px 0;">${item.name}</h4>
+						${descricao ? `<p>${descricao}</p>` : ''}
+					</div>
+				</div>`;
+			}
+
+			await ChatMessage.create({
+				user: game.user.id,
+				speaker: speaker,
+				content: content
+			});
+
+		} catch (error) {
+			console.error("T20 Items Manager | Erro ao exibir item do inventário no chat:", error);
+			ui.notifications.error(`Erro ao exibir ${item.name}`);
+		} finally {
+			// Remover classe de processamento após 500ms
+			setTimeout(() => {
+				$(event.currentTarget).removeClass('processing');
+			}, 500);
+		}
+	}
+
+	/**
+	 * Handler para clique no nome do inventário (expande/contrai descrição)
+	 */
+	onInventoryNameClick(event) {
+		event.preventDefault();
+		event.stopPropagation();
+
+		const $name = $(event.currentTarget);
+		const $item = $name.closest('.inventory-item');
+
+		if ($item.length === 0) return;
+
+		const itemId = $item.data('item-id') || $item.attr('data-item-id');
+		if (!itemId) return;
+
+		const item = this.actor.items.get(itemId);
+		if (!item) return;
+
+		// Toggle expanded class
+		$item.toggleClass('expanded');
+
+		// Enriquecer descrição na primeira expansão
+		const $descContainer = $item.find('.inventory-details-description');
+		if ($item.hasClass('expanded') && $descContainer.length > 0 && $descContainer.html().trim() === '') {
+			let descricao = '';
+			if (item.system?.descricao?.value) {
+				descricao = item.system.descricao.value;
+			} else if (item.system?.description?.value) {
+				descricao = item.system.description.value;
+			}
+
+			if (descricao) {
+				TextEditor.enrichHTML(descricao, {
+					async: true,
+					relativeTo: this.actor
+				}).then(html => {
+					$descContainer.html(html);
+				}).catch(e => {
+					$descContainer.html(this.escapeHtml(descricao));
+				});
+			}
+		}
+	}
+
 	/**
 	 * Escapa HTML para prevenir XSS
 	 */

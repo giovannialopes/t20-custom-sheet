@@ -4,7 +4,7 @@
  */
 
 import { PowersManager } from "./t20-powers.mjs";
-import { WeaponsManager, EquipmentManager } from "./t20-items.mjs";
+import { WeaponsManager, EquipmentManager, InventoryManager } from "./t20-items.mjs";
 
 /* -------------------------------------------- */
 /*  Module Initialization                       */
@@ -24,6 +24,9 @@ Hooks.once("ready", async () => {
 		if (typeof EquipmentManager === 'undefined') {
 			console.error("T20 Custom Sheet | EquipmentManager não foi importado corretamente");
 		}
+		if (typeof InventoryManager === 'undefined') {
+			console.error("T20 Custom Sheet | InventoryManager não foi importado corretamente");
+		}
 	} catch (e) {
 		console.error("T20 Custom Sheet | Erro ao verificar imports:", e);
 	}
@@ -34,7 +37,8 @@ Hooks.once("ready", async () => {
 			"modules/t20-custom-sheet/templates/actor/powers-tab.hbs",
 			"modules/t20-custom-sheet/templates/actor/items-tab.hbs",
 			"modules/t20-custom-sheet/templates/actor/list-weapons-custom.hbs",
-			"modules/t20-custom-sheet/templates/actor/list-equipment-custom.hbs"
+			"modules/t20-custom-sheet/templates/actor/list-equipment-custom.hbs",
+			"modules/t20-custom-sheet/templates/actor/list-inventory-custom.hbs"
 		]);
 		
 		// Registrar os partials manualmente no Handlebars
@@ -60,6 +64,12 @@ Hooks.once("ready", async () => {
 		if (equipmentTemplate) {
 			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/list-equipment-custom", equipmentTemplate);
 			console.log("T20 Custom Sheet | Partial list-equipment-custom registrado com sucesso");
+		}
+		
+		const inventoryTemplate = await fetch("modules/t20-custom-sheet/templates/actor/list-inventory-custom.hbs").then(r => r.text());
+		if (inventoryTemplate) {
+			Handlebars.registerPartial("modules/t20-custom-sheet/templates/actor/list-inventory-custom", inventoryTemplate);
+			console.log("T20 Custom Sheet | Partial list-inventory-custom registrado com sucesso");
 		}
 	} catch (error) {
 		console.error("T20 Custom Sheet | Erro ao carregar/registrar partials:", error);
@@ -162,6 +172,12 @@ Hooks.once("ready", async () => {
 				console.error("T20 Custom Sheet | Erro ao inicializar EquipmentManager:", e);
 			}
 			
+			try {
+				this.inventoryManager = new InventoryManager(this);
+			} catch (e) {
+				console.error("T20 Custom Sheet | Erro ao inicializar InventoryManager:", e);
+			}
+			
 			// Adicionar badges de tipo aos poderes e configurar filtros
 			setTimeout(() => {
 				if (this.powersManager) {
@@ -174,6 +190,9 @@ Hooks.once("ready", async () => {
 					}
 					if (this.equipmentManager) {
 						this.equipmentManager.setupEquipmentSection();
+					}
+					if (this.inventoryManager) {
+						this.inventoryManager.setupInventorySection();
 					}
 				}, 200);
 			}, 100);
@@ -231,6 +250,9 @@ Hooks.once("ready", async () => {
 						if (this.equipmentManager) {
 							this.equipmentManager.setupEquipmentSection();
 						}
+						if (this.inventoryManager) {
+							this.inventoryManager.setupInventorySection();
+						}
 					}, 100);
 				}
 			});
@@ -268,6 +290,11 @@ Hooks.once("ready", async () => {
 							this.equipmentManager.setupEquipmentSection();
 						}, 100);
 					}
+					if (this.inventoryManager) {
+						setTimeout(() => {
+							this.inventoryManager.setupInventorySection();
+						}, 100);
+					}
 				} catch (error) {
 					console.error("T20 Custom Sheet | Erro ao equipar/desequipar:", error);
 					ui.notifications.error(`Erro ao ${newEquipped ? 'equipar' : 'desequipar'} ${item.name}`);
@@ -291,6 +318,44 @@ Hooks.once("ready", async () => {
 					setTimeout(() => {
 						if (this.weaponsManager) {
 							this.weaponsManager.setupWeaponsSection();
+						}
+					}, 100);
+				}
+			});
+			
+			// Handler para ícones roláveis de inventário
+			html.off('click', '.inventory-list-custom .inventory-icon').on('click', '.inventory-list-custom .inventory-icon', (event) => {
+				if (this.inventoryManager) {
+					this.inventoryManager.onInventoryIconClick(event);
+				} else {
+					console.warn("T20 Custom Sheet | InventoryManager não inicializado");
+				}
+			});
+			
+			// Handler para clique no nome do inventário (expande/contrai descrição)
+			html.off('click', '.inventory-list-custom .inventory-name').on('click', '.inventory-list-custom .inventory-name', (event) => {
+				if (this.inventoryManager) {
+					this.inventoryManager.onInventoryNameClick(event);
+				}
+			});
+			
+			// Handler para controles de editar e deletar inventário
+			html.find('.inventory-list-custom .item-edit').off('click').on('click', (event) => {
+				event.preventDefault();
+				const itemId = $(event.currentTarget).data('item-id');
+				const item = this.actor.items.get(itemId);
+				if (item) item.sheet.render(true);
+			});
+			
+			html.find('.inventory-list-custom .item-delete').off('click').on('click', (event) => {
+				event.preventDefault();
+				const itemId = $(event.currentTarget).data('item-id');
+				const item = this.actor.items.get(itemId);
+				if (item) {
+					item.delete();
+					setTimeout(() => {
+						if (this.inventoryManager) {
+							this.inventoryManager.setupInventorySection();
 						}
 					}, 100);
 				}
