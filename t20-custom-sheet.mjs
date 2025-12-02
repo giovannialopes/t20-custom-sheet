@@ -13,27 +13,35 @@ Hooks.once("ready", async () => {
 	// Aguardar o sistema Tormenta20 estar pronto antes de registrar
 	// Tentar obter a classe base do sistema
 	let BaseSheetClass;
+	
+	// Método 1: Tentar importar do sistema usando o caminho correto
 	try {
-		// Tentar importar diretamente do sistema
-		const module = await import("../../module/sheets/actor-character.mjs");
+		const systemId = game.system.id || "tormenta20";
+		const module = await import(`systems/${systemId}/module/sheets/actor-character.mjs`);
 		BaseSheetClass = module.default;
+		console.log("T20 Custom Sheet | Classe base importada com sucesso");
 	} catch (e) {
-		console.warn("T20 Custom Sheet | Não foi possível importar a classe base diretamente, tentando método alternativo");
-		// Se não conseguir importar, tentar usar do CONFIG ou buscar nas sheets registradas
-		const registeredSheets = foundry.documents.collections.Actors.sheetClasses;
-		for (const [scope, sheets] of Object.entries(registeredSheets)) {
-			if (scope === "tormenta20") {
-				for (const [sheetClass, config] of Object.entries(sheets)) {
-					if (config.types?.includes("character") && config.makeDefault) {
+		console.warn("T20 Custom Sheet | Não foi possível importar a classe base diretamente, tentando método alternativo", e);
+		
+		// Método 2: Buscar nas sheets registradas
+		try {
+			const sheetClasses = foundry.documents.collections.Actors.sheetClasses;
+			if (sheetClasses && sheetClasses.tormenta20) {
+				// Procurar a sheet padrão de character
+				for (const [sheetClass, config] of Object.entries(sheetClasses.tormenta20)) {
+					if (config && config.types && config.types.includes("character") && config.makeDefault) {
 						BaseSheetClass = sheetClass;
+						console.log("T20 Custom Sheet | Classe base encontrada nas sheets registradas");
 						break;
 					}
 				}
 			}
+		} catch (e2) {
+			console.warn("T20 Custom Sheet | Erro ao buscar nas sheets registradas", e2);
 		}
 		
 		if (!BaseSheetClass) {
-			console.error("T20 Custom Sheet | Não foi possível encontrar a classe base do sistema");
+			console.error("T20 Custom Sheet | Não foi possível encontrar a classe base do sistema. A ficha customizada não será registrada.");
 			return;
 		}
 	}
