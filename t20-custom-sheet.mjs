@@ -132,16 +132,21 @@ Hooks.once("ready", async () => {
 				let tipo = this._getPowerType(item);
 				const tipoLabel = this._getPowerTypeLabel(tipo);
 				
-				// Normalizar tipo para uso consistente
-				const tipoNormalizado = this._normalizePowerTypeKey(tipo);
-				
-				// Atualizar data attribute com tipo normalizado
-				$item.attr('data-power-type', tipoNormalizado);
+				// Atualizar data attribute (usar normalizado para filtros, mas manter original para badge CSS)
+				const tipoNormalizadoParaFiltro = this._normalizePowerTypeKey(tipo);
+				$item.attr('data-power-type', tipoNormalizadoParaFiltro);
 				
 				// Adicionar badge de tipo
 				const $badgePlaceholder = $item.find('.power-type-placeholder');
 				if ($badgePlaceholder.length > 0 && $badgePlaceholder.hasClass('power-type-placeholder')) {
-					// Usar o tipo já normalizado
+					// Normalizar o tipo para usar no CSS (substituir espaços e caracteres especiais por hífen)
+					let tipoCss = tipo;
+					// Tratamento especial: se o label for "Habilidade de Classe", forçamos o tipo CSS correspondente
+					if (tipoLabel && tipoLabel.toLowerCase() === "habilidade de classe") {
+						tipoCss = "habilidade-de-classe";
+					}
+					const tipoNormalizado = tipoCss.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '-').toLowerCase();
+					
 					$badgePlaceholder
 						.removeClass('power-type-placeholder')
 						.addClass('power-type-badge')
