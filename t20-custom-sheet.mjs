@@ -24,9 +24,9 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 		return foundry.utils.mergeObject(super.defaultOptions, {
 			classes: ["tormenta20", "sheet", "actor", "character", "custom-sheet"],
 			template: "modules/t20-custom-sheet/templates/actor/character-custom-sheet.hbs",
-			width: 900,
+			width: 800,
 			height: 600,
-			left: null,
+			left: 20,
 			top: null,
 			resizable: true,
 			dragDrop: [{ dragSelector: ".item-list .item:not(.item-header)" }],
@@ -53,47 +53,70 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 	async _render(force = false, options = {}) {
 		await super._render(force, options);
 		
-		// Posicionar a ficha no lado esquerdo quando renderizada pela primeira vez
-		// Aguardar um frame para garantir que o DOM está pronto
+		// Forçar posicionamento no lado esquerdo após renderização
+		// Usar múltiplos métodos para garantir que funcione
+		setTimeout(() => {
+			this._forceLeftPosition();
+		}, 0);
+		
 		requestAnimationFrame(() => {
-			this._positionSheet();
+			this._forceLeftPosition();
 		});
 	}
 
 	/**
-	 * Posiciona a ficha no lado esquerdo da tela
+	 * Força a ficha a ficar no lado esquerdo da tela
 	 */
-	_positionSheet() {
+	_forceLeftPosition() {
 		if (!this.element || !this.element.length) return;
 		
-		const width = this.options.width || 900;
-		const height = this.options.height || 600;
+		const width = 800;
+		const height = 600;
 		
-		// Calcular posição no lado esquerdo da viewport
-		const viewportWidth = window.innerWidth || 1920;
+		// Calcular posição no lado esquerdo
 		const viewportHeight = window.innerHeight || 1080;
+		const left = 20;
+		const top = Math.max(20, (viewportHeight - height) / 2);
 		
-		// Posicionar no lado esquerdo com um pequeno espaçamento da borda
-		const left = 20; // 20px da borda esquerda
-		const top = Math.max(0, (viewportHeight - height) / 2); // Centralizado verticalmente
+		// Método 1: Usar setPosition se disponível
+		if (typeof this.setPosition === 'function') {
+			try {
+				this.setPosition({
+					width: width,
+					height: height,
+					left: left,
+					top: top
+				});
+			} catch (e) {
+				console.warn("Erro ao usar setPosition:", e);
+			}
+		}
 		
-		// Aplicar posição
-		// Usar jQuery se disponível, senão usar método nativo
+		// Método 2: Aplicar diretamente no elemento
 		if (this.element && this.element.css) {
 			this.element.css({
-				left: `${left}px`,
-				top: `${top}px`,
+				left: `${left}px !important`,
+				top: `${top}px !important`,
 				width: `${width}px`,
 				height: `${height}px`
 			});
 		}
 		
-		// Atualizar a posição no objeto para que seja salva
+		// Método 3: Atualizar posição no objeto
 		if (this.position) {
 			this.position.left = left;
 			this.position.top = top;
 			this.position.width = width;
 			this.position.height = height;
+		}
+		
+		// Método 4: Aplicar diretamente no DOM se jQuery não funcionar
+		const domElement = this.element?.[0] || this.element?.get?.(0);
+		if (domElement) {
+			domElement.style.left = `${left}px`;
+			domElement.style.top = `${top}px`;
+			domElement.style.width = `${width}px`;
+			domElement.style.height = `${height}px`;
 		}
 	}
 
