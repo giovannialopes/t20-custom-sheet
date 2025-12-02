@@ -462,6 +462,11 @@ export class EquipmentManager {
 			const labelsTipo = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
 			const isArmaduraDebug = tipoStr.toLowerCase().includes('armadura') || labelsTipo.includes('armadura');
 			
+			const tipoStr = system.tipo ? (typeof system.tipo === 'object' ? (system.tipo.value || system.tipo.label || '') : String(system.tipo)) : '';
+			const labelsTipo = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
+			const tipoLower = tipoStr.toLowerCase();
+			const isArmaduraDebug = tipoLower.includes('armadura') || labelsTipo.includes('armadura');
+			
 			console.log("T20 Items Manager | Estrutura completa do item (equipamento):", {
 				name: item.name,
 				labels: item.labels,
@@ -470,7 +475,9 @@ export class EquipmentManager {
 				system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
 				tipo: system.tipo,
 				tipoStr: tipoStr,
+				tipoLower: tipoLower,
 				labelsTipo: item.labels?.tipo,
+				labelsTipoLower: labelsTipo,
 				tipoUso: system.tipoUso,
 				subtipo: system.subtipo,
 				categoria: system.categoria,
@@ -480,7 +487,9 @@ export class EquipmentManager {
 				equipado: system.equipado,
 				espaco: system.espaco,
 				peso: system.peso,
-				isArmadura: isArmaduraDebug
+				isArmadura: isArmaduraDebug,
+				"tipoLower.includes('armadura')": tipoLower.includes('armadura'),
+				"labelsTipo.includes('armadura')": labelsTipo.includes('armadura')
 			});
 			
 			// Formatar estatísticas (defesa/espaço)
@@ -510,7 +519,15 @@ export class EquipmentManager {
 		
 		// Verificar se é uma armadura
 		// O sistema T20 pode ter tipo como "Armadura Leve", "Armadura Pesada", etc
-		const tipoStr = system.tipo ? (typeof system.tipo === 'object' ? (system.tipo.value || system.tipo.label || '') : String(system.tipo)) : '';
+		let tipoStr = '';
+		if (system.tipo) {
+			if (typeof system.tipo === 'object') {
+				tipoStr = system.tipo.value || system.tipo.label || system.tipo.name || '';
+			} else {
+				tipoStr = String(system.tipo);
+			}
+		}
+		
 		const tipoLower = tipoStr.toLowerCase();
 		const labelsTipo = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
 		
@@ -520,6 +537,15 @@ export class EquipmentManager {
 		                   system.type === 'armadura' ||
 		                   system.categoria === 'armadura' ||
 		                   system.category === 'armadura';
+		
+		console.log("T20 Items Manager | Verificação de armadura para", item.name, ":", {
+			tipoStr,
+			tipoLower,
+			labelsTipo,
+			isArmadura,
+			"tipoLower.includes('armadura')": tipoLower.includes('armadura'),
+			"labelsTipo.includes('armadura')": labelsTipo.includes('armadura')
+		});
 		
 		let finalText = '';
 		
