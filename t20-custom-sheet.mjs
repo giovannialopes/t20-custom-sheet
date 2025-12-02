@@ -12,6 +12,11 @@ import { PowersManager } from "./t20-powers.mjs";
 Hooks.once("ready", async () => {
 	console.log("T20 Custom Sheet | Inicializando módulo de ficha customizada");
 
+	// Pré-carregar templates necessários
+	await loadTemplates([
+		"modules/t20-custom-sheet/templates/actor/powers-tab.hbs"
+	]);
+
 	// Aguardar o sistema Tormenta20 estar pronto antes de registrar
 	// Tentar obter a classe base do sistema
 	let BaseSheetClass;
