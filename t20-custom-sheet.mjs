@@ -169,10 +169,45 @@ Hooks.once("ready", async () => {
 				}
 			}
 			
-			// Obter custo de mana (PM)
-			let manaCost = item.system?.custo || item.system?.custoPM || item.system?.pm || item.system?.mana || null;
+			// Mapear valores de execução para os labels corretos do sistema
+			const execucaoMap = {
+				"passivo": "Passivo",
+				"passive": "Passivo",
+				"padrão": "Padrão",
+				"padrao": "Padrão",
+				"standard": "Padrão",
+				"movimento": "Movimento",
+				"movement": "Movimento",
+				"completa": "Completa",
+				"complete": "Completa",
+				"reação": "Reação",
+				"reacao": "Reação",
+				"reaction": "Reação",
+				"livre": "Livre",
+				"free": "Livre",
+				"minuto": "Minuto",
+				"minute": "Minuto",
+				"hora": "Hora",
+				"hour": "Hora",
+				"dia": "Dia",
+				"day": "Dia",
+				"especial": "Especial",
+				"special": "Especial"
+			};
 			
-			if (manaCost) {
+			// Normalizar e mapear o texto
+			const ativacaoLower = String(ativacaoText).toLowerCase().trim();
+			ativacaoText = execucaoMap[ativacaoLower] || ativacaoText;
+			
+			// Obter custo de mana (PM)
+			let manaCost = item.system?.custo?.pm || 
+			               item.system?.custoPM || 
+			               item.system?.pm || 
+			               item.system?.mana || 
+			               (item.system?.custo && typeof item.system.custo === 'object' ? item.system.custo.value || item.system.custo.total || item.system.custo.base : null) ||
+			               null;
+			
+			if (manaCost !== null && manaCost !== undefined) {
 				// Se for objeto, pegar o valor
 				if (typeof manaCost === 'object' && manaCost !== null) {
 					manaCost = manaCost.value || manaCost.total || manaCost.base || null;
@@ -182,8 +217,7 @@ Hooks.once("ready", async () => {
 				manaCost = Number(manaCost);
 				
 				if (!isNaN(manaCost) && manaCost > 0) {
-					$manaCost.text(`${manaCost} PM`).show();
-					ativacaoText = ativacaoText !== "Passivo" ? `${ativacaoText}, ${manaCost} PM` : `${ativacaoText} ${manaCost} PM`;
+					ativacaoText = `${ativacaoText} (${manaCost} PM)`;
 				}
 			}
 			
