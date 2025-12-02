@@ -189,12 +189,6 @@ Hooks.once("ready", async () => {
 				return;
 			}
 			
-			// Debug: verificar estrutura do item
-			console.log("T20 Custom Sheet | Formatando arma:", item.name, {
-				labels: item.labels,
-				system: item.system
-			});
-			
 			// Tentar usar labels do sistema primeiro (mais confiável)
 			// O sistema T20 geralmente formata tudo em item.labels.ataque
 			let finalText = item.labels?.ataque || item.labels?.attack || '';
@@ -202,16 +196,20 @@ Hooks.once("ready", async () => {
 			// Se não tiver label formatado, construir manualmente
 			if (!finalText || finalText === '' || finalText === '-') {
 				const system = item.system || {};
+				
+				// Debug temporário para ver estrutura
+				console.log("T20 Custom Sheet | Estrutura completa do item:", {
+					name: item.name,
+					labels: item.labels,
+					system: system,
+					ataque: system.ataque,
+					dano: system.dano,
+					critico: system.critico
+				});
+				
 				const ataque = system.ataque || system.attack || {};
 				const dano = system.dano || system.damage || {};
 				const critico = system.critico || system.critical || {};
-				
-				// Debug (apenas em desenvolvimento)
-				// console.log("T20 Custom Sheet | Dados da arma:", {
-				// 	ataque,
-				// 	dano,
-				// 	critico
-				// });
 				
 				// Formatar ataque - tentar diferentes campos
 				let ataqueValue = '';
@@ -223,38 +221,64 @@ Hooks.once("ready", async () => {
 					ataqueValue = ataque.bonus >= 0 ? `+${ataque.bonus}` : `${ataque.bonus}`;
 				}
 				
-				// Formatar dano - tentar diferentes formatos
+				// Formatar dano - o sistema T20 pode ter dano em formato de array ou objeto complexo
 				let danoText = '';
-				// Verificar se dano é um objeto ou string
-				if (typeof dano === 'string' && dano.trim() !== '') {
-					danoText = dano;
-				} else if (dano.dado || dano.dice) {
-					danoText = dano.dado || dano.dice;
-					// Tentar diferentes campos para bonus
-					const bonus = dano.bonus !== undefined ? dano.bonus : 
-					             (dano.mod !== undefined ? dano.mod : 
-					             (dano.value !== undefined ? dano.value : null));
-					if (bonus !== undefined && bonus !== null && bonus !== 0 && bonus !== '') {
-						const bonusNum = Number(bonus);
-						if (!isNaN(bonusNum)) {
-							danoText += bonusNum >= 0 ? ` + ${bonusNum}` : ` ${bonusNum}`;
+				
+				// Verificar se dano é um array (sistema T20 pode usar arrays para múltiplos danos)
+				if (Array.isArray(dano)) {
+					// Pegar o primeiro elemento do array
+					const primeiroDano = dano[0] || {};
+					if (primeiroDano.dado || primeiroDano.dice) {
+						danoText = primeiroDano.dado || primeiroDano.dice;
+						if (primeiroDano.bonus !== undefined && primeiroDano.bonus !== null && primeiroDano.bonus !== 0) {
+							const bonusNum = Number(primeiroDano.bonus);
+							if (!isNaN(bonusNum)) {
+								danoText += bonusNum >= 0 ? ` + ${bonusNum}` : ` ${bonusNum}`;
+							}
 						}
 					}
-				} else if (dano.total) {
-					// Se tiver total formatado, usar direto
-					danoText = String(dano.total);
+				} else if (typeof dano === 'string' && dano.trim() !== '') {
+					danoText = dano;
+				} else if (dano && typeof dano === 'object') {
+					// Verificar diferentes campos possíveis
+					if (dano.dado || dano.dice) {
+						danoText = dano.dado || dano.dice;
+						// Tentar diferentes campos para bonus
+						const bonus = dano.bonus !== undefined ? dano.bonus : 
+						             (dano.mod !== undefined ? dano.mod : 
+						             (dano.value !== undefined ? dano.value : 
+						             (dano.total !== undefined ? dano.total : null)));
+						if (bonus !== undefined && bonus !== null && bonus !== 0 && bonus !== '') {
+							const bonusNum = Number(bonus);
+							if (!isNaN(bonusNum)) {
+								danoText += bonusNum >= 0 ? ` + ${bonusNum}` : ` ${bonusNum}`;
+							}
+						}
+					} else if (dano.total) {
+						// Se tiver total formatado, usar direto
+						danoText = String(dano.total);
+					} else if (dano.formula) {
+						// Se tiver fórmula, usar
+						danoText = String(dano.formula);
+					}
 				}
 				
 				// Formatar crítico
 				let criticoText = '';
-				if (critico.range || critico.threat) {
-					criticoText = String(critico.range || critico.threat);
-					const multiplier = critico.multiplier || critico.mult;
-					if (multiplier && multiplier !== 2 && multiplier !== '2') {
-						criticoText += `/${multiplier}x`;
+				if (critico && typeof critico === 'object') {
+					if (critico.range || critico.threat) {
+						criticoText = String(critico.range || critico.threat);
+						const multiplier = critico.multiplier || critico.mult;
+						if (multiplier && multiplier !== 2 && multiplier !== '2') {
+							criticoText += `/${multiplier}x`;
+						}
+					} else if (critico.total) {
+						criticoText = String(critico.total);
+					} else if (critico.value) {
+						criticoText = String(critico.value);
 					}
-				} else if (critico.total) {
-					criticoText = String(critico.total);
+				} else if (critico) {
+					criticoText = String(critico);
 				}
 				
 				// Montar texto final no formato: +9 (1d4 + 5, 19)
@@ -277,9 +301,14 @@ Hooks.once("ready", async () => {
 				} else if (criticoText) {
 					finalText = criticoText;
 				}
+				
+				console.log("T20 Custom Sheet | Texto formatado:", finalText, "de", {
+					ataqueValue,
+					danoText,
+					criticoText
+				});
 			}
 			
-			// console.log("T20 Custom Sheet | Texto final formatado:", finalText);
 			$attackText.text(finalText || '-');
 		}
 		
