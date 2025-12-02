@@ -46,7 +46,7 @@
 					.list-powers-custom {
 						background: linear-gradient(145deg, #1a1d26 0%, #13151c 100%);
 						border-radius: 16px;
-						padding: 24px;
+						padding: 20px;
 						margin: 12px 0;
 						box-shadow: 
 							0 8px 32px rgba(0, 0, 0, 0.6),
@@ -77,8 +77,8 @@
 						display: flex;
 						justify-content: space-between;
 						align-items: center;
-						margin-bottom: 20px;
-						padding-bottom: 16px;
+						margin-bottom: 16px;
+						padding-bottom: 12px;
 						border-bottom: 2px solid rgba(255, 255, 255, 0.12);
 						position: relative;
 					}
@@ -106,11 +106,11 @@
 					.powers-chips {
 						display: flex;
 						flex-wrap: wrap;
-						gap: 10px;
-						margin-bottom: 20px;
-						padding: 16px;
+						gap: 8px;
+						margin-bottom: 16px;
+						padding: 12px;
 						background: rgba(0, 0, 0, 0.25);
-						border-radius: 12px;
+						border-radius: 10px;
 						border: 1px solid rgba(255, 255, 255, 0.1);
 						backdrop-filter: blur(10px);
 					}
@@ -241,73 +241,62 @@
 					
 					.powers-filters {
 						display: flex;
-						gap: 12px;
-						margin-bottom: 20px;
+						gap: 8px;
+						margin-bottom: 16px;
 						flex-wrap: wrap;
 					}
 					
 					.power-filter-input {
 						flex: 1;
-						min-width: 240px;
-						padding: 12px 16px;
-						background: rgba(255, 255, 255, 0.08);
-						border: 2px solid rgba(255, 255, 255, 0.12);
-						border-radius: 10px;
+						min-width: 180px;
+						padding: 6px 10px;
+						background: transparent;
+						border: none;
+						border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+						border-radius: 0;
 						color: #ffffff;
-						font-size: 14px;
-						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+						font-size: 13px;
+						transition: all 0.2s ease;
 						outline: none;
-						box-shadow: 
-							inset 0 2px 4px rgba(0, 0, 0, 0.2),
-							0 2px 4px rgba(0, 0, 0, 0.1);
 					}
 					
 					.power-filter-input:focus {
-						background: rgba(255, 255, 255, 0.12);
-						border-color: rgba(245, 194, 66, 0.6);
-						box-shadow: 
-							inset 0 2px 4px rgba(0, 0, 0, 0.2),
-							0 0 0 4px rgba(245, 194, 66, 0.2),
-							0 4px 12px rgba(0, 0, 0, 0.2);
+						border-bottom-color: rgba(245, 194, 66, 0.8);
+						background: rgba(255, 255, 255, 0.03);
 					}
 					
 					.power-filter-input::placeholder {
-						color: rgba(255, 255, 255, 0.4);
+						color: rgba(255, 255, 255, 0.35);
 						font-style: italic;
 					}
 					
 					.power-filter-type {
-						padding: 12px 16px;
-						background: rgba(255, 255, 255, 0.08);
-						border: 2px solid rgba(255, 255, 255, 0.12);
-						border-radius: 10px;
+						padding: 6px 28px 6px 10px;
+						background: transparent;
+						border: none;
+						border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+						border-radius: 0;
 						color: #ffffff;
-						font-size: 14px;
+						font-size: 13px;
 						cursor: pointer;
-						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+						transition: all 0.2s ease;
 						outline: none;
-						box-shadow: 
-							inset 0 2px 4px rgba(0, 0, 0, 0.2),
-							0 2px 4px rgba(0, 0, 0, 0.1);
 						appearance: none;
-						background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+						background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
 						background-repeat: no-repeat;
-						background-position: right 12px center;
-						padding-right: 40px;
+						background-position: right 8px center;
+						opacity: 0.8;
 					}
 					
 					.power-filter-type:focus {
-						background-color: rgba(255, 255, 255, 0.12);
-						border-color: rgba(245, 194, 66, 0.6);
-						box-shadow: 
-							inset 0 2px 4px rgba(0, 0, 0, 0.2),
-							0 0 0 4px rgba(245, 194, 66, 0.2),
-							0 4px 12px rgba(0, 0, 0, 0.2);
+						border-bottom-color: rgba(245, 194, 66, 0.8);
+						background-color: rgba(255, 255, 255, 0.03);
+						opacity: 1;
 					}
 					
 					.power-filter-type:hover {
-						border-color: rgba(255, 255, 255, 0.2);
-						background-color: rgba(255, 255, 255, 0.1);
+						border-bottom-color: rgba(255, 255, 255, 0.25);
+						opacity: 1;
 					}
 					
 					.powers-list {
