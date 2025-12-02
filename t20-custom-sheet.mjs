@@ -91,8 +91,12 @@ Hooks.once("ready", async () => {
 			// Adicionar badges de tipo aos poderes e configurar filtros
 			setTimeout(() => {
 				this._setupPowersSection();
-				this._setupFloatingIcons();
 			}, 100);
+			
+			// Configurar ícones flutuantes com um pouco mais de delay para garantir que o DOM esteja pronto
+			setTimeout(() => {
+				this._setupFloatingIcons();
+			}, 300);
 		}
 		
 		/** @override */
@@ -268,10 +272,61 @@ Hooks.once("ready", async () => {
 		 * Configura caixinhas flutuantes do lado direito da ficha com label "P"
 		 */
 		_setupFloatingIcons() {
-			if (!this.element || !this.element.length) return;
+			if (!this.element || !this.element.length) {
+				console.warn("T20 Custom Sheet | Element não encontrado para floating icons");
+				return;
+			}
 			
-			const $container = this.element.find('#floating-icons-container');
-			if ($container.length === 0) return;
+			// Buscar container - pode estar no elemento ou no documento (já que é position: fixed)
+			let $container = $(document).find(`#floating-icons-container[data-actor-id="${this.actor.id}"]`);
+			
+			// Se não encontrou, tentar buscar sem o atributo (para compatibilidade)
+			if ($container.length === 0) {
+				$container = $(document).find('#floating-icons-container');
+			}
+			
+			// Se ainda não encontrou, buscar no elemento da sheet
+			if ($container.length === 0) {
+				$container = this.element.find('#floating-icons-container');
+			}
+			
+			// Se ainda não encontrou, criar o container
+			if ($container.length === 0) {
+				console.log("T20 Custom Sheet | Criando container floating-icons-container");
+				$container = $('<div>')
+					.addClass('floating-icons-container')
+					.attr('id', 'floating-icons-container')
+					.attr('data-actor-id', this.actor.id)
+					.css({
+						position: 'fixed',
+						right: '15px',
+						top: '50%',
+						transform: 'translateY(-50%)',
+						display: 'flex',
+						flexDirection: 'column',
+						gap: '10px',
+						zIndex: 2000,
+						pointerEvents: 'none',
+						maxHeight: '90vh',
+						overflowY: 'auto',
+						padding: '5px'
+					});
+				
+				// Adicionar ao body ou ao elemento da sheet
+				$('body').append($container);
+			} else {
+				// Garantir que está visível
+				$container.show().css({
+					position: 'fixed',
+					right: '15px',
+					top: '50%',
+					transform: 'translateY(-50%)',
+					display: 'flex',
+					flexDirection: 'column',
+					zIndex: 2000,
+					pointerEvents: 'none'
+				});
+			}
 			
 			// Limpar caixinhas existentes
 			$container.empty();
@@ -279,7 +334,12 @@ Hooks.once("ready", async () => {
 			// Coletar todos os poderes
 			const poderes = this.actor.items.filter(item => item.type === 'poder');
 			
-			if (poderes.length === 0) return;
+			console.log(`T20 Custom Sheet | Encontrados ${poderes.length} poderes para criar caixinhas`);
+			
+			if (poderes.length === 0) {
+				console.warn("T20 Custom Sheet | Nenhum poder encontrado");
+				return;
+			}
 			
 			// Criar uma caixinha com label "P" para cada poder
 			poderes.forEach((item, index) => {
