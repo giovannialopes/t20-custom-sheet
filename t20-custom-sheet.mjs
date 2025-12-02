@@ -648,8 +648,20 @@ Hooks.once("ready", async () => {
 					$combobox.val(currentSelectedValue);
 					// Forçar atualização visual do select
 					$combobox[0].selectedIndex = $combobox.find(`option[value="${currentSelectedValue}"]`).index();
+					// Atualizar texto exibido manualmente
+					const selectedText = $combobox.find(`option[value="${currentSelectedValue}"]`).text();
+					const $container = $combobox.closest('.powers-combobox-container');
+					if ($container.length > 0) {
+						$container.attr('data-selected-text', selectedText);
+					}
 					// Disparar evento change para aplicar filtro
 					$combobox.trigger('change.combobox-filter');
+				}
+			} else {
+				// Se nenhum valor selecionado, mostrar "Todos os tipos"
+				const $container = $combobox.closest('.powers-combobox-container');
+				if ($container.length > 0) {
+					$container.attr('data-selected-text', 'Todos os tipos');
 				}
 			}
 		}
@@ -702,6 +714,24 @@ Hooks.once("ready", async () => {
 				});
 			};
 			
+			// Função para atualizar o texto exibido no combobox
+			const updateComboboxDisplayText = () => {
+				const nativeSelect = $combobox[0];
+				if (!nativeSelect) return;
+				
+				const selectedIndex = nativeSelect.selectedIndex;
+				const selectedText = nativeSelect.options[selectedIndex] ? nativeSelect.options[selectedIndex].text : 'Todos os tipos';
+				
+				// Atualizar o atributo data-selected-text no container para o CSS mostrar
+				const $container = $combobox.closest('.powers-combobox-container');
+				if ($container.length > 0) {
+					$container.attr('data-selected-text', selectedText);
+				}
+			};
+			
+			// Atualizar texto inicial
+			updateComboboxDisplayText();
+			
 			// Event listener para combobox
 			$combobox.off('change.combobox-filter').on('change.combobox-filter', (event) => {
 				const $select = $(event.currentTarget);
@@ -713,18 +743,6 @@ Hooks.once("ready", async () => {
 				const selectedValue = nativeSelect.value || '';
 				const selectedText = nativeSelect.options[selectedIndex] ? nativeSelect.options[selectedIndex].text : '';
 				
-				console.log('T20 Custom Sheet | Combobox change:', {
-					selectedIndex,
-					selectedValue,
-					selectedText,
-					allOptions: Array.from(nativeSelect.options).map((opt, idx) => ({
-						index: idx,
-						value: opt.value,
-						text: opt.text,
-						selected: opt.selected
-					}))
-				});
-				
 				// Garantir que o valor está correto
 				if (selectedValue !== $select.val()) {
 					$select.val(selectedValue);
@@ -735,9 +753,22 @@ Hooks.once("ready", async () => {
 					nativeSelect.selectedIndex = selectedIndex;
 				}
 				
+				// Atualizar o texto exibido
+				updateComboboxDisplayText();
+				
 				// Aplicar filtro
 				filterPowers(selectedValue);
 			});
+			
+			// Também atualizar quando o combobox recebe foco (para garantir sincronização)
+			$combobox.on('focus.combobox-display', () => {
+				updateComboboxDisplayText();
+			});
+			
+			// Atualizar após pequeno delay para garantir que tudo está renderizado
+			setTimeout(() => {
+				updateComboboxDisplayText();
+			}, 100);
 			
 			// Event listeners para controles de editar e deletar
 			this.element.find('.list-powers-custom .item-edit').off('click').on('click', (event) => {
