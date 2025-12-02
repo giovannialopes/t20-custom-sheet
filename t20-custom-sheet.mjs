@@ -228,6 +228,48 @@ Hooks.once("ready", async () => {
 				sheetData.actor.poderes = [];
 			}
 			
+			// Preparar tipos dos poderes para exibição
+			if (Array.isArray(sheetData.actor.poderes)) {
+				for (const poder of sheetData.actor.poderes) {
+					if (poder && poder.system) {
+						// Obter o tipo do poder de diferentes possíveis locais
+						let tipo = poder.system.tipo || 
+						           poder.system.type || 
+						           poder.tipo || 
+						           poder.type ||
+						           "geral";
+						
+						// Se o tipo vier como objeto, pegar o valor
+						if (typeof tipo === 'object' && tipo !== null) {
+							tipo = tipo.value || tipo.label || "geral";
+						}
+						
+						// Normalizar para string minúscula
+						tipo = String(tipo).toLowerCase().trim();
+						
+						// Mapear tipos para labels mais amigáveis
+						const tipoLabels = {
+							"geral": "Geral",
+							"origem": "Origem",
+							"classe": "Classe",
+							"racial": "Racial",
+							"racial_alternativa": "Racial Alternativa",
+							"racial alternativa": "Racial Alternativa",
+							"tormenta": "Tormenta",
+							"devoto": "Devoto",
+							"arquetipo": "Arquétipo",
+							"arquétipo": "Arquétipo",
+							"multiclasse": "Multiclasse",
+							"multi-classe": "Multiclasse"
+						};
+						
+						// Adicionar label do tipo ao poder
+						poder.tipoLabel = tipoLabels[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1);
+						poder.tipo = tipo;
+					}
+				}
+			}
+			
 			return sheetData;
 		}
 	}
