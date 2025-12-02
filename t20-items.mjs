@@ -1315,10 +1315,8 @@ export class InventoryManager {
 				return;
 			}
 
-			if (item.type !== 'consumivel') {
-				console.warn("T20 Items Manager | Item não é um consumível:", item.type);
-				return;
-			}
+			// Aceitar todos os tipos de itens de inventário (geral, consumivel, loot, etc)
+			// Não filtrar por tipo específico
 
 			// Log completo do item do inventário
 			const system = item.system || {};
@@ -1492,10 +1490,8 @@ export class InventoryManager {
 			return;
 		}
 
-		if (item.type !== 'consumivel') {
-			console.warn("T20 Items Manager | Item não é um consumível:", item.type);
-			return;
-		}
+		// Aceitar todos os tipos de itens de inventário
+		// Não filtrar por tipo específico
 
 		try {
 			// Tentar usar o item do sistema T20
@@ -1518,7 +1514,8 @@ export class InventoryManager {
 				const possibleTemplates = [
 					"systems/tormenta20/templates/chat/item-card.hbs",
 					"systems/tormenta20/templates/chat/consumable-card.hbs",
-					"systems/tormenta20/templates/items/consumivel-chat.hbs"
+					"systems/tormenta20/templates/items/consumivel-chat.hbs",
+					"systems/tormenta20/templates/chat/general-item-card.hbs"
 				];
 
 				let templateFound = false;
