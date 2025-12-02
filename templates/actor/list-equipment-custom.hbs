@@ -9,19 +9,21 @@
 				<div class="equipment-stats" data-item-id="{{item._id}}">
 					<span class="equipment-stats-text">-</span>
 				</div>
-				<div class="equipment-actions" data-item-id="{{item._id}}">
-					<button class="equipment-toggle-btn" data-item-id="{{item._id}}" title="Equipar/Desequipar">
-						<i class="fas fa-hand-paper"></i>
-					</button>
-				</div>
 			</div>
 			<div class="equipment-controls">
-				<a class="item-control item-edit equipment-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
-					<i class="fas fa-edit"></i>
-				</a>
-				<a class="item-control item-delete equipment-control" title="{{localize 'T20.ItemDelete'}}" data-item-id="{{item._id}}">
-					<i class="fas fa-trash"></i>
-				</a>
+				<div class="equipment-controls-row">
+					<a class="item-control item-edit equipment-control" title="{{localize 'T20.ItemEdit'}}" data-item-id="{{item._id}}">
+						<i class="fas fa-edit"></i>
+					</a>
+					<a class="item-control item-delete equipment-control" title="{{localize 'T20.ItemDelete'}}" data-item-id="{{item._id}}">
+						<i class="fas fa-trash"></i>
+					</a>
+				</div>
+				<div class="equipment-actions" data-item-id="{{item._id}}">
+					<button class="equipment-toggle-btn" data-item-id="{{item._id}}" title="Equipar/Desequipar">
+						<i class="fas fa-shield-alt"></i>
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -182,46 +184,54 @@
 
 .equipment-actions {
 	display: flex;
-	gap: 5px;
-	margin-top: 6px;
+	justify-content: center;
+	width: 100%;
 }
 
 .equipment-toggle-btn {
-	padding: 6px 10px;
-	background: rgba(74, 144, 226, 0.2);
-	border: 2px solid rgba(74, 144, 226, 0.4);
-	border-radius: 6px;
-	color: #4a90e2;
+	padding: 4px 8px;
+	background: transparent;
+	border: 2px solid rgba(192, 57, 43, 0.6);
+	border-radius: 4px;
+	color: rgba(192, 57, 43, 0.8);
 	cursor: pointer;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	font-size: 12px;
+	font-size: 11px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 4px;
+	width: 28px;
+	height: 28px;
+	min-width: 28px;
+	min-height: 28px;
 }
 
 .equipment-toggle-btn:hover {
-	background: rgba(74, 144, 226, 0.4);
-	border-color: rgba(74, 144, 226, 0.7);
-	color: #ffffff;
-	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+	border-color: rgba(192, 57, 43, 0.9);
+	color: rgba(192, 57, 43, 1);
+	transform: scale(1.1);
 }
 
 .equipment-toggle-btn.equipped {
-	background: rgba(39, 174, 96, 0.2);
-	border-color: rgba(39, 174, 96, 0.4);
-	color: #27ae60;
+	border-color: rgba(74, 144, 226, 0.8);
+	color: rgba(74, 144, 226, 1);
+	background: rgba(74, 144, 226, 0.1);
 }
 
 .equipment-toggle-btn.equipped:hover {
-	background: rgba(39, 174, 96, 0.4);
-	border-color: rgba(39, 174, 96, 0.7);
-	box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+	border-color: rgba(74, 144, 226, 1);
+	background: rgba(74, 144, 226, 0.2);
+	transform: scale(1.1);
 }
 
 .equipment-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: flex-end;
+}
+
+.equipment-controls-row {
 	display: flex;
 	gap: 5px;
 }

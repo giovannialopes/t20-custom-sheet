@@ -457,19 +457,30 @@ export class EquipmentManager {
 			}
 			
 			// Debug: verificar estrutura completa do equipamento
+			const system = item.system || {};
+			const tipoStr = system.tipo ? (typeof system.tipo === 'object' ? (system.tipo.value || system.tipo.label || '') : String(system.tipo)) : '';
+			const labelsTipo = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
+			const isArmaduraDebug = tipoStr.toLowerCase().includes('armadura') || labelsTipo.includes('armadura');
+			
 			console.log("T20 Items Manager | Estrutura completa do item (equipamento):", {
 				name: item.name,
 				labels: item.labels,
 				labelsKeys: Object.keys(item.labels || {}),
-				systemKeys: Object.keys(item.system || {}),
-				system: JSON.parse(JSON.stringify(item.system || {})), // Deep clone para ver tudo
-				tipo: item.system?.tipo,
-				subtipo: item.system?.subtipo,
-				categoria: item.system?.categoria,
-				defesa: item.system?.defesa,
-				penalidade: item.system?.penalidade,
-				espaco: item.system?.espaco,
-				peso: item.system?.peso
+				systemKeys: Object.keys(system),
+				system: JSON.parse(JSON.stringify(system)), // Deep clone para ver tudo
+				tipo: system.tipo,
+				tipoStr: tipoStr,
+				labelsTipo: item.labels?.tipo,
+				tipoUso: system.tipoUso,
+				subtipo: system.subtipo,
+				categoria: system.categoria,
+				defesa: system.defesa,
+				penalidade: system.penalidade,
+				equipped: system.equipped,
+				equipado: system.equipado,
+				espaco: system.espaco,
+				peso: system.peso,
+				isArmadura: isArmaduraDebug
 			});
 			
 			// Formatar estatísticas (defesa/espaço)
@@ -498,14 +509,17 @@ export class EquipmentManager {
 		const system = item.system || {};
 		
 		// Verificar se é uma armadura
-		// O sistema T20 geralmente tem um campo tipo ou categoria que indica se é armadura
-		const isArmadura = system.tipo === 'armadura' || 
+		// O sistema T20 pode ter tipo como "Armadura Leve", "Armadura Pesada", etc
+		const tipoStr = system.tipo ? (typeof system.tipo === 'object' ? (system.tipo.value || system.tipo.label || '') : String(system.tipo)) : '';
+		const tipoLower = tipoStr.toLowerCase();
+		const labelsTipo = item.labels?.tipo ? String(item.labels.tipo).toLowerCase() : '';
+		
+		const isArmadura = tipoLower.includes('armadura') ||
+		                   labelsTipo.includes('armadura') ||
+		                   system.tipo === 'armadura' || 
 		                   system.type === 'armadura' ||
 		                   system.categoria === 'armadura' ||
-		                   system.category === 'armadura' ||
-		                   (item.labels?.tipo && item.labels.tipo.toLowerCase().includes('armadura')) ||
-		                   (item.labels?.type && item.labels.type.toLowerCase().includes('armadura')) ||
-		                   (item.labels?.categoria && item.labels.categoria.toLowerCase().includes('armadura'));
+		                   system.category === 'armadura';
 		
 		let finalText = '';
 		
@@ -652,10 +666,10 @@ export class EquipmentManager {
 			if ($toggleBtn.length > 0) {
 				if (isEquipped) {
 					$toggleBtn.addClass('equipped').attr('title', 'Desequipar');
-					$toggleBtn.find('i').removeClass('fa-hand-paper').addClass('fa-check-circle');
+					$toggleBtn.find('i').removeClass('fa-shield-alt').addClass('fa-shield-alt');
 				} else {
 					$toggleBtn.removeClass('equipped').attr('title', 'Equipar');
-					$toggleBtn.find('i').removeClass('fa-check-circle').addClass('fa-hand-paper');
+					$toggleBtn.find('i').removeClass('fa-shield-alt').addClass('fa-shield-alt');
 				}
 			}
 			
