@@ -26,7 +26,7 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 			template: "modules/t20-custom-sheet/templates/actor/character-custom-sheet.hbs",
 			width: 800,
 			height: 600,
-			left: 60, // Posição após a barra de ferramentas esquerda
+			left: null, // Usar posição padrão do Foundry (lado direito)
 			top: null,
 			resizable: true,
 			dragDrop: [{ dragSelector: ".item-list .item:not(.item-header)" }],
@@ -52,73 +52,7 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 	/** @override */
 	async _render(force = false, options = {}) {
 		await super._render(force, options);
-		
-		// Forçar posicionamento no lado esquerdo após renderização
-		// Usar múltiplos métodos para garantir que funcione
-		setTimeout(() => {
-			this._forceLeftPosition();
-		}, 0);
-		
-		requestAnimationFrame(() => {
-			this._forceLeftPosition();
-		});
-	}
-
-	/**
-	 * Força a ficha a ficar no lado esquerdo da tela (onde fica a lista de atores)
-	 */
-	_forceLeftPosition() {
-		if (!this.element || !this.element.length) return;
-		
-		const width = 800;
-		const height = 600;
-		
-		// Calcular posição no lado esquerdo, após a barra de ferramentas
-		// Posição similar à lista de atores do Foundry
-		const viewportHeight = window.innerHeight || 1080;
-		const left = 60; // Após a barra de ferramentas esquerda (~50px) + pequeno espaçamento
-		const top = Math.max(20, (viewportHeight - height) / 2);
-		
-		// Método 1: Usar setPosition se disponível
-		if (typeof this.setPosition === 'function') {
-			try {
-				this.setPosition({
-					width: width,
-					height: height,
-					left: left,
-					top: top
-				});
-			} catch (e) {
-				console.warn("Erro ao usar setPosition:", e);
-			}
-		}
-		
-		// Método 2: Aplicar diretamente no elemento
-		if (this.element && this.element.css) {
-			this.element.css({
-				left: `${left}px !important`,
-				top: `${top}px !important`,
-				width: `${width}px`,
-				height: `${height}px`
-			});
-		}
-		
-		// Método 3: Atualizar posição no objeto
-		if (this.position) {
-			this.position.left = left;
-			this.position.top = top;
-			this.position.width = width;
-			this.position.height = height;
-		}
-		
-		// Método 4: Aplicar diretamente no DOM se jQuery não funcionar
-		const domElement = this.element?.[0] || this.element?.get?.(0);
-		if (domElement) {
-			domElement.style.left = `${left}px`;
-			domElement.style.top = `${top}px`;
-			domElement.style.width = `${width}px`;
-			domElement.style.height = `${height}px`;
-		}
+		// A ficha usará o posicionamento padrão do Foundry (lado direito)
 	}
 
 	/* -------------------------------------------- */
