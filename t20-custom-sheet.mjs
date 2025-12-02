@@ -21,13 +21,19 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 
 	/** @override */
 	static get defaultOptions() {
+		// Calcular posição central da tela
+		const width = 900;
+		const height = 600;
+		const left = (window.innerWidth - width) / 2;
+		const top = (window.innerHeight - height) / 2;
+		
 		return foundry.utils.mergeObject(super.defaultOptions, {
 			classes: ["tormenta20", "sheet", "actor", "character", "custom-sheet"],
 			template: "modules/t20-custom-sheet/templates/actor/character-custom-sheet.hbs",
-			width: 900,
-			height: 600,
-			left: null,
-			top: null,
+			width: width,
+			height: height,
+			left: left,
+			top: top,
 			resizable: true,
 			scrollY: [
 				".tormenta20.base .sheet-body",
@@ -253,6 +259,9 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 	activateListeners(html) {
 		super.activateListeners(html);
 
+		// Centralizar a janela se ainda não estiver centralizada
+		this._centerWindow();
+
 		if (!this.isEditable) return;
 
 		// Input focus
@@ -268,6 +277,28 @@ class ActorSheetT20CustomCharacter extends foundry.appv1.sheets.ActorSheet {
 		html.find(".item .item-image").click((event) => this._onItemRoll(event));
 		html.find(".item-control.item-edit").click(this._onItemEdit.bind(this));
 		html.find(".item-control.item-delete").click(this._onItemDelete.bind(this));
+	}
+
+	/* -------------------------------------------- */
+
+	/**
+	 * Centraliza a janela no meio da tela
+	 */
+	_centerWindow() {
+		if (!this.element || !this.element.length) return;
+		
+		const windowElement = this.element[0];
+		const rect = windowElement.getBoundingClientRect();
+		const windowWidth = rect.width || this.options.width || 900;
+		const windowHeight = rect.height || this.options.height || 600;
+		
+		// Calcular posição central
+		const left = (window.innerWidth - windowWidth) / 2;
+		const top = (window.innerHeight - windowHeight) / 2;
+		
+		// Aplicar posição centralizada
+		windowElement.style.left = `${Math.max(0, left)}px`;
+		windowElement.style.top = `${Math.max(0, top)}px`;
 	}
 
 	/* -------------------------------------------- */
@@ -348,4 +379,14 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
 	console.log("T20 Custom Sheet | Módulo pronto para uso!");
+});
+
+// Hook para centralizar a janela sempre que for renderizada
+Hooks.on("renderActorSheet", (app, html, data) => {
+	if (app instanceof ActorSheetT20CustomCharacter) {
+		// Aguardar um frame para garantir que o DOM está pronto
+		setTimeout(() => {
+			app._centerWindow();
+		}, 0);
+	}
 });
