@@ -94,6 +94,28 @@ Hooks.once("ready", async () => {
 		get layout() {
 			return "character-custom";
 		}
+		
+		/** @override */
+		async _prepareItems(data) {
+			// Chamar o método da classe base primeiro
+			await super._prepareItems(data);
+			
+			// Garantir que inventario.itens seja criado mesmo com layout custom
+			// O método base só cria se layout === "character-base"
+			if (data.actor.inventario && !data.actor.inventario.itens) {
+				// Coletar todos os itens de todas as categorias
+				const allItems = [];
+				if (data.actor.inventario.arma?.items) allItems.push(...data.actor.inventario.arma.items);
+				if (data.actor.inventario.equipamento?.items) allItems.push(...data.actor.inventario.equipamento.items);
+				if (data.actor.inventario.consumivel?.items) allItems.push(...data.actor.inventario.consumivel.items);
+				if (data.actor.inventario.tesouro?.items) allItems.push(...data.actor.inventario.tesouro.items);
+				
+				data.actor.inventario.itens = { 
+					label: "Itens", 
+					items: allItems 
+				};
+			}
+		}
 
 		/** @override */
 		get template() {
@@ -199,29 +221,6 @@ Hooks.once("ready", async () => {
 						if (isNaN(skill.value)) skill.value = 0;
 					}
 				}
-			}
-			
-			// Garantir que o inventário sempre exista com estrutura válida
-			if (!sheetData.actor.inventario) {
-				sheetData.actor.inventario = {
-					arma: { items: [] },
-					equipamento: { items: [] },
-					consumivel: { items: [] },
-					tesouro: { items: [] },
-					itens: { items: [] }
-				};
-			} else {
-				// Garantir que cada categoria tenha items array
-				if (!sheetData.actor.inventario.arma) sheetData.actor.inventario.arma = { items: [] };
-				if (!sheetData.actor.inventario.arma.items) sheetData.actor.inventario.arma.items = [];
-				if (!sheetData.actor.inventario.equipamento) sheetData.actor.inventario.equipamento = { items: [] };
-				if (!sheetData.actor.inventario.equipamento.items) sheetData.actor.inventario.equipamento.items = [];
-				if (!sheetData.actor.inventario.consumivel) sheetData.actor.inventario.consumivel = { items: [] };
-				if (!sheetData.actor.inventario.consumivel.items) sheetData.actor.inventario.consumivel.items = [];
-				if (!sheetData.actor.inventario.tesouro) sheetData.actor.inventario.tesouro = { items: [] };
-				if (!sheetData.actor.inventario.tesouro.items) sheetData.actor.inventario.tesouro.items = [];
-				if (!sheetData.actor.inventario.itens) sheetData.actor.inventario.itens = { items: [] };
-				if (!sheetData.actor.inventario.itens.items) sheetData.actor.inventario.itens.items = [];
 			}
 			
 			// Garantir que poderes seja um array
