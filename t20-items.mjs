@@ -1341,7 +1341,7 @@ export class InventoryManager {
 			const $textRight = $encumbranceBar.find('.encumbrance-right');
 			
 			if ($textLeft.length > 0) {
-				$textLeft.text(`Carga: ${value} / Sobrecarga: ${max}`);
+				$textLeft.text(`Carga: ${value} / Sobrecarga: ${overload}`);
 			}
 			if ($textRight.length > 0) {
 				$textRight.text(`Limite: ${limit}`);
