@@ -503,11 +503,15 @@ export class WeaponsManager {
 		const equipadoValue = system.equipado;
 		const equippedValue = system.equipped;
 		const tipoUso = system.tipoUso || system.usageType || '';
+		const tipoUsoLower = (tipoUso || '').toLowerCase();
 		
 		const currentEquipped = equippedValue === true || 
 		                        (equipadoValue !== undefined && equipadoValue !== null && Number(equipadoValue) > 0) ||
 		                        tipoUso === 'Empunhado' || 
-		                        tipoUso === 'sim';
+		                        tipoUso === 'sim' ||
+		                        tipoUsoLower === 'empunhado' ||
+		                        tipoUsoLower === 'sim' ||
+		                        tipoUsoLower.includes('empunhado');
 		
 		const newEquipped = !currentEquipped;
 		
