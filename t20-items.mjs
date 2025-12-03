@@ -1168,15 +1168,38 @@ export class InventoryManager {
 	 * Configura a seção de currency (moedas)
 	 */
 	setupCurrencySection() {
-		if (!this.element || !this.element.length) {
+		// Usar sheet.element se disponível, senão usar this.element
+		const $context = (this.sheet?.element && this.sheet.element.length) ? this.sheet.element : this.element;
+		
+		if (!$context || !$context.length) {
 			console.warn("T20 Items Manager | Element não disponível para currency");
+			console.log("T20 Items Manager | this.element:", this.element);
+			console.log("T20 Items Manager | this.sheet.element:", this.sheet?.element);
 			return;
 		}
 
-		const $currencyFields = this.element.find('.currency-field');
+		// Tentar diferentes seletores
+		let $currencyContainer = $context.find('.currency-container');
+		let $currencyFields = $context.find('.currency-field');
+		let $currencySection = $context.find('.currency-encumbrance-section');
+		
+		console.log("T20 Items Manager | Procurando currency - .currency-container:", $currencyContainer.length);
+		console.log("T20 Items Manager | Procurando currency - .currency-field:", $currencyFields.length);
+		console.log("T20 Items Manager | Procurando currency - .currency-encumbrance-section:", $currencySection.length);
+		
+		// Se ainda não encontrou, tentar globalmente
 		if ($currencyFields.length === 0) {
-			console.warn("T20 Items Manager | Campos de currency não encontrados");
-			return;
+			$currencyFields = $('.currency-field');
+			$currencyContainer = $('.currency-container');
+			$currencySection = $('.currency-encumbrance-section');
+			console.log("T20 Items Manager | Currency encontrado globalmente - .currency-field:", $currencyFields.length);
+		}
+		
+		if ($currencyFields.length === 0 && $currencyContainer.length === 0 && $currencySection.length === 0) {
+			console.warn("T20 Items Manager | Campos de currency não encontrados em nenhum contexto");
+			console.log("T20 Items Manager | $context:", $context);
+			console.log("T20 Items Manager | $context HTML:", $context[0]);
+			// Mesmo assim, vamos logar os dados de currency
 		}
 
 		// Log completo do currency
@@ -1194,17 +1217,68 @@ export class InventoryManager {
 	 * Configura a seção de encumbrance (peso/carga)
 	 */
 	setupEncumbranceSection() {
-		if (!this.element || !this.element.length) {
+		// Usar sheet.element se disponível, senão usar this.element
+		const $context = (this.sheet?.element && this.sheet.element.length) ? this.sheet.element : this.element;
+		
+		if (!$context || !$context.length) {
 			console.warn("T20 Items Manager | Element não disponível para encumbrance");
+			console.log("T20 Items Manager | this.element:", this.element);
+			console.log("T20 Items Manager | this.sheet.element:", this.sheet?.element);
 			return;
 		}
 
-		const $encumbranceBar = this.element.find('.encumbrance-bar');
+		// Tentar diferentes seletores
+		let $encumbranceBar = $context.find('.encumbrance-bar');
+		let $encumbranceContainer = $context.find('.encumbrance-container');
+		let $encumbranceSection = $context.find('.currency-encumbrance-section');
+		
+		console.log("T20 Items Manager | Procurando encumbrance - .encumbrance-bar:", $encumbranceBar.length);
+		console.log("T20 Items Manager | Procurando encumbrance - .encumbrance-container:", $encumbranceContainer.length);
+		console.log("T20 Items Manager | Procurando encumbrance - .currency-encumbrance-section:", $encumbranceSection.length);
+		
+		// Se ainda não encontrou, tentar globalmente
 		if ($encumbranceBar.length === 0) {
-			console.warn("T20 Items Manager | Barra de encumbrance não encontrada");
+			$encumbranceBar = $('.encumbrance-bar');
+			$encumbranceContainer = $('.encumbrance-container');
+			$encumbranceSection = $('.currency-encumbrance-section');
+			console.log("T20 Items Manager | Encumbrance encontrado globalmente - .encumbrance-bar:", $encumbranceBar.length);
+		}
+		
+		if ($encumbranceBar.length === 0 && $encumbranceContainer.length === 0 && $encumbranceSection.length === 0) {
+			console.warn("T20 Items Manager | Barra de encumbrance não encontrada em nenhum contexto");
+			console.log("T20 Items Manager | $context:", $context);
+			console.log("T20 Items Manager | $context HTML:", $context[0]);
+			return;
+		}
+		
+		// Se encontrou a seção mas não a barra, tentar buscar dentro da seção
+		if ($encumbranceSection.length > 0 && $encumbranceBar.length === 0) {
+			const $barInSection = $encumbranceSection.find('.encumbrance-bar');
+			console.log("T20 Items Manager | Barra encontrada dentro da seção:", $barInSection.length);
+			if ($barInSection.length > 0) {
+				this._updateEncumbranceBar($barInSection);
+				return;
+			}
+		}
+		
+		// Se encontrou a barra diretamente, usar ela
+		if ($encumbranceBar.length > 0) {
+			this._updateEncumbranceBar($encumbranceBar);
 			return;
 		}
 
+		// Este método agora só encontra os elementos, a atualização é feita em _updateEncumbranceBar
+	}
+	
+	/**
+	 * Atualiza a barra de encumbrance com os valores
+	 */
+	_updateEncumbranceBar($encumbranceBar) {
+		if (!$encumbranceBar || $encumbranceBar.length === 0) {
+			console.warn("T20 Items Manager | Barra de encumbrance não fornecida para atualização");
+			return;
+		}
+		
 		try {
 			// Log completo do actor e system
 			console.log("T20 Items Manager | Actor completo:", this.actor);
@@ -1229,7 +1303,7 @@ export class InventoryManager {
 				$fill.css('width', `${pct}%`);
 				console.log("T20 Items Manager | Barra de encumbrance atualizada para", pct + "%");
 			} else {
-				console.warn("T20 Items Manager | Elemento .encumbrance-fill não encontrado");
+				console.warn("T20 Items Manager | Elemento .encumbrance-fill não encontrado na barra");
 			}
 
 			// Atualizar textos se necessário
