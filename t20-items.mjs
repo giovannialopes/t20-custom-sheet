@@ -1222,14 +1222,12 @@ export class InventoryManager {
 		}
 
 		// Log completo do currency
-		const currency = this.actor?.system?.currency || {};
-		console.log("T20 Items Manager | Currency completo:", currency);
-		console.log("T20 Items Manager | Currency.to:", currency.to);
-		console.log("T20 Items Manager | Currency.ts:", currency.ts);
-		console.log("T20 Items Manager | Currency.tc:", currency.tc);
-		console.log("T20 Items Manager | Currency.to.value:", currency.to?.value);
-		console.log("T20 Items Manager | Currency.ts.value:", currency.ts?.value);
-		console.log("T20 Items Manager | Currency.tc.value:", currency.tc?.value);
+		const dinheiro = this.actor?.system?.dinheiro || {};
+		console.log("T20 Items Manager | Dinheiro completo:", dinheiro);
+		console.log("T20 Items Manager | Dinheiro.to:", dinheiro.to);
+		console.log("T20 Items Manager | Dinheiro.tp:", dinheiro.tp);
+		console.log("T20 Items Manager | Dinheiro.tc:", dinheiro.tc);
+		console.log("T20 Items Manager | Dinheiro.tl:", dinheiro.tl);
 	}
 
 	/**
@@ -1314,19 +1312,20 @@ export class InventoryManager {
 			// Log completo do actor e system
 			console.log("T20 Items Manager | Actor completo:", this.actor);
 			console.log("T20 Items Manager | Actor.system:", this.actor?.system);
-			console.log("T20 Items Manager | Actor.system.encumbrance:", this.actor?.system?.encumbrance);
+			console.log("T20 Items Manager | Actor.system.attributes:", this.actor?.system?.attributes);
+			console.log("T20 Items Manager | Actor.system.attributes.carga:", this.actor?.system?.attributes?.carga);
 
-			const encumbrance = this.actor?.system?.encumbrance || {};
-			const value = encumbrance.value || 0;
-			const limit = encumbrance.limit || 30;
-			const max = encumbrance.max || 15;
+			const carga = this.actor?.system?.attributes?.carga || {};
+			const value = carga.value || 0;
+			const limit = carga.max || 30;
+			const overload = carga.overload || 15;
 
-			console.log("T20 Items Manager | Encumbrance - value:", value, "max:", max, "limit:", limit);
+			console.log("T20 Items Manager | Carga - value:", value, "overload:", overload, "limit:", limit);
 
 			// Calcular porcentagem
 			const pct = limit > 0 ? Math.min((value / limit) * 100, 100) : 0;
 
-			console.log("T20 Items Manager | Encumbrance - porcentagem calculada:", pct);
+			console.log("T20 Items Manager | Carga - porcentagem calculada:", pct);
 
 			// Atualizar a barra
 			const $fill = $encumbranceBar.find('.encumbrance-fill');
