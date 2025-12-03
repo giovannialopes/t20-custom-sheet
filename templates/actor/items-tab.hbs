@@ -313,6 +313,7 @@
 		{{!-- Currency and Encumbrance Section --}}
 		<div class="items-section currency-encumbrance-section">
 			{{!-- Currency --}}
+			{{#if system.currency}}
 			<div class="currency-container">
 				<div class="currency-field currency-gold">
 					<i class="fas fa-coins currency-icon currency-icon-gold"></i>
@@ -330,19 +331,20 @@
 					<input type="number" name="system.currency.tc.value" value="{{system.currency.tc.value}}" class="currency-input" data-dtype="Number" />
 				</div>
 			</div>
+			{{/if}}
 			
 			{{!-- Encumbrance --}}
+			{{#if system.encumbrance}}
 			<div class="encumbrance-container">
 				<div class="encumbrance-bar" data-encumbrance-value="{{system.encumbrance.value}}" data-encumbrance-limit="{{system.encumbrance.limit}}">
-					{{#with system.encumbrance}}
 					<div class="encumbrance-fill" style="width: 0%"></div>
 					<div class="encumbrance-text">
-						<span class="encumbrance-left">Carga: {{value}} / Sobrecarga: {{max}}</span>
-						<span class="encumbrance-right">Limite: {{limit}}</span>
+						<span class="encumbrance-left">Carga: {{system.encumbrance.value}} / Sobrecarga: {{system.encumbrance.max}}</span>
+						<span class="encumbrance-right">Limite: {{system.encumbrance.limit}}</span>
 					</div>
-					{{/with}}
 				</div>
 			</div>
+			{{/if}}
 		</div>
 
 		{{!-- Armas Section --}}

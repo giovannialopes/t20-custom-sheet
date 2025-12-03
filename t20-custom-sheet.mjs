@@ -373,19 +373,27 @@ Hooks.once("ready", async () => {
 		 * Atualiza a barra de encumbrance com os valores corretos
 		 */
 		_updateEncumbranceBar(html) {
+			if (!html || !html.length) return;
+			
 			const $encumbranceBar = html.find('.encumbrance-bar');
 			if ($encumbranceBar.length === 0) return;
 			
-			const encumbrance = this.actor.system?.encumbrance || {};
-			const value = encumbrance.value || 0;
-			const limit = encumbrance.limit || 30;
-			
-			// Calcular porcentagem
-			const pct = limit > 0 ? Math.min((value / limit) * 100, 100) : 0;
-			
-			// Atualizar a barra
-			const $fill = $encumbranceBar.find('.encumbrance-fill');
-			$fill.css('width', `${pct}%`);
+			try {
+				const encumbrance = this.actor?.system?.encumbrance || {};
+				const value = encumbrance.value || 0;
+				const limit = encumbrance.limit || 30;
+				
+				// Calcular porcentagem
+				const pct = limit > 0 ? Math.min((value / limit) * 100, 100) : 0;
+				
+				// Atualizar a barra
+				const $fill = $encumbranceBar.find('.encumbrance-fill');
+				if ($fill.length > 0) {
+					$fill.css('width', `${pct}%`);
+				}
+			} catch (error) {
+				console.error("T20 Custom Sheet | Erro ao atualizar barra de encumbrance:", error);
+			}
 		}
 		
 		
