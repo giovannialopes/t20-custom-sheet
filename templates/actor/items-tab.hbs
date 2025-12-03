@@ -172,6 +172,137 @@
 	.item-control.item-create i {
 		margin-right: 6px;
 	}
+
+	/* Currency and Encumbrance Styles */
+	.currency-encumbrance-section {
+		background: rgba(22, 26, 35, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 12px;
+		padding: 16px;
+		box-shadow: 
+			0 4px 12px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+		margin-bottom: 20px;
+	}
+
+	.currency-container {
+		display: flex;
+		gap: 12px;
+		margin-bottom: 16px;
+	}
+
+	.currency-field {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		background: #f5e6d3;
+		border-radius: 8px;
+		padding: 10px 12px;
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.currency-icon {
+		font-size: 18px;
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.currency-icon-gold {
+		color: #d4af37;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	}
+
+	.currency-icon-silver {
+		color: #c0c0c0;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	}
+
+	.currency-icon-copper {
+		color: #8b4513;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	}
+
+	.currency-label {
+		font-weight: 700;
+		color: #333;
+		font-size: 14px;
+	}
+
+	.currency-input {
+		font-weight: 600;
+		color: #333;
+		font-size: 14px;
+		margin-left: auto;
+		background: transparent;
+		border: none;
+		width: 60px;
+		text-align: right;
+		padding: 0;
+	}
+
+	.currency-input:focus {
+		outline: none;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 4px;
+		padding: 2px 4px;
+	}
+
+	.encumbrance-container {
+		width: 100%;
+	}
+
+	.encumbrance-bar {
+		position: relative;
+		width: 100%;
+		height: 40px;
+		background: #2c2c2c;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.encumbrance-fill {
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		background: linear-gradient(90deg, 
+			rgba(74, 144, 226, 0.8) 0%,
+			rgba(100, 181, 246, 0.8) 100%);
+		transition: width 0.3s ease;
+		box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+	}
+
+	.encumbrance-text {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 12px;
+		color: #ffffff;
+		font-size: 13px;
+		font-weight: 600;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+		z-index: 1;
+	}
+
+	.encumbrance-left {
+		flex: 1;
+	}
+
+	.encumbrance-right {
+		text-align: right;
+	}
 	</style>
 
 	<div class="items-header">
@@ -179,6 +310,41 @@
 	</div>
 
 	<div class="items-sections">
+		{{!-- Currency and Encumbrance Section --}}
+		<div class="items-section currency-encumbrance-section">
+			{{!-- Currency --}}
+			<div class="currency-container">
+				<div class="currency-field currency-gold">
+					<i class="fas fa-coins currency-icon currency-icon-gold"></i>
+					<span class="currency-label">TO</span>
+					<input type="number" name="system.currency.to.value" value="{{system.currency.to.value}}" class="currency-input" data-dtype="Number" />
+				</div>
+				<div class="currency-field currency-silver">
+					<i class="fas fa-coins currency-icon currency-icon-silver"></i>
+					<span class="currency-label">T$</span>
+					<input type="number" name="system.currency.ts.value" value="{{system.currency.ts.value}}" class="currency-input" data-dtype="Number" />
+				</div>
+				<div class="currency-field currency-copper">
+					<i class="fas fa-coins currency-icon currency-icon-copper"></i>
+					<span class="currency-label">TC</span>
+					<input type="number" name="system.currency.tc.value" value="{{system.currency.tc.value}}" class="currency-input" data-dtype="Number" />
+				</div>
+			</div>
+			
+			{{!-- Encumbrance --}}
+			<div class="encumbrance-container">
+				<div class="encumbrance-bar" data-encumbrance-value="{{system.encumbrance.value}}" data-encumbrance-limit="{{system.encumbrance.limit}}">
+					{{#with system.encumbrance}}
+					<div class="encumbrance-fill" style="width: 0%"></div>
+					<div class="encumbrance-text">
+						<span class="encumbrance-left">Carga: {{value}} / Sobrecarga: {{max}}</span>
+						<span class="encumbrance-right">Limite: {{limit}}</span>
+					</div>
+					{{/with}}
+				</div>
+			</div>
+		</div>
+
 		{{!-- Armas Section --}}
 		<div class="items-section">
 			<div class="items-section-header">

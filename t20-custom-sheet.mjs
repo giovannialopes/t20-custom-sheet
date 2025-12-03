@@ -194,6 +194,10 @@ Hooks.once("ready", async () => {
 					if (this.inventoryManager) {
 						this.inventoryManager.setupInventorySection();
 					}
+					// Atualizar barra de encumbrance
+					if (this.element) {
+						this._updateEncumbranceBar(this.element);
+					}
 				}, 200);
 			}, 100);
 		}
@@ -360,6 +364,28 @@ Hooks.once("ready", async () => {
 					}, 100);
 				}
 			});
+			
+			// Atualizar barra de encumbrance
+			this._updateEncumbranceBar(html);
+		}
+		
+		/**
+		 * Atualiza a barra de encumbrance com os valores corretos
+		 */
+		_updateEncumbranceBar(html) {
+			const $encumbranceBar = html.find('.encumbrance-bar');
+			if ($encumbranceBar.length === 0) return;
+			
+			const encumbrance = this.actor.system?.encumbrance || {};
+			const value = encumbrance.value || 0;
+			const limit = encumbrance.limit || 30;
+			
+			// Calcular porcentagem
+			const pct = limit > 0 ? Math.min((value / limit) * 100, 100) : 0;
+			
+			// Atualizar a barra
+			const $fill = $encumbranceBar.find('.encumbrance-fill');
+			$fill.css('width', `${pct}%`);
 		}
 		
 		
