@@ -313,38 +313,34 @@
 		{{!-- Currency and Encumbrance Section --}}
 		<div class="items-section currency-encumbrance-section">
 			{{!-- Currency --}}
-			{{#if system.currency}}
 			<div class="currency-container">
 				<div class="currency-field currency-gold">
 					<i class="fas fa-coins currency-icon currency-icon-gold"></i>
 					<span class="currency-label">TO</span>
-					<input type="number" name="system.currency.to.value" value="{{system.currency.to.value}}" class="currency-input" data-dtype="Number" />
+					<input type="number" name="system.currency.to.value" value="{{#if system.currency.to.value}}{{system.currency.to.value}}{{else}}0{{/if}}" class="currency-input" data-dtype="Number" />
 				</div>
 				<div class="currency-field currency-silver">
 					<i class="fas fa-coins currency-icon currency-icon-silver"></i>
 					<span class="currency-label">T$</span>
-					<input type="number" name="system.currency.ts.value" value="{{system.currency.ts.value}}" class="currency-input" data-dtype="Number" />
+					<input type="number" name="system.currency.ts.value" value="{{#if system.currency.ts.value}}{{system.currency.ts.value}}{{else}}0{{/if}}" class="currency-input" data-dtype="Number" />
 				</div>
 				<div class="currency-field currency-copper">
 					<i class="fas fa-coins currency-icon currency-icon-copper"></i>
 					<span class="currency-label">TC</span>
-					<input type="number" name="system.currency.tc.value" value="{{system.currency.tc.value}}" class="currency-input" data-dtype="Number" />
+					<input type="number" name="system.currency.tc.value" value="{{#if system.currency.tc.value}}{{system.currency.tc.value}}{{else}}0{{/if}}" class="currency-input" data-dtype="Number" />
 				</div>
 			</div>
-			{{/if}}
 			
 			{{!-- Encumbrance --}}
-			{{#if system.encumbrance}}
 			<div class="encumbrance-container">
-				<div class="encumbrance-bar" data-encumbrance-value="{{system.encumbrance.value}}" data-encumbrance-limit="{{system.encumbrance.limit}}">
+				<div class="encumbrance-bar" data-encumbrance-value="{{#if system.encumbrance.value}}{{system.encumbrance.value}}{{else}}0{{/if}}" data-encumbrance-limit="{{#if system.encumbrance.limit}}{{system.encumbrance.limit}}{{else}}30{{/if}}">
 					<div class="encumbrance-fill" style="width: 0%"></div>
 					<div class="encumbrance-text">
-						<span class="encumbrance-left">Carga: {{system.encumbrance.value}} / Sobrecarga: {{system.encumbrance.max}}</span>
-						<span class="encumbrance-right">Limite: {{system.encumbrance.limit}}</span>
+						<span class="encumbrance-left">Carga: {{#if system.encumbrance.value}}{{system.encumbrance.value}}{{else}}0{{/if}} / Sobrecarga: {{#if system.encumbrance.max}}{{system.encumbrance.max}}{{else}}15{{/if}}</span>
+						<span class="encumbrance-right">Limite: {{#if system.encumbrance.limit}}{{system.encumbrance.limit}}{{else}}30{{/if}}</span>
 					</div>
 				</div>
 			</div>
-			{{/if}}
 		</div>
 
 		{{!-- Armas Section --}}
