@@ -1165,9 +1165,92 @@ export class InventoryManager {
 	}
 
 	/**
+	 * Configura a seção de currency (moedas)
+	 */
+	setupCurrencySection() {
+		if (!this.element || !this.element.length) {
+			console.warn("T20 Items Manager | Element não disponível para currency");
+			return;
+		}
+
+		const $currencyFields = this.element.find('.currency-field');
+		if ($currencyFields.length === 0) {
+			console.warn("T20 Items Manager | Campos de currency não encontrados");
+			return;
+		}
+
+		// Log completo do currency
+		const currency = this.actor?.system?.currency || {};
+		console.log("T20 Items Manager | Currency completo:", currency);
+		console.log("T20 Items Manager | Currency.to:", currency.to);
+		console.log("T20 Items Manager | Currency.ts:", currency.ts);
+		console.log("T20 Items Manager | Currency.tc:", currency.tc);
+		console.log("T20 Items Manager | Currency.to.value:", currency.to?.value);
+		console.log("T20 Items Manager | Currency.ts.value:", currency.ts?.value);
+		console.log("T20 Items Manager | Currency.tc.value:", currency.tc?.value);
+	}
+
+	/**
+	 * Configura a seção de encumbrance (peso/carga)
+	 */
+	setupEncumbranceSection() {
+		if (!this.element || !this.element.length) {
+			console.warn("T20 Items Manager | Element não disponível para encumbrance");
+			return;
+		}
+
+		const $encumbranceBar = this.element.find('.encumbrance-bar');
+		if ($encumbranceBar.length === 0) {
+			console.warn("T20 Items Manager | Barra de encumbrance não encontrada");
+			return;
+		}
+
+		try {
+			// Log completo do actor e system
+			console.log("T20 Items Manager | Actor completo:", this.actor);
+			console.log("T20 Items Manager | Actor.system:", this.actor?.system);
+			console.log("T20 Items Manager | Actor.system.encumbrance:", this.actor?.system?.encumbrance);
+
+			const encumbrance = this.actor?.system?.encumbrance || {};
+			const value = encumbrance.value || 0;
+			const limit = encumbrance.limit || 30;
+			const max = encumbrance.max || 15;
+
+			console.log("T20 Items Manager | Encumbrance - value:", value, "max:", max, "limit:", limit);
+
+			// Calcular porcentagem
+			const pct = limit > 0 ? Math.min((value / limit) * 100, 100) : 0;
+
+			console.log("T20 Items Manager | Encumbrance - porcentagem calculada:", pct);
+
+			// Atualizar a barra
+			const $fill = $encumbranceBar.find('.encumbrance-fill');
+			if ($fill.length > 0) {
+				$fill.css('width', `${pct}%`);
+				console.log("T20 Items Manager | Barra de encumbrance atualizada para", pct + "%");
+			} else {
+				console.warn("T20 Items Manager | Elemento .encumbrance-fill não encontrado");
+			}
+
+			// Atualizar textos se necessário
+			const $textLeft = $encumbranceBar.find('.encumbrance-left');
+			const $textRight = $encumbranceBar.find('.encumbrance-right');
+			
+			if ($textLeft.length > 0) {
+				$textLeft.text(`Carga: ${value} / Sobrecarga: ${max}`);
+			}
+			if ($textRight.length > 0) {
+				$textRight.text(`Limite: ${limit}`);
+			}
+		} catch (error) {
+			console.error("T20 Items Manager | Erro ao atualizar barra de encumbrance:", error);
+		}
+	}
+
+	/**
 	 * Configura a seção de inventário
 	 */
-		setupInventorySection() {
+	setupInventorySection() {
 		if (!this.element || !this.element.length) return;
 
 		const $inventoryList = this.element.find('.inventory-list-custom');
