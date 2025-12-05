@@ -1,8 +1,8 @@
 {
   "id": "t20-custom-sheet",
   "title": "T20 Custom Sheet",
-  "description": "Módulo que adiciona uma nova ficha de personagem personalizada para o sistema Tormenta20",
-  "version": "1.6.0",
+  "description": "Subida de Versão 1.6.3",
+  "version": "1.6.3",
   "compatibility": {
     "minimum": "13",
     "verified": "13",
